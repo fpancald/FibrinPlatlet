@@ -12,7 +12,7 @@ ForceDiagramStorage::ForceDiagramStorage(std::weak_ptr<NodeSystemDevice> a_syste
 
 	system = a_system;
 	builder = b_system;
-	bn = a_fileName; //this will be used later to open files
+/*	bn = a_fileName; //this will be used later to open files
 	std::ofstream statesOutput(a_fileName + ".sta");
 	std::ofstream statesOutputStrain(a_fileName + "_Strain.sta");
 
@@ -38,7 +38,7 @@ ForceDiagramStorage::ForceDiagramStorage(std::weak_ptr<NodeSystemDevice> a_syste
 	}
 
 
-	statesOutput.close();
+	statesOutput.close();*/
 };
 
 void ForceDiagramStorage::updateStrain() {
@@ -111,7 +111,7 @@ void ForceDiagramStorage::print_VTK_File() {
 		unsigned maxNodeCount = sys->generalParams.maxNodeCount;
 		unsigned maxNeighborCount = (sys->generalParams).maxNeighborCount;
 
-		unsigned numEdges = sys->generalParams.originEdgeCount;
+		unsigned numEdges = sys->generalParams.currentEdgeCount;
 
 		ofs << "# vtk DataFile Version 3.0" << std::endl;
 		ofs << "Point representing Sub_cellular elem model" << std::endl;
@@ -152,7 +152,7 @@ void ForceDiagramStorage::print_VTK_File() {
 
 		ofs << "CELL_TYPES " << numCells << std::endl;
 		for (unsigned i = 0; i<numEdges; i++) {
-			ofs << 3 << std::endl;
+			ofs << 3 << std::endl; //edge joining two points
 		}
 
 

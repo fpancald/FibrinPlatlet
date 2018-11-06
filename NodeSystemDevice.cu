@@ -31,11 +31,11 @@ void NodeSystemDevice::solveForcesOnDevice() {
 	thrust::fill(nodeInfoVecs.nodeForceZ.begin(),nodeInfoVecs.nodeForceZ.end(),0);
 
 	if (generalParams.linking == true) {
-		/*	LinkNodesOnDevice(
+			LinkNodesOnDevice(
 					nodeInfoVecs,
 					wlcInfoVecs,
 					auxVecs,
-					generalParams);*/
+					generalParams);
 	}
 	TorsionSolveOnDevice(nodeInfoVecs, torsionInfoVecs, generalParams);
 
@@ -71,7 +71,7 @@ void NodeSystemDevice::solveSystemDevice() {
 		solveForcesOnDevice(); //resets and solves forces for next time step
 
 
-		if (generalParams.iterationCounter % 500 == 0) {
+		if (generalParams.iterationCounter % 50 == 0) {
 			storage->print_VTK_File();
 			//store sum of all forces on each node. Used in stress calculations
 			//store before upadting storage class.
@@ -404,6 +404,8 @@ void NodeSystemDevice::setWLCVecs(
 		wlcInfoVecs.lengthZero[indexR] = edgeLen;
 		wlcInfoVecs.globalNeighbors[indexR] = idL;
 		(wlcInfoVecs.currentNodeEdgeCountVector[idR])++; //left connects to right
+
+		generalParams.currentEdgeCount++;
 
 	}
 
