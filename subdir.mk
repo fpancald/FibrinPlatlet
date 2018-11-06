@@ -6,6 +6,7 @@ NVCC := nvcc
 CFLAGS := -static -std=c++11 -Wall -Wextra
 NVCCFLAGS := 
 IFLAGS = -isystem/afs/crc.nd.edu/x86_64_linux/c/cuda/8.0/include/
+LIBS := -lgsl -lgslcblas -lpugixml -L/afs/crc.nd.edu/user/s/sbritto2/networkgen/FibrinCode/UnderConstructionThrustExtension/pugixml/lib64
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
