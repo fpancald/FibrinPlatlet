@@ -6,5 +6,5 @@ glm
 pugixml
 objects.mk
 bend-model
-*.o*.
+*.o*.*
 *.sta
