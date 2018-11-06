@@ -1,0 +1,9 @@
+#Untracked files
+*.vtk
+*.o
+AnimationTest
+glm
+pugixml
+objects.mk
+bend-model
+*.o*.
