@@ -49,7 +49,7 @@ struct PltInfoVecs {
 	//
 	// thrust::host_vector<unsigned> idEdgesMadeHost;
 	//
-	// thrust::device_vector<unsigned> idEdgesMadeTemp;
+	// thrust::device_vector<unsigned> idEdgesMadeTemp; 
 
 	thrust::device_vector<double> sumForcesOnPlt;
 
@@ -69,21 +69,19 @@ struct PltInfoVecs {
 	thrust::device_vector<double> pltVelocity;
 
 //holds forces to advance position and velocity
-	thrust::device_vector<unsigned> nodeUnreducedId;
-	thrust::device_vector<double> nodeUnreducedForceX;
-	thrust::device_vector<double> nodeUnreducedForceY;
-	thrust::device_vector<double> nodeUnreducedForceZ;
 	thrust::device_vector<double> pltForceX;
 	thrust::device_vector<double> pltForceY;
 	thrust::device_vector<double> pltForceZ;
 
-		thrust::device_vector<unsigned> nodeReducedId;
-		thrust::device_vector<double> nodeReducedForceX;
-		thrust::device_vector<double> nodeReducedForceY;
-		thrust::device_vector<double> nodeReducedForceZ;
-		thrust::device_vector<double> pltUnreducedForceX;
-		thrust::device_vector<double> pltUnreducedForceY;
-		thrust::device_vector<double> pltUnreducedForceZ;
+	thrust::device_vector<unsigned> nodeUnreducedId;
+	thrust::device_vector<double> nodeUnreducedForceX;
+	thrust::device_vector<double> nodeUnreducedForceY;
+	thrust::device_vector<double> nodeUnreducedForceZ;
+
+	thrust::device_vector<unsigned> nodeReducedId;
+	thrust::device_vector<double> nodeReducedForceX;
+	thrust::device_vector<double> nodeReducedForceY;
+	thrust::device_vector<double> nodeReducedForceZ;
 
 //
 
@@ -139,7 +137,7 @@ struct DomainParams {
 	double maxY;
 	double minZ;
 	double maxZ;
-  double pltminX;
+  	double pltminX;
 	double pltmaxX;
 	double pltminY;
 	double pltmaxY;
@@ -155,7 +153,7 @@ struct DomainParams {
 	unsigned XBucketCount;
 	unsigned YBucketCount;
 	unsigned ZBucketCount;
-	unsigned totalBucketCount;
+	unsigned totalBucketCount=0;//initialized as zero to set system.
 };
 
 
@@ -304,11 +302,11 @@ public:
 		thrust::host_vector<double>& hostPosY,
 		thrust::host_vector<double>& hostPosZ);
 
-  void setPltVecs(
-    thrust::host_vector<bool>& hostIsPltFixed,
-    thrust::host_vector<double>& hostPltPosX,
-    thrust::host_vector<double>& hostPltPosY,
-    thrust::host_vector<double>& hostPltPosZ);
+  	void setPltVecs(
+  	  thrust::host_vector<bool>& hostIsPltFixed,
+  	  thrust::host_vector<double>& hostPltPosX,
+  	  thrust::host_vector<double>& hostPltPosY,
+  	  thrust::host_vector<double>& hostPltPosZ);
 
 	void setTorsionVecs(
 		thrust::host_vector<unsigned>& hostTorsionIndexLeft,

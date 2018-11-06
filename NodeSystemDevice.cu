@@ -15,7 +15,7 @@ void NodeSystemDevice::setBucketScheme() {
 		pltInfoVecs,
 		domainParams,
 		auxVecs,
-		generalParams); //reset dimensions before bucketting domain. Possibly replace with larger domain?}
+		generalParams); 
 
 	buildBucketScheme(nodeInfoVecs, pltInfoVecs, domainParams,
 		auxVecs, generalParams);
@@ -31,25 +31,16 @@ void NodeSystemDevice::solveForcesOnDevice() {
 	thrust::fill(nodeInfoVecs.nodeForceZ.begin(),nodeInfoVecs.nodeForceZ.end(),0);
 
 	if (generalParams.linking == true) {
-			LinkNodesOnDevice(
+		/*	LinkNodesOnDevice(
 					nodeInfoVecs,
 					wlcInfoVecs,
 					auxVecs,
-					generalParams);
+					generalParams);*/
 	}
 	TorsionSolveOnDevice(nodeInfoVecs, torsionInfoVecs, generalParams);
 
 	//std::cout<<"prewlc"<<std::endl;
 	WLCSolveOnDevice(nodeInfoVecs, wlcInfoVecs, generalParams);
-
-
-
-
-	//platelets
-	//RESET FORCE TO ZERO AT BEGINNING/////////////////////////////////////////////////
-	thrust::fill(pltInfoVecs.pltForceX.begin(),pltInfoVecs.pltForceX.end(),0);
-	thrust::fill(pltInfoVecs.pltForceY.begin(),pltInfoVecs.pltForceY.end(),0);
-	thrust::fill(pltInfoVecs.pltForceZ.begin(),pltInfoVecs.pltForceZ.end(),0);
 
 	//platetelet-node forces
 	PltForceOnDevice(nodeInfoVecs, wlcInfoVecs, generalParams, pltInfoVecs, auxVecs);
@@ -80,7 +71,8 @@ void NodeSystemDevice::solveSystemDevice() {
 		solveForcesOnDevice(); //resets and solves forces for next time step
 
 
-		if (generalParams.iterationCounter % 50 == 0) {
+		if (generalParams.iterationCounter % 500 == 0) {
+			storage->print_VTK_File();
 			//store sum of all forces on each node. Used in stress calculations
 			//store before upadting storage class.
 			thrust::transform(
@@ -147,29 +139,40 @@ void NodeSystemDevice::initializeSystem(
 	thrust::host_vector<bool>& hostIsPltFixed,
 	thrust::host_vector<double>& hostPltPosX,
 	thrust::host_vector<double>& hostPltPosY,
-	thrust::host_vector<double>& hostPltPosZ
-) {
+	thrust::host_vector<double>& hostPltPosZ) {
 
 	std::cout<< "total Edge Count: "<< generalParams.originEdgeCount << std::endl;
 	std::cout << "max num nodes: " << generalParams.maxNodeCount << std::endl;
 	//platelets
+
+		//platelets
+		hostPltPosX.push_back(0.0);
+		//hostPltPosX.push_back(2.0);
+		//hostPltPosX.push_back(3.0);
+	
+		hostPltPosY.push_back(1.35);
+		//hostPltPosY.push_back(2.0);
+		//hostPltPosY.push_back(3.0);
+	
+		hostPltPosZ.push_back(0.0);
+		//hostPltPosZ.push_back(2.0);
+		//hostPltPosZ.push_back(3.0);
+		generalParams.maxPltCount = hostPltPosX.size();
 	std::cout << "max num platelets: " << generalParams.maxPltCount << std::endl;
 
 
+
+	setPltVecs(
+		hostIsPltFixed,
+		hostPltPosX,
+		hostPltPosY,
+		hostPltPosZ);
 
 	setNodeVecs(//calls initDimensionBucketScheme
 		hostIsNodeFixed,
 		hostPosX,
 		hostPosY,
 		hostPosZ);
-
-	//platelets
-	setPltVecs(//calls initDimensionBucketScheme
-		hostIsPltFixed,
-		hostPltPosX,
-		hostPltPosY,
-		hostPltPosZ);
-
 
 
 	setTorsionVecs(
@@ -238,21 +241,22 @@ void NodeSystemDevice::setNodeVecs(
 		auxVecs,
 		generalParams);
 
-	//set original parameters for domain. others will be reset as simulation takes place.
+		
 	domainParams.originMinX = domainParams.minX;
 	domainParams.originMaxX = domainParams.maxX;
 	domainParams.originMinY = domainParams.minY;
 	domainParams.originMaxY = domainParams.maxY;
 	domainParams.originMinZ = domainParams.minZ;
 	domainParams.originMaxZ = domainParams.maxZ;
+
 	std::cout<< "node count : " <<nodeInfoVecs.nodeLocY.size()<< std::endl;
 
 
 	auxVecs.bucketKeys.resize(generalParams.maxNodeCount);
-	auxVecs.bucketValues.resize(generalParams.maxNodeCount);
+	auxVecs.bucketPltValues.resize(generalParams.maxNodeCount);
 	auxVecs.bucketValuesIncludingNeighbor.resize(27 * (generalParams.maxNodeCount));
 	auxVecs.bucketKeysExpanded.resize(27 *( generalParams.maxNodeCount ));
-
+	
 };
 
 //platelet
@@ -275,17 +279,15 @@ void NodeSystemDevice::setPltVecs(
 	pltInfoVecs.pltForceY.resize(generalParams.maxPltCount);
 	pltInfoVecs.pltForceZ.resize(generalParams.maxPltCount);
 
-	//pltInfoVecs.discretizedEdgeStrain.resize(generalParams.maxPltCount * generalParams.maxNeighborCount);
-	//pltInfoVecs.discretizedEdgeAlignment.resize(generalParams.maxPltCount * generalParams.maxNeighborCount);
-
-	//sized larger for input later
-	//pltInfoVecs.deviceEdgeLeft.resize(generalParams.maxPltCount * generalParams.maxNeighborCount);
-	//pltInfoVecs.deviceEdgeRight.resize(generalParams.maxPltCount * generalParams.maxNeighborCount);
-
-
-	//thrust::fill(pltInfoVecs.discretizedEdgeStrain.begin(), pltInfoVecs.discretizedEdgeStrain.end(),0.0);
-	//thrust::fill(pltInfoVecs.deviceEdgeRight.begin(), pltInfoVecs.deviceEdgeRight.end(), 0);	//fill force and velocity with zeros for computation.
-	//thrust::fill(pltInfoVecs.deviceEdgeLeft.begin(), pltInfoVecs.deviceEdgeLeft.end(), 0);	//fill force and velocity with zeros for computation.
+	pltInfoVecs.nodeUnreducedId.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
+	pltInfoVecs.nodeUnreducedForceX.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
+	pltInfoVecs.nodeUnreducedForceY.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
+	pltInfoVecs.nodeUnreducedForceZ.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
+	
+	pltInfoVecs.nodeReducedId.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
+	pltInfoVecs.nodeReducedForceX.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
+	pltInfoVecs.nodeReducedForceY.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
+	pltInfoVecs.nodeReducedForceZ.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
 
 	thrust::fill(pltInfoVecs.sumForcesOnPlt.begin(), pltInfoVecs.sumForcesOnPlt.end(), 0);
 
@@ -295,33 +297,18 @@ void NodeSystemDevice::setPltVecs(
 	thrust::copy(hostPltPosZ.begin(), hostPltPosZ.end(), pltInfoVecs.pltLocZ.begin());
 
 
+	std::cout<<"num platelets: "<< pltInfoVecs.pltLocX.size() << std::endl;
+	std::cout<<"num platelets var: "<< generalParams.maxPltCount << std::endl;
 	//copy fixed positions
 	pltInfoVecs.isPltFixed.resize(generalParams.maxPltCount);
-	thrust::copy(hostIsPltFixed.begin(), hostIsPltFixed.end(), pltInfoVecs.isPltFixed.begin());
+	thrust::fill(pltInfoVecs.isPltFixed.begin(), pltInfoVecs.isPltFixed.end(), false);
+	//thrust::copy(hostIsPltFixed.begin(), hostIsPltFixed.end(), pltInfoVecs.isPltFixed.begin());
 
-	//pltInfoVecs.idEdgesMadeTemp.resize(generalParams.maxPltCount * generalParams.maxLinksPerIteration);
 
-	//at this point all nodes are filled, so we can generate domainParams
-	// initDimensionBucketScheme(
-	// 	pltInfoVecs,
-	// 	domainParams,
-	// 	auxVecs,
-	// 	generalParams);
-
-	//set original parameters for domain. others will be reset as simulation takes place.
-	// domainParams.originMinX = domainParams.minX;
-	// domainParams.originMaxX = domainParams.maxX;
-	// domainParams.originMinY = domainParams.minY;
-	// domainParams.originMaxY = domainParams.maxY;
-	// domainParams.originMinZ = domainParams.minZ;
-	// domainParams.originMaxZ = domainParams.maxZ;
-	// std::cout<< "platelets count : " <<pltInfoVecs.pltLocY.size()<< std::endl;
-	//
-	//
-	// auxVecs.bucketPltKeys.resize(generalParams.maxPltCount);
-	// auxVecs.bucketPltValues.resize(generalParams.maxPltCount);
-	// auxVecs.bucketPltValuesIncludingNeighbor.resize(27 * (generalParams.maxPltCount));
-	// auxVecs.bucketPltKeysExpanded.resize(27 *( generalParams.maxPltCount ));
+	auxVecs.bucketPltKeys.resize(generalParams.maxPltCount);
+	auxVecs.bucketValues.resize(generalParams.maxPltCount);
+	auxVecs.bucketPltValuesIncludingNeighbor.resize(27 * (generalParams.maxPltCount));
+	auxVecs.bucketPltKeysExpanded.resize(27 *( generalParams.maxPltCount ));
 
 };
 

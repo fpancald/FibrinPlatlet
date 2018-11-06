@@ -76,11 +76,11 @@ public:
 	//platelets
 	unsigned originPltCount = 0;
 	unsigned numPlts;
-	double defaultPltMass = 20;
-	double pltRForce = 0.4;
+	double defaultPltMass = 100;
+	double pltRForce = 1.4;
 	double pltR = 0.1;
 	unsigned pltMaxConn = 100;
-	double pltForce = 1.0;
+	double pltForce = 10.0;
 
 	//std::shared_ptr<NodeSystemDevice> host_ptr_devNodeSystem;
 	std::vector<std::shared_ptr<BuildNode>> buildNodes;
@@ -116,13 +116,6 @@ public:
 	thrust::host_vector<double> hostPltPosZ;
 
 
-	thrust::host_vector<double> hostTargetForceX;
-	thrust::host_vector<double> hostTargetForceY;
-	thrust::host_vector<double> hostTargetForceZ;
-	//platelets
-	thrust::host_vector<double> hostPltTargetForceX;
-	thrust::host_vector<double> hostPltTargetForceY;
-	thrust::host_vector<double> hostPltTargetForceZ;
 
 	thrust::host_vector<bool> hostIsNodeFixed;
 	//platelets

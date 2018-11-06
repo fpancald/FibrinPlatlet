@@ -1,6 +1,6 @@
 #!/bin/csh
 
-#$ -M 	francesp@ucr.edu # Email address for job notification
+#$ -M 	a@ucr.edu # Email address for job notification
 #$ -m  abe		 # Send mail when job begins, ends and aborts
 #$ -q  gpu 	 # Specify queue
 #$ -l gpu_card=1
