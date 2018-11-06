@@ -7,3 +7,4 @@ pugixml
 objects.mk
 bend-model
 *.o*.
+*.sta

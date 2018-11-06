@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <data>
 <settings>
-		<!-- model parameters-->
-		<resistance>3.769911184308</resistance>
+	<!-- model parameters-->
+	<resistance>3.769911184308</resistance>
     <spring-stiffness>50</spring-stiffness>
     <torsion-stiffness>0.002262593420685</torsion-stiffness>
     <persistance-length>0.001074033502990</persistance-length>
@@ -14,29 +14,29 @@
     <constant-extra-nodes>false</constant-extra-nodes>
     <mass>1.0</mass><!--used?-->
     <link-diameter>0.1</link-diameter>
-		<use-linking>true</use-linking>
+	<use-linking>true</use-linking>
     <worm-like>true</worm-like>
 
-		<plt_mass>2.0</plt_mass><!-- platelet mass-->
-		<plt_force>5.0</plt_force><!-- platelet force-->
-		<plt_max_conn>5</plt_max_conn><!-- platelet maximum number of connections-->
-		<plt_r>1.0</plt_r>   <!-- radius of platelet from center (volume exclusion)-->
-		<plt_r_force>2.0<plt_r_force><!-- force radius from platelet center-->
+	<plt_mass>2.0</plt_mass><!-- platelet mass-->
+	<plt_force>5.0</plt_force><!-- platelet force-->
+	<plt_max_conn>5</plt_max_conn><!-- platelet maximum number of connections-->
+	<plt_r>1.0</plt_r>   <!-- radius of platelet from center (volume exclusion)-->
+	<plt_r_force>2.0</plt_r_force><!-- force radius from platelet center-->
 </settings>
 
     <nodes default-mass="1.0">
         <node>0 0 0</node>
-				<node>1.0 0.001 0</node>
-				<node>1.0 -1.0 0</node>
+		<node>1.0 0.001 0</node>
+		<node>1.0 -1.0 0</node>
         <node>0.05 0.0 0</node>
         <node>-1.0 0.0 0</node>
         <node>-1.0 -1.0 0</node>
         <node>0.0 2.0 0</node>
     </nodes>
 
-		<plts plt-mass="2.0">
-			<plt> 1.0 0.5 0.0 </plt>
-		</plts>
+	<plts plt-mass="2.0">
+		<plt> 1.0 0.5 0.0 </plt>
+	</plts>
 
     <links>
         <link>0 1</link>
@@ -46,8 +46,11 @@
         <link>0 6</link>
         <link>3 6</link>
     </links>
+	
     <fixed>
     </fixed>
-		<pltfixed>
+	
+	<pltfixed>
     </pltfixed>
+	
 </data>

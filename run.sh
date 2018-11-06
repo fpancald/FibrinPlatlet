@@ -1,14 +1,14 @@
 #!/bin/csh
 
-#$ -M 	a@ucr.edu # Email address for job notification
+#$ -M 	@ucr.edu # Email address for job notification
 #$ -m  abe		 # Send mail when job begins, ends and aborts
 #$ -q  gpu 	 # Specify queue
 #$ -l gpu_card=1
-#s -pe smp 4         #specifies threads??? maybe
+#$ -pe smp 4         #specifies threads??? maybe
 #$ -N  Test	 # Specify job name
 #$ -t 1       #specify number of data input files
 
-set data = ( data_Rec_0.013_10_10_10.xml )
+set data = ( plt_data_Rec_0.013_10_10_10.xml )
 
 
 module purge
