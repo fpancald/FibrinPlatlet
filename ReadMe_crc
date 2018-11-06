@@ -1,0 +1,52 @@
+7 July 2017 
+Author: sBritton
+
+Compile Instructions:
+to compile on the crc 
+module load gsl/4.9.2
+module load gcc/2.3
+module load cuda/8.0
+
+if pugixml is not installed download it and put into the folder, then from scripts folder with all
+your files. You need to write the path to pugixml in objects.mk then do
+make 
+if the source file are moved remember to copy all MK files in the respective locations.
+
+you should now have an executable called bend-model.
+./bend-model diagram -eps=0.01 -df=1 -dt=0.05 -dataField=3 --rheometerSim=0.1
+
+eps : determines minimal change in coordinates in order to advance system iteration.
+df : determines force application for non potential related forces.
+dt : numerical solver timestep.
+dataField : 5 different elastic moduli are available from .1, 1, 10, 25, 50 MPa (default ~.2). Choose one here if you want non default.
+rheometerSim: runs compression simulation.
+
+Code Explanation: 
+
+Parameter: explanation 
+<resistance>3.769911184308</resistance> : denotes viscous constant
+<spring-stiffness>50</spring-stiffness> : spring constant for linear springs
+<torsion-stiffness>0.001376210306399</torsion-stiffness> : spring constant for bending springs
+<persistance-length>1.078318881078757e-06</persistance-length> : 1st wlc spring parameter
+<absolute-temperature>300.0</absolute-temperature> :temp in kelvin
+<contour-length-multiplier>2.616639919165452</contour-length-multiplier> : 2nd wlc spring parameter
+<use-extra-nodes>false</use-extra-nodes> :determines if you would like to use any extra nodes
+<units-per-extra-node>0.3</units-per-extra-node> :if you want to use extra nodes, subdivide by distance
+<extra-nodes-per-edge>9</extra-nodes-per-edge> :number of nodes per edge if constant-extra-nodes == true
+<constant-extra-nodes>false</constant-extra-nodes> :if you want, you can use a fixed number of nodes per edge
+<mass>10.0</mass> :fixed mass of each node
+<node-diameter>0.1</node-diameter> :not used
+<link-diameter>0.1</link-diameter> :determines linking distance
+<strain-test>0.9</strain-test> :if using rheometerSim, you can also run a strain test.
+<use-linking>true</use-linking> :default true. Turns linking off and on
+<worm-like>true</worm-like> :uses wlc springs instead of linear.
+<boundary-condition>true</boundary-condition> : keeps rheometer simulation 
+
+
+
+To learn about makefiles read:
+https://www.gnu.org/software/make/manual/make.html#Simple-Makefile
+
+
+
+

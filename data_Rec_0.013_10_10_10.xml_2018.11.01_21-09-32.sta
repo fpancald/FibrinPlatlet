@@ -1,0 +1,12 @@
+node_count 7
+origin_node_count 7
+origin_link_count 6
+sub_node_count 9
+link_count 6
+
+0 1
+0 2
+3 4
+3 5
+0 6
+3 6
