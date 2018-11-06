@@ -101,9 +101,6 @@ unsigned NodeSystemBuilder::addNode(__attribute__ ((unused)) double mass, glm::d
 	hostPosX.push_back(pos.x);
 	hostPosY.push_back(pos.y);
 	hostPosZ.push_back(pos.z);
-	hostTargetForceX.push_back(0);
-	hostTargetForceY.push_back(0);
-	hostTargetForceZ.push_back(0);
 
 
 
@@ -128,9 +125,6 @@ unsigned NodeSystemBuilder::addPlt(__attribute__ ((unused)) double pltmass, glm:
 	hostPltPosX.push_back(pos.x);
 	hostPltPosY.push_back(pos.y);
 	hostPltPosZ.push_back(pos.z);
-	hostPltTargetForceX.push_back(0);
-	hostPltTargetForceY.push_back(0);
-	hostPltTargetForceZ.push_back(0);
 
 
 

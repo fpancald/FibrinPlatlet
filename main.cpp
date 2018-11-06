@@ -221,10 +221,7 @@ void run(int argc, char** argv) {
 	t0 = time(0);
 
 	double epsilon = 0.01;
-	double timeStep = 0.01;
-
-	bool eps_found = false;
-	bool time_found = false;
+	double timeStep = 0.001;
 
 	for (int i = -1; i < argc-1; i++) {
 
@@ -241,20 +238,17 @@ void run(int argc, char** argv) {
 		std::cout<<"val: "<< val <<std::endl;
 
 		if (key == "-dt") {
-			time_found = true;
 			timeStep = std::atof(val.c_str());
 			std::cout<<"setting timestep: "<< timeStep << std::endl;
 			continue;
 		}
 		if (key == "-eps") {
-			eps_found = true;
 			epsilon = std::atof(val.c_str());
 			std::cout<<"setting epsilon: "<< epsilon << std::endl;
 			continue;
 		}
 	}
 
-	if ((time_found) && (eps_found)) {
 
 		auto builder = std::make_shared<NodeSystemBuilder>(epsilon, timeStep);
 
@@ -273,7 +267,7 @@ void run(int argc, char** argv) {
 
 		std::cout << "solving system in main" << std::endl;
 		system->solveSystemDevice();
-	}
+	
 
 	t1 = time(0);  //current time at the end of solving the system.
 	int total,hours,min,sec;

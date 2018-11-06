@@ -89,6 +89,7 @@ struct NeighborFunctor : public thrust::unary_function<Tuu, Tuu> {
 		unsigned yPos = (thrust::get<0>(v) - zPos * area) / numOfBucketsInXDim;	//row
 		unsigned yPosTop = yPos + 1;
 		unsigned yPosBottom = yPos - 1;
+
 		if (yPosBottom > volume) {
 			//wraparound unsigend
 			yPosBottom = numOfBucketsInYDim - 1;

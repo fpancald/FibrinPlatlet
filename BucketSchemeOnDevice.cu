@@ -10,12 +10,12 @@ void initDimensionBucketScheme(
 	AuxVecs& auxVecs,
 	GeneralParams& generalParams) {
 
-	domainParams.minX = (*(thrust::min_element(nodeInfoVecs.nodeLocX.begin(), nodeInfoVecs.nodeLocX.end())));
-	domainParams.maxX = (*(thrust::max_element(nodeInfoVecs.nodeLocX.begin(), nodeInfoVecs.nodeLocX.end())));
-	domainParams.minY = (*(thrust::min_element(nodeInfoVecs.nodeLocY.begin(), nodeInfoVecs.nodeLocY.end())));
-	domainParams.maxY = (*(thrust::max_element(nodeInfoVecs.nodeLocY.begin(), nodeInfoVecs.nodeLocY.end())));
-	domainParams.minZ = (*(thrust::min_element(nodeInfoVecs.nodeLocZ.begin(), nodeInfoVecs.nodeLocZ.end())));
-	domainParams.maxZ = (*(thrust::max_element(nodeInfoVecs.nodeLocZ.begin(), nodeInfoVecs.nodeLocZ.end())));
+	double minXTemp = (*(thrust::min_element(nodeInfoVecs.nodeLocX.begin(), nodeInfoVecs.nodeLocX.end())));
+	double maxXTemp = (*(thrust::max_element(nodeInfoVecs.nodeLocX.begin(), nodeInfoVecs.nodeLocX.end())));
+	double minYTemp = (*(thrust::min_element(nodeInfoVecs.nodeLocY.begin(), nodeInfoVecs.nodeLocY.end())));
+	double maxYTemp = (*(thrust::max_element(nodeInfoVecs.nodeLocY.begin(), nodeInfoVecs.nodeLocY.end())));
+	double minZTemp = (*(thrust::min_element(nodeInfoVecs.nodeLocZ.begin(), nodeInfoVecs.nodeLocZ.end())));
+	double maxZTemp = (*(thrust::max_element(nodeInfoVecs.nodeLocZ.begin(), nodeInfoVecs.nodeLocZ.end())));
 
 	//platelets
 	domainParams.pltminX = (*(thrust::min_element(pltInfoVecs.pltLocX.begin(), pltInfoVecs.pltLocX.end())));
@@ -25,56 +25,40 @@ void initDimensionBucketScheme(
 	domainParams.pltminZ = (*(thrust::min_element(pltInfoVecs.pltLocZ.begin(), pltInfoVecs.pltLocZ.end())));
 	domainParams.pltmaxZ = (*(thrust::max_element(pltInfoVecs.pltLocZ.begin(), pltInfoVecs.pltLocZ.end())));
 
-	if (domainParams.minX > domainParams.pltminX){
-		domainParams.minX = domainParams.pltminX;
-	}
-	if (domainParams.maxX < domainParams.pltmaxX){
-		domainParams.maxX = domainParams.pltmaxX;
-	}
-	if (domainParams.minY > domainParams.pltminY){
-		domainParams.minY = domainParams.pltminY;
-	}
-	if (domainParams.maxY < domainParams.pltmaxY){
-		domainParams.maxY = domainParams.pltmaxY;
-	}
-	if (domainParams.minZ > domainParams.pltminZ){
-		domainParams.minZ = domainParams.pltminZ;
-	}
-	if (domainParams.maxZ < domainParams.pltmaxZ){
-		domainParams.maxZ = domainParams.pltmaxZ;
-	}
+	double space = 0.0;
+	domainParams.minX = min(minXTemp, domainParams.pltminX) - space;
+	domainParams.maxX = max(maxXTemp, domainParams.pltmaxX) + space;
+	domainParams.minY = min(minYTemp, domainParams.pltminY) - space;
+	domainParams.maxY = max(maxYTemp, domainParams.pltmaxY) + space;
+	domainParams.minZ = min(minZTemp, domainParams.pltminZ) - space;
+	domainParams.maxZ = max(maxZTemp, domainParams.pltmaxZ) + space;
 
-
-	if (generalParams.iterationCounter == 0) {
-		domainParams.originMinX = domainParams.minX;
-		domainParams.originMaxX = domainParams.maxX;
-		domainParams.originMinY = domainParams.minY;
-		domainParams.originMaxY = domainParams.maxY;
-		domainParams.originMinZ = domainParams.minZ;
-		domainParams.originMaxZ = domainParams.maxZ;
+	domainParams.XBucketCount = (ceil(domainParams.maxX - domainParams.minX) / domainParams.gridSpacing) + 1;
+	domainParams.YBucketCount = (ceil(domainParams.maxY - domainParams.minY) / domainParams.gridSpacing) + 1;
+	domainParams.ZBucketCount = (ceil(domainParams.maxZ - domainParams.minZ) / domainParams.gridSpacing) + 1;
+	
+	if ( (domainParams.XBucketCount * domainParams.YBucketCount * domainParams.ZBucketCount) != domainParams.totalBucketCount	) {
 
 		//double amount of buckets in case of resizing networks
-		domainParams.XBucketCount = 2.0 * ceil(ceil(domainParams.maxX - domainParams.minX) / domainParams.gridSpacing) + 1;
-		domainParams.YBucketCount = 2.0 * ceil(ceil(domainParams.maxY - domainParams.minY) / domainParams.gridSpacing) + 1;
-		domainParams.ZBucketCount = 2.0 * ceil(ceil(domainParams.maxZ - domainParams.minZ) / domainParams.gridSpacing) + 1;
 		domainParams.totalBucketCount = domainParams.XBucketCount * domainParams.YBucketCount * domainParams.ZBucketCount;
-
-		if (generalParams.iterationCounter == 0 )
-			std::cout<<"total bucket count: "<< domainParams.totalBucketCount<<std::endl;
+		std::cout<<"grid: "<< domainParams.gridSpacing << std::endl;
+		std::cout<<"total bucket count: "<< domainParams.totalBucketCount<<std::endl;
 
 		auxVecs.keyBegin.resize(domainParams.totalBucketCount);
 		auxVecs.keyEnd.resize(domainParams.totalBucketCount);
 		//platelets
 		auxVecs.keyPltBegin.resize(domainParams.totalBucketCount);
 		auxVecs.keyPltEnd.resize(domainParams.totalBucketCount);
+
 	}
+
 	thrust::fill(auxVecs.keyBegin.begin(),auxVecs.keyBegin.end(),0);
 	thrust::fill(auxVecs.keyEnd.begin(),auxVecs.keyEnd.end(),0);
 	//platelets
 	thrust::fill(auxVecs.keyPltBegin.begin(),auxVecs.keyPltBegin.end(),0);
 	thrust::fill(auxVecs.keyPltEnd.begin(),auxVecs.keyPltEnd.end(),0);
 
-}
+};
 
 //convert buckets into neighboring scheme
 void extendBucketScheme(
@@ -86,7 +70,7 @@ void extendBucketScheme(
 	//memory is already allocated.
 	unsigned endIndexExpanded = (auxVecs.endIndexBucketKeys) * 27;
 	//platelets
-	unsigned endIndexPltExpanded = (auxVecs.endIndexBucketPltKeys) * 27;
+//	unsigned endIndexPltExpanded = (auxVecs.endIndexBucketPltKeys) * 27;
 
 	//test for removing copies.
 	unsigned valuesCount = auxVecs.bucketValues.size();
@@ -147,9 +131,14 @@ void extendBucketScheme(
 
 	//unsigned endIndexSearch = endIndexExpanded - numberOfOutOfRange;
 
-	thrust::sort_by_key(auxVecs.bucketKeysExpanded.begin(),
+	thrust::stable_sort_by_key(auxVecs.bucketKeysExpanded.begin(),
 		auxVecs.bucketKeysExpanded.begin() + endIndexExpanded,
 		auxVecs.bucketValuesIncludingNeighbor.begin());
+	
+	numberInsideRange = 
+		thrust::get<0>(thrust::unique_by_key(auxVecs.bucketValuesIncludingNeighbor.begin(),
+			auxVecs.bucketValuesIncludingNeighbor.begin() + endIndexExpanded,
+			auxVecs.bucketKeysExpanded.begin())) - auxVecs.bucketValuesIncludingNeighbor.begin();
 
 	auxVecs.bucketKeysExpanded.erase(
 			auxVecs.bucketKeysExpanded.begin() + numberInsideRange,
@@ -175,10 +164,10 @@ void extendBucketScheme(
 		auxVecs.keyEnd.begin());
 
 	//platelets
-	unsigned valuesPltCount = auxVecs.bucketPltValues.size();
+	/*unsigned valuesPltCount = auxVecs.bucketPltValues.size();
 	thrust::fill(auxVecs.bucketPltKeysExpanded.begin(),auxVecs.bucketPltKeysExpanded.end(),0);
 	thrust::fill(auxVecs.bucketPltValuesIncludingNeighbor.begin(),auxVecs.bucketPltValuesIncludingNeighbor.end(),0);
-
+*/
 
 
 
@@ -192,6 +181,7 @@ void extendBucketScheme(
 	* e.g. movement is 5 and first iterator is initialized as 9
 	* result array is [9,9,9,9,9];
 	*/
+	/*
 	thrust::constant_iterator<unsigned> pltlast = pltfirst + (auxVecs.endIndexBucketPltKeys); // this is NOT numerical addition!
 
 	expand(pltfirst, pltlast,
@@ -258,7 +248,7 @@ void extendBucketScheme(
 	thrust::upper_bound(auxVecs.bucketPltKeysExpanded.begin(),
 		auxVecs.bucketPltKeysExpanded.end(),pltsearch_begin,
 		pltsearch_begin + domainParams.totalBucketCount,
-		auxVecs.keyPltEnd.begin());
+		auxVecs.keyPltEnd.begin());*/
 
 }
 
@@ -276,6 +266,8 @@ void buildBucketScheme(
 	// takes counting iterator and coordinates
 	// return tuple of keys and values
 	// transform the points to their bucket indices
+	
+	//std::cout<<"bucket nodes"<<std::endl;
 	thrust::for_each(
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
@@ -300,25 +292,27 @@ void buildBucketScheme(
 thrust::sort_by_key(auxVecs.bucketValues.begin(),
 		auxVecs.bucketValues.begin() + generalParams.maxNodeCount,
 		auxVecs.bucketKeys.begin());
-	unsigned numberOutOfRange = thrust::count(auxVecs.bucketKeys.begin(),
+unsigned numberOutOfRange = thrust::count(auxVecs.bucketKeys.begin(),
 			auxVecs.bucketKeys.begin() + generalParams.maxNodeCount, ULONG_MAX);
 
 	auxVecs.endIndexBucketKeys = generalParams.maxNodeCount - numberOutOfRange;
 
 	//platelets
+	//std::cout<<"bucket platelet"<<std::endl;
+	thrust::counting_iterator<unsigned> indexBucketBegin1(0);
 	thrust::for_each(
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
 				pltInfoVecs.pltLocX.begin(),
 				pltInfoVecs.pltLocY.begin(),
 				pltInfoVecs.pltLocZ.begin(),
-				indexBucketBegin)),
+				indexBucketBegin1)),
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
 				pltInfoVecs.pltLocX.begin(),
 				pltInfoVecs.pltLocY.begin(),
 				pltInfoVecs.pltLocZ.begin(),
-				indexBucketBegin)) + generalParams.maxPltCount,
+				indexBucketBegin1)) + generalParams.maxPltCount,
 		BucketIndexer(
 			domainParams.minX, domainParams.maxX, domainParams.minY,
 			domainParams.maxY, domainParams.minZ, domainParams.maxZ,
@@ -326,11 +320,14 @@ thrust::sort_by_key(auxVecs.bucketValues.begin(),
 			thrust::raw_pointer_cast(auxVecs.bucketPltKeys.data()),
 			thrust::raw_pointer_cast(auxVecs.bucketPltValues.data())));
 
+			
+	//std::cout<<"end bucket platelet"<<std::endl;
 //test sorting by node instaed of bucket index
 thrust::sort_by_key(auxVecs.bucketPltValues.begin(),
 		auxVecs.bucketPltValues.begin() + generalParams.maxPltCount,
 		auxVecs.bucketPltKeys.begin());
-	unsigned numberPltOutOfRange = thrust::count(auxVecs.bucketPltKeys.begin(),
+	
+unsigned numberPltOutOfRange = thrust::count(auxVecs.bucketPltKeys.begin(),
 			auxVecs.bucketPltKeys.begin() + generalParams.maxPltCount, ULONG_MAX);
 
 	auxVecs.endIndexBucketPltKeys = generalParams.maxPltCount - numberPltOutOfRange;
