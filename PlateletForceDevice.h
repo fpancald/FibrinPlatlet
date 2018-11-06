@@ -163,6 +163,7 @@ struct PltonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3>  {
                   sumPltForceZ += (-1.0) * forceNodeZ;
 
                   //store force in temporary vector. Call reduction later.
+
                   nodeUForceXAddr[storageLocation + pullCounter] = forceNodeX;
                   nodeUForceYAddr[storageLocation + pullCounter] = forceNodeY;
                   nodeUForceZAddr[storageLocation + pullCounter] = forceNodeZ;
