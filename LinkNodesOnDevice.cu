@@ -70,7 +70,7 @@ void LinkNodesOnDevice(
 	
 				if ((id != 0) && (count > 0) ) {
 					//count edges 
-					std::cout<<"placing id: "<< id<<std::endl;
+					//std::cout<<"placing id: "<< id<<std::endl;
 				
 					//idEdgesMadeHost contains id's in matrix format
 					nodeInfoVecs.idEdgesMadeHost.push_back(id);

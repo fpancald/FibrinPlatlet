@@ -226,11 +226,13 @@ struct GeneralParams{
 	double fiberDiameter = 0.1;
 
   //platelet parameters
-	double pltForce=0;
-	unsigned pltMaxConn=80;
-	double pltR=0.2;
-	double pltRForce=0;
-	double pltMass=2;
+  //look in builder for default parameter settings.
+	double pltForce;
+	unsigned pltMaxConn;
+	double pltR;
+	double pltRForce;
+	double pltMass;
+	double pltDensity;
 
 	//parameters for advancing timestep and determining equilibrium
 	double df, dtMax, dtTemp, epsilon, maxForce;

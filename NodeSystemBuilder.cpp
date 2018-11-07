@@ -1,5 +1,6 @@
 #include <cuda.h>
-#include <curand.h>
+#include <cstdlib>
+#include <random>
 #include <set>
 #include <list>
 #include <vector>
@@ -294,7 +295,6 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 	numPlts = hostPltPosX.size();
 	numEdges = hostWLCEdgeLeft.size();
 	std::cout << "node count: " << numNodes << std::endl;//Plt
-	std::cout << "platelet count: " << numPlts << std::endl;
 
 
 	//preferred edge angle is always taken into account.
@@ -309,13 +309,51 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 		}
 	}
 
+	//build platelets if density > 0
+	if (pltDensity > 0.0) {
+		double pltminX = (*(thrust::min_element(hostPosX.begin(), hostPosX.end())));
+		double pltmaxX = (*(thrust::max_element(hostPosX.begin(), hostPosX.end())));
+		double pltminY = (*(thrust::min_element(hostPosY.begin(), hostPosY.end())));
+		double pltmaxY = (*(thrust::max_element(hostPosY.begin(), hostPosY.end())));
+		double pltminZ = (*(thrust::min_element(hostPosZ.begin(), hostPosZ.end())));
+		double pltmaxZ = (*(thrust::max_element(hostPosZ.begin(), hostPosZ.end())));
+		numPlts = static_cast<unsigned>(ceil((pltmaxX - pltminX) * (pltmaxY - pltminY) * (pltmaxZ - pltminZ) * pltDensity));
+		
+		std::cout<< "number of plts from density: "<< numPlts<<std::endl;
+		
+		
+		double padding = 1.0;
 
+		std::random_device rdX;  //Will be used to obtain a seed for the random number engine
+		std::random_device rdY;  //Will be used to obtain a seed for the random number engine
+		std::random_device rdZ;  //Will be used to obtain a seed for the random number engine
+    	std::mt19937 genX(rdX()); //Standard mersenne_twister_engine seeded with rd()
+    	std::mt19937 genY(rdY()); //Standard mersenne_twister_engine seeded with rd()
+    	std::mt19937 genZ(rdZ()); //Standard mersenne_twister_engine seeded with rd()
+    	std::uniform_real_distribution<> distX(pltmaxX + padding, pltminX - padding);
+    	std::uniform_real_distribution<> distY(pltmaxY + padding, pltminY - padding);
+    	std::uniform_real_distribution<> distZ(pltmaxZ + padding, pltminZ - padding);
+
+		for (unsigned plt = 0; plt < numPlts; plt++ ){
+			double xPos = distX(genX);
+			double yPos = distY(genY);
+			double zPos = distZ(genZ);
+			hostPltPosX.push_back(xPos);
+			hostPltPosY.push_back(yPos);
+			hostPltPosZ.push_back(zPos);
+			std::cout<<" plt pos: "<< xPos << " "<< yPos << " "<< zPos << std::endl;
+		}
+    	  
+
+	} 
+
+	std::cout << "platelet count: " << numPlts << std::endl;
 	//now all the edges and variables are set.
 	//so set the system and return a pointer.
 	std::shared_ptr<NodeSystemDevice> host_ptr_devNodeSystem = std::make_shared<NodeSystemDevice>();
 
 	host_ptr_devNodeSystem->generalParams.maxNodeCount = hostPosX.size();
-	host_ptr_devNodeSystem->generalParams.maxPltCount = hostPltPosX.size();//Plt
+	host_ptr_devNodeSystem->generalParams.maxPltCount = numPlts;//Plt
 	host_ptr_devNodeSystem->generalParams.totalTorsionCount = hostTorsionAngleZero.size();
 
 	host_ptr_devNodeSystem->generalParams.originNodeCount = originNodeCount;
@@ -352,7 +390,9 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 	host_ptr_devNodeSystem->generalParams.pltMass = defaultPltMass;
 	host_ptr_devNodeSystem->domainParams.gridSpacing = std::max(pltRForce, 5*defaultLinkDiameter);
 	host_ptr_devNodeSystem->generalParams.fiberDiameter = defaultLinkDiameter ;
+	host_ptr_devNodeSystem->generalParams.pltDensity = pltDensity;
 
+	
 	host_ptr_devNodeSystem->initializeSystem(
 		hostIsNodeFixed,
 		hostPosX,

@@ -133,7 +133,8 @@ struct psrnormgen {
 		a(_a),
 		b(_b) {}
 
-    __device__ double operator()(const unsigned n) const
+    __host__ __device__ 
+	double operator()(const unsigned n) const
     {
         thrust::default_random_engine rng(n);
         thrust::normal_distribution<float> dist(a, b);
@@ -153,7 +154,8 @@ struct psrunifgen {
 		a(_a),
 		b(_b) {}
 
-    __device__ double operator()(const unsigned n) const
+    __host__ __device__ 
+	double operator()(const unsigned n) const
     {
         thrust::default_random_engine rng(n);
         thrust::uniform_real_distribution<float> dist(a, b);
