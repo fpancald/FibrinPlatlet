@@ -242,7 +242,7 @@ struct GeneralParams{
 	//total equilibrium iters and linking determiner
 	unsigned iterationCounter = 0;
 	bool linking = true;
-	unsigned maxLinksPerIteration = 5;
+	unsigned maxLinksPerIteration = 20;
 
 };
 

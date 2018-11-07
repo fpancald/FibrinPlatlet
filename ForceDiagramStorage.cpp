@@ -7,7 +7,7 @@
 
 
 ForceDiagramStorage::ForceDiagramStorage(std::weak_ptr<NodeSystemDevice> a_system,
-	std::weak_ptr<NodeSystemBuilder> b_system , const std::string& a_fileName) {
+	std::weak_ptr<NodeSystemBuilder> b_system , __attribute__ ((unused)) const std::string& a_fileName) {
 	//std::cout << "FDM constructor" << std::endl;
 
 	system = a_system;
@@ -135,14 +135,14 @@ void ForceDiagramStorage::print_VTK_File() {
 
 
 		ofs << "CELLS " << numCells << " " << numNumsInCells << std::endl;
-
+/*
 		for (unsigned edge = 0; edge < numEdges; edge++) {
 			unsigned idL = sys->nodeInfoVecs.deviceEdgeLeft[edge];
 			unsigned idR = sys->nodeInfoVecs.deviceEdgeRight[edge];
 
 			ofs<< 2 << " " << idL << " " << idR << std::endl;
-		}
-		/*for (unsigned idA = 0; idA < maxNodeCount; idA++ ){
+		}*/
+		for (unsigned idA = 0; idA < maxNodeCount; idA++ ){
 
 			unsigned beginIndex = idA * maxNeighborCount;
 			unsigned endIndex = beginIndex + maxNeighborCount;
@@ -154,7 +154,7 @@ void ForceDiagramStorage::print_VTK_File() {
 					ofs<< 2 << " " << idA << " " << idB << std::endl;
 				}
 			}
-		}*/
+		}
 
 		ofs << "CELL_TYPES " << numCells << std::endl;
 		for (unsigned i = 0; i< numEdges; i++) {
@@ -165,9 +165,9 @@ void ForceDiagramStorage::print_VTK_File() {
 
 		//
 		ofs << "CELL_DATA " << numCells << std::endl;
-		ofs << "SCALARS magnitude double " << std::endl;
+		ofs << "SCALARS Fiber_Strain double " << std::endl;
 		ofs << "LOOKUP_TABLE default "  << std::endl;
-		for (unsigned edge = 0; edge < numEdges; edge++) {
+	/*	for (unsigned edge = 0; edge < numEdges; edge++) {
 			unsigned idA = sys->nodeInfoVecs.deviceEdgeLeft[edge];
 			unsigned idB = sys->nodeInfoVecs.deviceEdgeRight[edge];
 
@@ -191,8 +191,8 @@ void ForceDiagramStorage::print_VTK_File() {
 			double strain = (L1 - L0) / L0;
 			ofs << std::fixed << strain   << std::endl;
 
-		}
-		/*for (unsigned idA = 0; idA < maxNodeCount; idA++ ){
+		}*/
+		for (unsigned idA = 0; idA < maxNodeCount; idA++ ){
 
 			unsigned beginIndex = idA * maxNeighborCount;
 			unsigned endIndex = beginIndex + maxNeighborCount;
@@ -216,7 +216,7 @@ void ForceDiagramStorage::print_VTK_File() {
 					ofs << std::fixed << strain   << std::endl;
 				}
 			}
-		}*/
+		}
 
 		ofs.close();
 

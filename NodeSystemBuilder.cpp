@@ -330,9 +330,9 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
     	std::mt19937 genX(rdX()); //Standard mersenne_twister_engine seeded with rd()
     	std::mt19937 genY(rdY()); //Standard mersenne_twister_engine seeded with rd()
     	std::mt19937 genZ(rdZ()); //Standard mersenne_twister_engine seeded with rd()
-    	std::uniform_real_distribution<> distX(pltmaxX + padding, pltminX - padding);
-    	std::uniform_real_distribution<> distY(pltmaxY + padding, pltminY - padding);
-    	std::uniform_real_distribution<> distZ(pltmaxZ + padding, pltminZ - padding);
+    	std::uniform_real_distribution<> distX(pltminX + padding, pltmaxX - padding);
+    	std::uniform_real_distribution<> distY(pltminY + padding, pltmaxY - padding);
+    	std::uniform_real_distribution<> distZ(pltminZ + padding, pltmaxZ - padding);
 
 		for (unsigned plt = 0; plt < numPlts; plt++ ){
 			double xPos = distX(genX);

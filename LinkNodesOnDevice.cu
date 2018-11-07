@@ -38,6 +38,16 @@ void LinkNodesOnDevice(
 					generalParams.maxLinksPerIteration, 
 					thrust::raw_pointer_cast(nodeInfoVecs.idEdgesMadeTemp.data()) ) );
 		
+		thrust::for_each(  
+						auxVecs.bucketKeys.begin(),
+						auxVecs.bucketKeys.begin() + generalParams.maxNodeCount,
+		
+				DeLinkCopiesFunctor(
+					thrust::raw_pointer_cast(wlcInfoVecs.globalNeighbors.data()),
+					thrust::raw_pointer_cast(wlcInfoVecs.lengthZero.data()),
+					thrust::raw_pointer_cast(wlcInfoVecs.currentNodeEdgeCountVector.data()),
+					generalParams.maxNeighborCount,
+					generalParams.maxNodeCount ) );
 
 		unsigned numAdded = thrust::count_if( nodeInfoVecs.idEdgesMadeTemp.begin(), nodeInfoVecs.idEdgesMadeTemp.end(), isNotEqualToZero() );
 		if (numAdded != 0) {

@@ -93,7 +93,7 @@ struct LinkNodesFunctor {
 			unsigned endIndex = keyEnd[bucketId];
 
 			for (unsigned iter = beginIndex; iter < endIndex; iter++ ) {
-				if (numPlacedLinks > maxLinksPerIteration) {
+				if (numPlacedLinks >= maxLinksPerIteration) {
 					break;
 				}
 
