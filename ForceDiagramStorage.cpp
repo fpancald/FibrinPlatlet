@@ -120,7 +120,7 @@ void ForceDiagramStorage::print_VTK_File() {
 
 
 		ofs << "POINTS " << maxNodeCount << " float" << std::endl;
-		for (unsigned i = 0; i< maxNodeCount; i++) {
+		for (unsigned i = 0; i< maxNodeCount; i++) { 
 			double xPos = sys->nodeInfoVecs.nodeLocX[i];
 			double yPos = sys->nodeInfoVecs.nodeLocY[i];
 			double zPos = sys->nodeInfoVecs.nodeLocZ[i];
@@ -136,7 +136,13 @@ void ForceDiagramStorage::print_VTK_File() {
 
 		ofs << "CELLS " << numCells << " " << numNumsInCells << std::endl;
 
-		for (unsigned idA = 0; idA < maxNodeCount; idA++ ){
+		for (unsigned edge = 0; edge < numEdges; edge++) {
+			unsigned idL = sys->nodeInfoVecs.deviceEdgeLeft[edge];
+			unsigned idR = sys->nodeInfoVecs.deviceEdgeRight[edge];
+
+			ofs<< 2 << " " << idL << " " << idR << std::endl;
+		}
+		/*for (unsigned idA = 0; idA < maxNodeCount; idA++ ){
 
 			unsigned beginIndex = idA * maxNeighborCount;
 			unsigned endIndex = beginIndex + maxNeighborCount;
@@ -148,10 +154,10 @@ void ForceDiagramStorage::print_VTK_File() {
 					ofs<< 2 << " " << idA << " " << idB << std::endl;
 				}
 			}
-		}
+		}*/
 
 		ofs << "CELL_TYPES " << numCells << std::endl;
-		for (unsigned i = 0; i<numEdges; i++) {
+		for (unsigned i = 0; i< numEdges; i++) {
 			ofs << 3 << std::endl; //edge joining two points
 		}
 
@@ -161,8 +167,32 @@ void ForceDiagramStorage::print_VTK_File() {
 		ofs << "CELL_DATA " << numCells << std::endl;
 		ofs << "SCALARS magnitude double " << std::endl;
 		ofs << "LOOKUP_TABLE default "  << std::endl;
+		for (unsigned edge = 0; edge < numEdges; edge++) {
+			unsigned idA = sys->nodeInfoVecs.deviceEdgeLeft[edge];
+			unsigned idB = sys->nodeInfoVecs.deviceEdgeRight[edge];
 
-		for (unsigned idA = 0; idA < maxNodeCount; idA++ ){
+			unsigned begin = idA * sys->generalParams.maxNeighborCount;
+			unsigned end = begin + sys->generalParams.maxNeighborCount;
+			double L0;
+			for (unsigned i = begin; i < end; i++) {
+				unsigned idTemp = sys->wlcInfoVecs.globalNeighbors[i];
+				if (idTemp == idB){
+					L0 = sys->wlcInfoVecs.lengthZero[i];
+				}
+			}
+			double xL = sys->nodeInfoVecs.nodeLocX[idA];
+			double yL = sys->nodeInfoVecs.nodeLocY[idA];
+			double zL = sys->nodeInfoVecs.nodeLocZ[idA];
+			double xR = sys->nodeInfoVecs.nodeLocX[idB];
+			double yR = sys->nodeInfoVecs.nodeLocY[idB];
+			double zR = sys->nodeInfoVecs.nodeLocZ[idB];
+
+			double L1 = std::sqrt( (xL - xR)*(xL - xR)+(yL - yR)*(yL - yR)+(zL - zR)*(zL - zR));
+			double strain = (L1 - L0) / L0;
+			ofs << std::fixed << strain   << std::endl;
+
+		}
+		/*for (unsigned idA = 0; idA < maxNodeCount; idA++ ){
 
 			unsigned beginIndex = idA * maxNeighborCount;
 			unsigned endIndex = beginIndex + maxNeighborCount;
@@ -186,7 +216,7 @@ void ForceDiagramStorage::print_VTK_File() {
 					ofs << std::fixed << strain   << std::endl;
 				}
 			}
-		}
+		}*/
 
 		ofs.close();
 

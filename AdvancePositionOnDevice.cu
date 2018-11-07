@@ -68,7 +68,7 @@ thrust::counting_iterator<unsigned> index_sequence_plt_begin(_seedplt);
 	 gaussianPltData.begin(), psrunifgen(-1.0, 1.0));
 
 thrust::counting_iterator<unsigned> pltIndexBegin(0);
-/*
+
 thrust::transform(
  thrust::make_zip_iterator(
 	 thrust::make_tuple(
@@ -102,7 +102,7 @@ thrust::transform(
 	 generalParams.kB,
 	 generalParams.pltMass,
 	 generalParams.maxPltCount,
-	 thrust::raw_pointer_cast(pltInfoVecs.isPltFixed.data())));*/
+	 thrust::raw_pointer_cast(pltInfoVecs.isPltFixed.data())));
 
 //finally, clear the random data.
 	 gaussianPltData.clear();
