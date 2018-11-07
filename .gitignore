@@ -8,3 +8,5 @@ objects.mk
 bend-model
 *.o*.*
 *.sta
+*.mat
+

@@ -22,6 +22,7 @@
 	<plt_max_conn>5</plt_max_conn><!-- platelet maximum number of connections-->
 	<plt_r>1.0</plt_r>   <!-- radius of platelet from center (volume exclusion)-->
 	<plt_r_force>2.0</plt_r_force><!-- force radius from platelet center-->
+	<plt_density> </plt_density>
 </settings>
 
     <nodes default-mass="1.0">
