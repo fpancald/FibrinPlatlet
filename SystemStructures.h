@@ -6,6 +6,7 @@
 #include <cmath>
 
 #include <thrust/random.h>
+#include <thrust/count.h>
 #include <thrust/extrema.h>
 #include <thrust/sort.h>
 #include <thrust/for_each.h>
@@ -30,7 +31,7 @@
 #include <thrust/random/uniform_real_distribution.h>
 #include <stdint.h>
 #include <thrust/sequence.h>
-
+ 
 
 struct NodeInfoVecs;
 struct PltInfoVecs;
@@ -294,6 +295,22 @@ struct is_greater_than {
   __device__
   bool operator()(const unsigned& x) {
 	if ( x > limit ) {
+    	return true;
+	}
+	else {
+		return false;
+	}
+  }
+};
+
+struct is_less_than {
+	unsigned limit;
+
+	 __host__ __device__
+	is_less_than(unsigned& _limit) : limit(_limit) {}
+  __device__
+  bool operator()(const unsigned& x) {
+	if ( x < limit ) {
     	return true;
 	}
 	else {
