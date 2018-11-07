@@ -145,8 +145,7 @@ void NodeSystemDevice::initializeSystem(
 	std::cout << "max num nodes: " << generalParams.maxNodeCount << std::endl;
 	//platelets
 
-	generalParams.maxPltCount = hostPltPosX.size();
-	std::cout << "max num platelets: " << generalParams.maxPltCount << std::endl;
+	std::cout << "max num platelets in device: " << generalParams.maxPltCount << std::endl;
 
 
 

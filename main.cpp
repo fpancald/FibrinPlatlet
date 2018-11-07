@@ -77,6 +77,7 @@ std::shared_ptr<NodeSystemDevice> createNodeSystem(const char* schemeFile, std::
 
 	if (auto p = props.child("use-linking"))
 		builder->linking = (p.text().as_bool());
+////////////////////////////////////////////////////		
 //platelets parameters
 	if (auto p = props.child("plt_mass"))
 		builder->defaultPltMass = (p.text().as_double());
@@ -90,8 +91,14 @@ std::shared_ptr<NodeSystemDevice> createNodeSystem(const char* schemeFile, std::
 	if (auto p = props.child("plt_r"))
 		builder->pltR = (p.text().as_double());
 
-	if (auto p = props.child("plt_r_force"))
+	if (auto p = props.child("plt_r_force")) {
 		builder->pltRForce = (p.text().as_double());
+	}
+
+	if (auto p = props.child("plt_density")) {
+		builder->pltDensity = (p.text().as_double());
+		std::cout<<"setting density: "<< builder->pltDensity << std::endl;
+	}
 
 	std::cout << "builder ptr address: " << builder << std::endl;
 	std::vector<unsigned> originNodes;
@@ -148,35 +155,25 @@ std::shared_ptr<NodeSystemDevice> createNodeSystem(const char* schemeFile, std::
 	double defaultPltMass = nodes.attribute("plt-mass").as_double(-1.0);
 	builder->defaultPltMass = defaultPltMass;
 
-	//debuggin printl
-	//std::cout<<"default mass: " << defaultMass << std::endl;
-	for (auto plt = plts.child("plt"); plt; plt = plt.next_sibling("plt")) {
-		pltmass = plt.attribute("mass").as_double(defaultPltMass);
-		if (mass < 0.0) {
-			std::cout << "parse error: plt mass is undefined\n";
-			return 0;
-		}
-		const char* text = plt.text().as_string();
+	//only use platelet input if density is zero
+	if ((builder->pltDensity) != 0.0) {
+		for (auto plt = plts.child("plt"); plt; plt = plt.next_sibling("plt")) {
+			
+			if (defaultPltMass < 0.0) {
+				std::cout << "parse error: plt mass is undefined\n";
+				return 0;
+			}
+			const char* text = plt.text().as_string();
 
-		//std::cout<<"mass: " << mass << std::endl;
-		if (3 != sscanf(text, "%lf %lf %lf", &pltx, &plty, &pltz)) {
-			std::cout << "parse plt error\n";
-			return 0;
+			//std::cout<<"mass: " << mass << std::endl;
+			if (3 != sscanf(text, "%lf %lf %lf", &pltx, &plty, &pltz)) {
+				std::cout << "parse plt error\n";
+				return 0;
+			}
+			__attribute__ ((unused)) int unused = builder->addPlt(defaultPltMass, glm::dvec3(pltx, plty, pltz));
 		}
-		__attribute__ ((unused)) int unused = builder->addPlt(pltmass, glm::dvec3(pltx, plty, pltz));
-	}
-//platelets links?
-	/*unsigned from, to;
-	for (auto link = links.child("link"); link; link = link.next_sibling("link")) {
-		if (2 != sscanf(link.text().as_string(""), "%u %u" , &from, &to)) {
-			std::cout << "parse link error\n";
-			return 0;
-		}
-		builder->putSpring(from, to); //adds edges into saved vectors
-
 	}
 
-	std::cout << "post springs" << std::endl;*/
 
 
 	//replace false entries with true if node is fixed.

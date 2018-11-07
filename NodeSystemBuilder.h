@@ -80,7 +80,8 @@ public:
 	double pltRForce = 1.4;
 	double pltR = 0.1;
 	unsigned pltMaxConn = 100;
-	double pltForce = 10.0;
+	double pltForce = 1.0;
+	double pltDensity = 0.0;
 
 	//std::shared_ptr<NodeSystemDevice> host_ptr_devNodeSystem;
 	std::vector<std::shared_ptr<BuildNode>> buildNodes;
