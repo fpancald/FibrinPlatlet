@@ -145,19 +145,7 @@ void NodeSystemDevice::initializeSystem(
 	std::cout << "max num nodes: " << generalParams.maxNodeCount << std::endl;
 	//platelets
 
-		//platelets
-		hostPltPosX.push_back(0.0);
-		//hostPltPosX.push_back(2.0);
-		//hostPltPosX.push_back(3.0);
-	
-		hostPltPosY.push_back(1.35);
-		//hostPltPosY.push_back(2.0);
-		//hostPltPosY.push_back(3.0);
-	
-		hostPltPosZ.push_back(0.0);
-		//hostPltPosZ.push_back(2.0);
-		//hostPltPosZ.push_back(3.0);
-		generalParams.maxPltCount = hostPltPosX.size();
+	generalParams.maxPltCount = hostPltPosX.size();
 	std::cout << "max num platelets: " << generalParams.maxPltCount << std::endl;
 
 
