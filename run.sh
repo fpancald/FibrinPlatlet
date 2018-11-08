@@ -14,7 +14,7 @@ set data = ( plt_data_Rec_0.013_10_10_10.xml )
 module purge
 module load gcc/6.2.0
 module load gsl/2.3
-module load cuda
+module load cuda/9.1
 echo -n "It is currently: ";date
 echo -n "I am logged on as ";whoami
 echo -n "This computer is called ";hostname

@@ -47,12 +47,13 @@ void PltForceOnDevice(
         		 pltInfoVecs.pltForceX.begin(),
         		 pltInfoVecs.pltForceY.begin(),
         		 pltInfoVecs.pltForceZ.begin())),
-             PltonNodeForceFunctor( 
+             PltonNodeForceFunctor(
                  generalParams.pltMaxConn,
                  generalParams.pltRForce,
                  generalParams.pltForce,
                  generalParams.pltR,
                  generalParams.maxPltCount,
+                 generalParams.fiberDiameter,
                  thrust::raw_pointer_cast(nodeInfoVecs.nodeLocX.data()),
                  thrust::raw_pointer_cast(nodeInfoVecs.nodeLocY.data()),
                  thrust::raw_pointer_cast(nodeInfoVecs.nodeLocZ.data()),
@@ -62,7 +63,7 @@ void PltForceOnDevice(
                  thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedId.data()),
                  thrust::raw_pointer_cast(auxVecs.bucketValuesIncludingNeighbor.data()),
                  thrust::raw_pointer_cast(auxVecs.keyBegin.data()),
-                 thrust::raw_pointer_cast(auxVecs.keyEnd.data()) ) ); 
+                 thrust::raw_pointer_cast(auxVecs.keyEnd.data()) ) );
 
         //now call a sort by key followed by a reduce by key to figure out which nodes are have force applied.
         //then make a functor that takes the id and force (4 tuple) and takes that force and adds it to the id'th entry in nodeInfoVecs.nodeForceX,Y,Z
@@ -90,7 +91,7 @@ void PltForceOnDevice(
         					pltInfoVecs.nodeUnreducedForceZ.begin())),
         			pltInfoVecs.nodeReducedId.begin(),
         			thrust::make_zip_iterator(
-        				thrust::make_tuple(
+        				thrust::make_tuple(//need t check
         					pltInfoVecs.nodeReducedForceX.begin(),
         					pltInfoVecs.nodeReducedForceY.begin(),
         					pltInfoVecs.nodeReducedForceZ.begin())),
@@ -115,6 +116,47 @@ void PltForceOnDevice(
         				thrust::raw_pointer_cast(nodeInfoVecs.nodeForceY.data()),
         				thrust::raw_pointer_cast(nodeInfoVecs.nodeForceZ.data())));
 
+                //Call the plt force on plts functor
+            thrust::transform(
+              thrust::make_zip_iterator(
+                thrust::make_tuple(
+                auxVecs.bucketPltKeys.begin(),
+                auxVecs.bucketPltValues.begin(),
+                  pltInfoVecs.pltLocX.begin(),
+                  pltInfoVecs.pltLocY.begin(),
+                  pltInfoVecs.pltLocZ.begin(),
+                  pltInfoVecs.pltForceX.begin(),
+                  pltInfoVecs.pltForceY.begin(),
+                  pltInfoVecs.pltForceZ.begin())),
+              thrust::make_zip_iterator(
+                thrust::make_tuple(
+                  auxVecs.bucketPltKeys.begin(),
+                auxVecs.bucketPltValues.begin(),
+                  pltInfoVecs.pltLocX.begin(),
+                  pltInfoVecs.pltLocY.begin(),
+                  pltInfoVecs.pltLocZ.begin(),
+                  pltInfoVecs.pltForceX.begin(),
+                  pltInfoVecs.pltForceY.begin(),
+                  pltInfoVecs.pltForceZ.begin())) + generalParams.maxPltCount,
+             //save plt forces
+             thrust::make_zip_iterator(
+               thrust::make_tuple(
+             //reset's forces
+                 pltInfoVecs.pltForceX.begin(),
+                 pltInfoVecs.pltForceY.begin(),
+                 pltInfoVecs.pltForceZ.begin())),
+                 PltonPltForceFunctor(
+                     generalParams.pltMaxConn,
+                     generalParams.pltRForce,
+                     generalParams.pltForce,
+                     generalParams.pltR,
+                     generalParams.maxPltCount,
+                     thrust::raw_pointer_cast(pltInfoVecs.pltLocX.data()),
+                     thrust::raw_pointer_cast(pltInfoVecs.pltLocY.data()),
+                     thrust::raw_pointer_cast(pltInfoVecs.pltLocZ.data()),
+                     thrust::raw_pointer_cast(auxVecs.bucketPltValuesIncludingNeighbor.data()),
+                     thrust::raw_pointer_cast(auxVecs.keyPltBegin.data()),
+                     thrust::raw_pointer_cast(auxVecs.keyPltEnd.data()) ) );
         	}
 
 

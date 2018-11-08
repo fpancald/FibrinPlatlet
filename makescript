@@ -1,0 +1,6 @@
+module purge
+module load gcc/6.2.0
+module load gsl/2.3
+module load cuda/9.1
+make clean 
+make -j 12
