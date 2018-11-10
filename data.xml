@@ -19,9 +19,9 @@
 
 	<plt_mass>2.0</plt_mass><!-- platelet mass-->
 	<plt_force>5.0</plt_force><!-- platelet force-->
-	<plt_max_conn>5</plt_max_conn><!-- platelet maximum number of connections-->
+	<plt_max_conn>300</plt_max_conn><!-- platelet maximum number of connections-->
 	<plt_r>1.0</plt_r>   <!-- radius of platelet from center (volume exclusion)-->
-	<plt_r_force>2.0</plt_r_force><!-- force radius from platelet center-->
+	<plt_r_force>1.5</plt_r_force><!-- force radius from platelet center-->
 	<plt_density>0.1</plt_density>
 </settings>
     <nodes default-mass="1.0">

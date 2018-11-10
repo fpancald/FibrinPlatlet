@@ -38,6 +38,7 @@ void LinkNodesOnDevice(
 					generalParams.maxLinksPerIteration, 
 					thrust::raw_pointer_cast(nodeInfoVecs.idEdgesMadeTemp.data()) ) );
 		
+		
 		thrust::for_each(  
 						auxVecs.bucketKeys.begin(),
 						auxVecs.bucketKeys.begin() + generalParams.maxNodeCount,

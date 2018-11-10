@@ -70,12 +70,15 @@ void extendBucketScheme(
 	//memory is already allocated.
 	unsigned endIndexExpanded = (auxVecs.endIndexBucketKeys) * 27;
 	//platelets
-//	unsigned endIndexPltExpanded = (auxVecs.endIndexBucketPltKeys) * 27;
+	unsigned endIndexPltExpanded = (auxVecs.endIndexBucketPltKeys) * 27;
 
 	//test for removing copies.
 	unsigned valuesCount = auxVecs.bucketValues.size();
 	thrust::fill(auxVecs.bucketKeysExpanded.begin(),auxVecs.bucketKeysExpanded.end(),0);
 	thrust::fill(auxVecs.bucketValuesIncludingNeighbor.begin(),auxVecs.bucketValuesIncludingNeighbor.end(),0);
+
+	thrust::fill(auxVecs.bucketPltKeysExpanded.begin(),auxVecs.bucketPltKeysExpanded.end(),0);
+	thrust::fill(auxVecs.bucketPltValuesIncludingNeighbor.begin(),auxVecs.bucketPltValuesIncludingNeighbor.end(),0);
 
 
 
@@ -181,7 +184,8 @@ void extendBucketScheme(
 	* e.g. movement is 5 and first iterator is initialized as 9
 	* result array is [9,9,9,9,9];
 	*/
-	/*
+	
+	
 	thrust::constant_iterator<unsigned> pltlast = pltfirst + (auxVecs.endIndexBucketPltKeys); // this is NOT numerical addition!
 
 	expand(pltfirst, pltlast,
@@ -226,6 +230,11 @@ void extendBucketScheme(
 	thrust::sort_by_key(auxVecs.bucketPltKeysExpanded.begin(),
 		auxVecs.bucketPltKeysExpanded.begin() + endIndexPltExpanded,
 		auxVecs.bucketPltValuesIncludingNeighbor.begin());
+	
+	pltnumberInsideRange = 
+		thrust::get<0>(thrust::unique_by_key(auxVecs.bucketPltValuesIncludingNeighbor.begin(),
+			auxVecs.bucketPltValuesIncludingNeighbor.begin() + endIndexExpanded,
+			auxVecs.bucketPltKeysExpanded.begin())) - auxVecs.bucketPltValuesIncludingNeighbor.begin();
 
 	auxVecs.bucketPltKeysExpanded.erase(
 			auxVecs.bucketPltKeysExpanded.begin() + pltnumberInsideRange,
@@ -248,7 +257,7 @@ void extendBucketScheme(
 	thrust::upper_bound(auxVecs.bucketPltKeysExpanded.begin(),
 		auxVecs.bucketPltKeysExpanded.end(),pltsearch_begin,
 		pltsearch_begin + domainParams.totalBucketCount,
-		auxVecs.keyPltEnd.begin());*/
+		auxVecs.keyPltEnd.begin());
 
 }
 

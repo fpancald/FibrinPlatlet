@@ -135,14 +135,14 @@ void ForceDiagramStorage::print_VTK_File() {
 
 
 		ofs << "CELLS " << numCells << " " << numNumsInCells << std::endl;
-/*
+
 		for (unsigned edge = 0; edge < numEdges; edge++) {
 			unsigned idL = sys->nodeInfoVecs.deviceEdgeLeft[edge];
 			unsigned idR = sys->nodeInfoVecs.deviceEdgeRight[edge];
 
 			ofs<< 2 << " " << idL << " " << idR << std::endl;
-		}*/
-		for (unsigned idA = 0; idA < maxNodeCount; idA++ ){
+		}
+	/*	for (unsigned idA = 0; idA < maxNodeCount; idA++ ){
 
 			unsigned beginIndex = idA * maxNeighborCount;
 			unsigned endIndex = beginIndex + maxNeighborCount;
@@ -154,7 +154,7 @@ void ForceDiagramStorage::print_VTK_File() {
 					ofs<< 2 << " " << idA << " " << idB << std::endl;
 				}
 			}
-		}
+		}*/
 
 		ofs << "CELL_TYPES " << numCells << std::endl;
 		for (unsigned i = 0; i< numEdges; i++) {
@@ -167,7 +167,7 @@ void ForceDiagramStorage::print_VTK_File() {
 		ofs << "CELL_DATA " << numCells << std::endl;
 		ofs << "SCALARS Fiber_Strain double " << std::endl;
 		ofs << "LOOKUP_TABLE default "  << std::endl;
-	/*	for (unsigned edge = 0; edge < numEdges; edge++) {
+		for (unsigned edge = 0; edge < numEdges; edge++) {
 			unsigned idA = sys->nodeInfoVecs.deviceEdgeLeft[edge];
 			unsigned idB = sys->nodeInfoVecs.deviceEdgeRight[edge];
 
@@ -191,8 +191,8 @@ void ForceDiagramStorage::print_VTK_File() {
 			double strain = (L1 - L0) / L0;
 			ofs << std::fixed << strain   << std::endl;
 
-		}*/
-		for (unsigned idA = 0; idA < maxNodeCount; idA++ ){
+		}
+	/*	for (unsigned idA = 0; idA < maxNodeCount; idA++ ){
 
 			unsigned beginIndex = idA * maxNeighborCount;
 			unsigned endIndex = beginIndex + maxNeighborCount;
@@ -216,18 +216,18 @@ void ForceDiagramStorage::print_VTK_File() {
 					ofs << std::fixed << strain   << std::endl;
 				}
 			}
-		}
+		}*/
 
 		ofs.close();
 
 	}
 
-	//now print platelets
-	if (sys) {
+	//now print platelets with attatchments
+	if ((sys)) {
 		unsigned digits = ceil(log10(iteration + 1));
 		std::string format = ".vtk";
 		std::string Number;
-		std::string initial = "AnimationTest/Platelet_";
+		std::string initial = "AnimationTest/Platelet";
 		std::ofstream ofs;
 		if (digits == 1 || digits == 0) {
 			Number = "0000" + std::to_string(iteration);
@@ -245,46 +245,80 @@ void ForceDiagramStorage::print_VTK_File() {
 		std::string Filename = initial + Number + format;
 
 		ofs.open(Filename.c_str());
-
-
+		
+	
 		unsigned maxPltCount = sys->generalParams.maxPltCount;
 
-
+		unsigned num_connections = sys->pltInfoVecs.numConnections;
+		
+		double xPos;
+		double yPos;
+		double zPos;
+		
 		ofs << "# vtk DataFile Version 3.0" << std::endl;
 		ofs << "Point representing Sub_cellular elem model" << std::endl;
 		ofs << "ASCII" << std::endl << std::endl;
 		ofs << "DATASET UNSTRUCTURED_GRID" << std::endl;
-
-
-		ofs << "POINTS " << maxPltCount << " float" << std::endl;
+		
+		 
+		ofs << "POINTS " << maxPltCount + num_connections << " float" << std::endl;
 		for (unsigned i = 0; i< maxPltCount; i++) {
-			double xPos = sys->pltInfoVecs.pltLocX[i];
-			double yPos = sys->pltInfoVecs.pltLocY[i];
-			double zPos = sys->pltInfoVecs.pltLocZ[i];
+			xPos = sys->pltInfoVecs.pltLocX[i];
+			yPos = sys->pltInfoVecs.pltLocY[i];
+			zPos = sys->pltInfoVecs.pltLocZ[i];
 
 			ofs << std::setprecision(5) <<std::fixed<< xPos << " " << yPos << " " << zPos << " " << '\n'<< std::fixed;
 		}
-		//now plot particles
+
+		//set location for nodes that plt is connected to
+		//ie  
+		for (unsigned i = 0; i < num_connections; i++ ) {
+			unsigned node_id = sys->pltInfoVecs.nodeImagingConnection[i];
+
+			xPos = sys->nodeInfoVecs.nodeLocX[node_id];
+			yPos = sys->nodeInfoVecs.nodeLocY[node_id];
+			zPos = sys->nodeInfoVecs.nodeLocZ[node_id];
+			
+			ofs << std::setprecision(5) <<std::fixed<< xPos << " " << yPos << " " << zPos << " " << '\n'<< std::fixed;
+		
+		}
 
 
+		//std::cout<<'here1'<<std::flush;
+		
 		unsigned numCells = 1;
-		unsigned numNumsInCells = maxPltCount+1;
+		numCells += num_connections;//add conections cells for edges
 
+		unsigned numNumsInCells = 1 + maxPltCount;
+		numNumsInCells += 3 * num_connections;//3 numbers per edge
 
 		ofs << "CELLS " << numCells << " " << numNumsInCells << std::endl;
+		
 		//place edges as cells of type 2. 
-		ofs<< maxPltCount << " ";
+		ofs<< maxPltCount;
 		for (unsigned point = 0; point < maxPltCount; point++ ){
 			ofs<< " " << point;
 		}
 		ofs<<" "<< std::endl;
 
-		ofs << "CELL_TYPES " << numCells << std::endl;
+		//std::cout<<'here2'<<std::flush;
+		for (unsigned edge = 0; edge < num_connections; edge++ ){
+
+			unsigned node_Id = maxPltCount + edge;
+			unsigned plt_id = sys->pltInfoVecs.pltImagingConnection[edge];
+				
+			ofs <<2<< " "<< node_Id << " "<< plt_id <<std::endl;
+		}
+		ofs << "CELL_TYPES " << numCells << std::endl;  
+		//set edges and last set scattered points
+				
 		ofs << 2 << std::endl;//scatter points for capsid
 		
-
-
+	//	std::cout<<'here3'<<std::flush;
+		for (unsigned edge = 0; edge< num_connections; edge++ ){
+			ofs<< 3 <<std::endl;
+		}
 		ofs.close();
-
 	}
+
 };
