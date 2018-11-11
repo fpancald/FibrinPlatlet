@@ -317,7 +317,7 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 		double pltmaxY = (*(thrust::max_element(hostPosY.begin(), hostPosY.end())));
 		double pltminZ = (*(thrust::min_element(hostPosZ.begin(), hostPosZ.end())));
 		double pltmaxZ = (*(thrust::max_element(hostPosZ.begin(), hostPosZ.end())));
-		numPlts = static_cast<unsigned>(ceil((pltmaxX - pltminX) * (pltmaxY - pltminY) * (pltmaxZ - pltminZ) * pltDensity));
+		numPlts = 2;//static_cast<unsigned>(ceil((pltmaxX - pltminX) * (pltmaxY - pltminY) * (pltmaxZ - pltminZ) * pltDensity));
 		
 		std::cout<< "number of plts from density: "<< numPlts<<std::endl;
 		
@@ -338,9 +338,9 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 			double xPos = distX(genX);
 			double yPos = distY(genY);
 			double zPos = distZ(genZ);
-			hostPltPosX.push_back(xPos);
-			hostPltPosY.push_back(yPos);
-			hostPltPosZ.push_back(zPos);
+			hostPltPosX.push_back(static_cast<double>(plt+0.1) );
+			hostPltPosY.push_back(static_cast<double>(plt+0.1) );
+			hostPltPosZ.push_back(static_cast<double>(plt+0.1) );
 			std::cout<<" plt pos: "<< xPos << " "<< yPos << " "<< zPos << std::endl;
 		}
     	  

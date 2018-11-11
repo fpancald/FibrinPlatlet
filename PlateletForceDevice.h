@@ -15,6 +15,11 @@ void PltForceOnDevice(
   AuxVecs& auxVecs);
 
 
+void PltInteractionOnDevice(
+  	GeneralParams& generalParams,
+  	PltInfoVecs& pltInfoVecs,
+  	AuxVecs& auxVecs);
+
 
 struct AddPltonNodeForceFunctor {//same as torsion
 	double* forceXAddr;
@@ -53,6 +58,7 @@ struct PltonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3>  {
   double pltR;
   unsigned maxPltCount;
   double fiberDiameter;
+  unsigned maxNodeCount;
 
   double* nodeLocXAddr;
 	double* nodeLocYAddr;
@@ -61,6 +67,7 @@ struct PltonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3>  {
 	double* nodeUForceYAddr;
 	double* nodeUForceZAddr;
   unsigned* nodeUId;
+  unsigned* pltUId;
 
 	unsigned* bucketNbrsExp;
 	unsigned* keyBegin;
@@ -76,6 +83,7 @@ struct PltonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3>  {
             double& _pltR,
             unsigned& _maxPltCount,
             double& _fiberDiameter,
+            unsigned& _maxNodeCount,
 
             double* _nodeLocXAddr,
             double* _nodeLocYAddr,
@@ -84,6 +92,7 @@ struct PltonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3>  {
             double* _nodeUForceYAddr,
             double* _nodeUForceZAddr,
       			unsigned* _nodeUId,
+            unsigned* _pltUId,
 
       			unsigned* _bucketNbrsExp,
       			unsigned* _keyBegin,
@@ -95,6 +104,7 @@ struct PltonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3>  {
     pltR(_pltR),
     maxPltCount(_maxPltCount),
     fiberDiameter(_fiberDiameter),
+    maxNodeCount(_maxNodeCount),
 
     nodeLocXAddr(_nodeLocXAddr),
 		nodeLocYAddr(_nodeLocYAddr),
@@ -103,6 +113,7 @@ struct PltonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3>  {
 		nodeUForceYAddr(_nodeUForceYAddr),
 		nodeUForceZAddr(_nodeUForceZAddr),
     nodeUId(_nodeUId),
+    pltUId(_pltUId),
 
 		bucketNbrsExp(_bucketNbrsExp),
 		keyBegin(_keyBegin),
@@ -132,12 +143,12 @@ struct PltonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3>  {
         double sumPltForceZ = 0.0;
 
         //Loop through the number of available neighbors for each plt.
-        unsigned pullCounter=0;
+        unsigned interactionCounter=0;
 
-        for(unsigned i = beginIndex; i < endIndex; i++) {
+        for(unsigned i = 0; i < maxNodeCount; i++) {
 
           //Choose a neighbor.
-          unsigned pullNode_id = bucketNbrsExp[i];
+          unsigned pullNode_id = i;//bucketNbrsExp[i];
           //
           //Get position of node
           double vecN_PX = pltLocX - nodeLocXAddr[pullNode_id];
@@ -151,7 +162,7 @@ struct PltonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3>  {
 
 
           //only pull as many as are arms.
-          if (pullCounter < pltmaxConn) {
+          if (interactionCounter < pltmaxConn) {
               //attraction if platelet and fiber are within interaction distance but not overlapping
               if ((dist < pltRForce) && (dist > pltR + fiberDiameter/2) ) {
                   //node only affects plt position if it is pulled.
@@ -167,12 +178,13 @@ struct PltonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3>  {
 
                   //store force in temporary vector. Call reduction later.
 
-                  nodeUForceXAddr[storageLocation + pullCounter] = forceNodeX;
-                  nodeUForceYAddr[storageLocation + pullCounter] = forceNodeY;
-                  nodeUForceZAddr[storageLocation + pullCounter] = forceNodeZ;
-                  nodeUId[storageLocation + pullCounter] = pullNode_id;
+                  nodeUForceXAddr[storageLocation + interactionCounter] = forceNodeX;
+                  nodeUForceYAddr[storageLocation + interactionCounter] = forceNodeY;
+                  nodeUForceZAddr[storageLocation + interactionCounter] = forceNodeZ;
+                  nodeUId[storageLocation + interactionCounter] = pullNode_id;
+                  pltUId[storageLocation + interactionCounter] = pltId;
 
-                  pullCounter++;
+                  interactionCounter++;
 
               }
               //repulsion if fiber and platelet overlap
@@ -190,22 +202,19 @@ struct PltonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3>  {
 
                   //store force in temporary vector. Call reduction later.
 
-                  nodeUForceXAddr[storageLocation + pullCounter] = forceNodeX;
-                  nodeUForceYAddr[storageLocation + pullCounter] = forceNodeY;
-                  nodeUForceZAddr[storageLocation + pullCounter] = forceNodeZ;
-                  nodeUId[storageLocation + pullCounter] = pullNode_id;
-
+                  nodeUForceXAddr[storageLocation + interactionCounter] = forceNodeX;
+                  nodeUForceYAddr[storageLocation + interactionCounter] = forceNodeY;
+                  nodeUForceZAddr[storageLocation + interactionCounter] = forceNodeZ;
+                  nodeUId[storageLocation + interactionCounter] = pullNode_id;
+                  pltUId[storageLocation + interactionCounter] = pltId;
+                  
+                  interactionCounter++;
               }
           }
 
 
     }
-
-
-
-
     return thrust::make_tuple(sumPltForceX, sumPltForceY, sumPltForceZ);
-
 
    }
 };
@@ -221,6 +230,10 @@ struct PltonPltForceFunctor : public thrust::unary_function<U2CVec6, CVec3>  {
   double* pltLocXAddr;
 	double* pltLocYAddr;
 	double* pltLocZAddr;
+  
+  double* pltForceXAddr;
+	double* pltForceYAddr;
+	double* pltForceZAddr;
 
 	unsigned* bucketNbrsExp;
 	unsigned* keyBegin;
@@ -240,6 +253,10 @@ struct PltonPltForceFunctor : public thrust::unary_function<U2CVec6, CVec3>  {
             double* _pltLocYAddr,
             double* _pltLocZAddr,
 
+            double* _pltForceXAddr,
+            double* _pltForceYAddr,
+            double* _pltForceZAddr,
+
       			unsigned* _bucketNbrsExp,
       			unsigned* _keyBegin,
       			unsigned* _keyEnd) :
@@ -254,95 +271,93 @@ struct PltonPltForceFunctor : public thrust::unary_function<U2CVec6, CVec3>  {
 		pltLocYAddr(_pltLocYAddr),
 		pltLocZAddr(_pltLocZAddr),
 
+    pltForceXAddr(_pltForceXAddr),
+    pltForceYAddr(_pltForceYAddr),
+    pltForceZAddr(_pltForceZAddr),
+
 		bucketNbrsExp(_bucketNbrsExp),
 		keyBegin(_keyBegin),
 		keyEnd(_keyEnd) {}
 
 
    __device__
- 		CVec3 operator()(const U2CVec6 &u2d6) {
+ 		void operator()(const U2CVec3 &u2d3) {
 
-        unsigned bucketId = thrust::get<0>(u2d6);
-        unsigned pltId = thrust::get<1>(u2d6);
+        unsigned bucketId = thrust::get<0>(u2d3);
+        unsigned pltId = thrust::get<1>(u2d3);
 
         //beginning and end of attempted interaction network nodes.
 		    unsigned beginIndex = keyBegin[bucketId];
 		    unsigned endIndex = keyEnd[bucketId];
 
+        double pltLocX = thrust::get<2>(u2d3);
+        double pltLocY = thrust::get<3>(u2d3);
+        double pltLocZ = thrust::get<4>(u2d3);
 
 
-        double pltLocX = thrust::get<2>(u2d6);
-        double pltLocY = thrust::get<3>(u2d6);
-        double pltLocZ = thrust::get<4>(u2d6);
-
-
-        double sumPltForceX = thrust::get<5>(u2d6);
-        double sumPltForceY = thrust::get<6>(u2d6);
-        double sumPltForceZ = thrust::get<7>(u2d6);
+        double sumPltForceX = 0.0;
+        double sumPltForceY = 0.0; 
+        double sumPltForceZ = 0.0;
 
         //Loop through the number of available neighbors for each plt.
-        unsigned pullCounter=0;
+        unsigned interactionCounter=0;
 
-        for(unsigned i = beginIndex; i < endIndex; i++) {
+//for now no bucket scheme
+        for(unsigned i = 0; i < maxPltCount; i++) {
 
           //Choose a neighbor.
-          unsigned pullPlt_id = bucketNbrsExp[i];
+          unsigned pullPlt_id = i;//bucketNbrsExp[i];
           //
-          //Get position of plt
-          double vecN_PX = pltLocX - pltLocXAddr[pullPlt_id];
-          double vecN_PY = pltLocY - pltLocYAddr[pullPlt_id];
-          double vecN_PZ = pltLocZ - pltLocZAddr[pullPlt_id];
-          //Calculate distance from plt to plt.
-          double dist = sqrt(
-              (vecN_PX) * (vecN_PX) +
-              (vecN_PY) * (vecN_PY) +
-              (vecN_PZ) * (vecN_PZ));
+          if ( (pullPlt_id != pltId) && (pullPlt_id < maxPltCount)) {
+            //Get position of plt
+            double vecN_PX = pltLocX - pltLocXAddr[pullPlt_id];
+            double vecN_PY = pltLocY - pltLocYAddr[pullPlt_id];
+            double vecN_PZ = pltLocZ - pltLocZAddr[pullPlt_id];
+            //Calculate distance from plt to plt.
+            double dist = sqrt(
+                (vecN_PX) * (vecN_PX) +
+                (vecN_PY) * (vecN_PY) +
+                (vecN_PZ) * (vecN_PZ));
 
 
-          //only pull as many as are arms.
-          if (pullCounter < pltmaxConn) {
-              //attraction if platelet and fiber are within interaction distance but not overlapping
-              if ((dist < pltRForce) && (dist > 2*pltR) ) {
-                  //plt only affects plt position if it is pulled.
-                  //Determine direction of force based on positions and multiply magnitude force
-                  double forcePltX = (vecN_PX / dist) * (pltForce);
-                  double forcePltY = (vecN_PY / dist) * (pltForce);
-                  double forcePltZ = (vecN_PZ / dist) * (pltForce);
+            //only pull as many as are arms.
+            if (interactionCounter < pltmaxConn) {
+                //attraction if platelet and fiber are within interaction distance but not overlapping
 
-                  //count force for plt.
-                  sumPltForceX += 2*(-1.0) * forcePltX;
-                  sumPltForceY += 2*(-1.0) * forcePltY;
-                  sumPltForceZ += 2*(-1.0) * forcePltZ;
+                  if ((dist < 2.0*pltRForce) && (dist > 2*pltR) ) {
+                      //plt only affects plt position if it is pulled.
+                      //Determine direction of force based on positions and multiply magnitude force
+                      double forcePltX = (vecN_PX / dist) * (pltForce);
+                      double forcePltY = (vecN_PY / dist) * (pltForce);
+                      double forcePltZ = (vecN_PZ / dist) * (pltForce);
 
-                  pullCounter++;
+                      //count force for plt.
+                      sumPltForceX += 2*(-1.0) * forcePltX;
+                      sumPltForceY += 2*(-1.0) * forcePltY;
+                      sumPltForceZ += 2*(-1.0) * forcePltZ;
 
-              }
-              //repulsion if fiber and platelet overlap
-              else if (dist < 2*pltR )  {
-                  //plt only affects plt position if it is pulled.
-                  //Determine direction of force based on positions and multiply magnitude force
-                  double forcePltX = -(vecN_PX / dist) * (pltForce);
-                  double forcePltY = -(vecN_PY / dist) * (pltForce);
-                  double forcePltZ = -(vecN_PZ / dist) * (pltForce);
+                  }
+                  //repulsion if fiber and platelet overlap
+                  else if (dist < 2*pltR )  {
+                      //plt only affects plt position if it is pulled.
+                      //Determine direction of force based on positions and multiply magnitude force
+                      double forcePltX = -(vecN_PX / dist) * (pltForce);
+                      double forcePltY = -(vecN_PY / dist) * (pltForce);
+                      double forcePltZ = -(vecN_PZ / dist) * (pltForce);
 
-                  //count force for plt.
-                  sumPltForceX += 2*(-1.0) * forcePltX;
-                  sumPltForceY += 2*(-1.0) * forcePltY;
-                  sumPltForceZ += 2*(-1.0) * forcePltZ;
+                      //count force for plt.
+                      sumPltForceX += 2*(-1.0) * forcePltX;
+                      sumPltForceY += 2*(-1.0) * forcePltY;
+                      sumPltForceZ += 2*(-1.0) * forcePltZ;
 
+                  }
+            }
+        }
 
-              }
-          }
-
-
+      }
+      pltForceXAddr[pltId] += sumPltForceX;
+      pltForceYAddr[pltId] += sumPltForceY;
+      pltForceZAddr[pltId] += sumPltForceZ;
     }
-
-
-
-
-    return thrust::make_tuple(sumPltForceX, sumPltForceY, sumPltForceZ);
-
-
-   }
 };
 #endif /*PLATELETFORCEDEVICE_H_*/

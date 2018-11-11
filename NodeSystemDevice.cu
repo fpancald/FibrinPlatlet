@@ -43,7 +43,18 @@ void NodeSystemDevice::solveForcesOnDevice() {
 	WLCSolveOnDevice(nodeInfoVecs, wlcInfoVecs, generalParams);
 
 	//platetelet-node forces
-	PltForceOnDevice(nodeInfoVecs, wlcInfoVecs, generalParams, pltInfoVecs, auxVecs);
+	//RESETS PLATELET FORCES
+	PltForceOnDevice(
+		nodeInfoVecs, 
+		wlcInfoVecs, 
+		generalParams, 
+		pltInfoVecs, 
+		auxVecs);
+
+	PltInteractionOnDevice(
+  		generalParams,
+  		pltInfoVecs,
+  		auxVecs);
 
 
 };
@@ -61,12 +72,13 @@ void NodeSystemDevice::solveSystemDevice() {
 		generalParams.currentTime += generalParams.dtTemp;
 
 
-		setBucketScheme();
 
 		AdvancePositionOnDevice(
 			nodeInfoVecs,
 			pltInfoVecs,
 		 	generalParams);
+			 
+		setBucketScheme();
 
 		solveForcesOnDevice(); //resets and solves forces for next time step
 
@@ -266,6 +278,9 @@ void NodeSystemDevice::setPltVecs(
 	pltInfoVecs.pltForceY.resize(generalParams.maxPltCount);
 	pltInfoVecs.pltForceZ.resize(generalParams.maxPltCount);
 
+	pltInfoVecs.pltImagingConnection.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
+	pltInfoVecs.nodeImagingConnection.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
+ 
 	pltInfoVecs.nodeUnreducedId.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
 	pltInfoVecs.nodeUnreducedForceX.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
 	pltInfoVecs.nodeUnreducedForceY.resize(generalParams.maxPltCount * generalParams.pltMaxConn);

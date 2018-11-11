@@ -73,6 +73,10 @@ struct PltInfoVecs {
 	thrust::device_vector<double> pltForceY;
 	thrust::device_vector<double> pltForceZ;
 
+	unsigned numConnections=0;
+	thrust::device_vector<unsigned> pltImagingConnection;//used for imaging
+	thrust::device_vector<unsigned> nodeImagingConnection;//used for imaging
+	
 	thrust::device_vector<unsigned> nodeUnreducedId;
 	thrust::device_vector<double> nodeUnreducedForceX;
 	thrust::device_vector<double> nodeUnreducedForceY;
@@ -205,7 +209,7 @@ struct GeneralParams{
 
 	double lagTime = 1.0;//set in main.cpp usin
 
-	unsigned maxNeighborCount = 80;
+	unsigned maxNeighborCount = 100;
 	unsigned maxNodeCount;//after discretize
 	unsigned originNodeCount;//pre discretize
   //platelets
