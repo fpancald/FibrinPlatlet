@@ -10,12 +10,13 @@
 
 
 void NodeSystemDevice::setBucketScheme() {
+
 	initDimensionBucketScheme(
 		nodeInfoVecs,
 		pltInfoVecs,
 		domainParams,
 		auxVecs,
-		generalParams); 
+		generalParams);
 
 	buildBucketScheme(nodeInfoVecs, pltInfoVecs, domainParams,
 		auxVecs, generalParams);
@@ -45,10 +46,10 @@ void NodeSystemDevice::solveForcesOnDevice() {
 	//platetelet-node forces
 	//RESETS PLATELET FORCES
 	PltForceOnDevice(
-		nodeInfoVecs, 
-		wlcInfoVecs, 
-		generalParams, 
-		pltInfoVecs, 
+		nodeInfoVecs,
+		wlcInfoVecs,
+		generalParams,
+		pltInfoVecs,
 		auxVecs);
 
 	PltInteractionOnDevice(
@@ -77,7 +78,7 @@ void NodeSystemDevice::solveSystemDevice() {
 			nodeInfoVecs,
 			pltInfoVecs,
 		 	generalParams);
-			 
+
 		setBucketScheme();
 
 		solveForcesOnDevice(); //resets and solves forces for next time step
@@ -240,7 +241,7 @@ void NodeSystemDevice::setNodeVecs(
 		auxVecs,
 		generalParams);
 
-		
+
 	domainParams.originMinX = domainParams.minX;
 	domainParams.originMaxX = domainParams.maxX;
 	domainParams.originMinY = domainParams.minY;
@@ -251,11 +252,11 @@ void NodeSystemDevice::setNodeVecs(
 	std::cout<< "node count : " <<nodeInfoVecs.nodeLocY.size()<< std::endl;
 
 
-	auxVecs.bucketKeys.resize(generalParams.maxNodeCount);
-	auxVecs.bucketPltValues.resize(generalParams.maxNodeCount);
-	auxVecs.bucketValuesIncludingNeighbor.resize(27 * (generalParams.maxNodeCount));
-	auxVecs.bucketKeysExpanded.resize(27 *( generalParams.maxNodeCount ));
-	
+	auxVecs.id_bucket.resize(generalParams.maxNodeCount);
+	auxVecs.id_value.resize(generalParams.maxNodeCount);
+	auxVecs.id_bucket_expanded.resize(27 * (generalParams.maxNodeCount));
+	auxVecs.id_value_expanded.resize(27 *( generalParams.maxNodeCount ));
+
 };
 
 //platelet
@@ -280,12 +281,12 @@ void NodeSystemDevice::setPltVecs(
 
 	pltInfoVecs.pltImagingConnection.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
 	pltInfoVecs.nodeImagingConnection.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
- 
+
 	pltInfoVecs.nodeUnreducedId.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
 	pltInfoVecs.nodeUnreducedForceX.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
 	pltInfoVecs.nodeUnreducedForceY.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
 	pltInfoVecs.nodeUnreducedForceZ.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
-	
+
 	pltInfoVecs.nodeReducedId.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
 	pltInfoVecs.nodeReducedForceX.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
 	pltInfoVecs.nodeReducedForceY.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
@@ -307,10 +308,10 @@ void NodeSystemDevice::setPltVecs(
 	//thrust::copy(hostIsPltFixed.begin(), hostIsPltFixed.end(), pltInfoVecs.isPltFixed.begin());
 
 
-	auxVecs.bucketPltKeys.resize(generalParams.maxPltCount);
-	auxVecs.bucketValues.resize(generalParams.maxPltCount);
-	auxVecs.bucketPltValuesIncludingNeighbor.resize(27 * (generalParams.maxPltCount));
-	auxVecs.bucketPltKeysExpanded.resize(27 *( generalParams.maxPltCount ));
+	auxVecs.idPlt_bucket.resize(generalParams.maxPltCount);
+	auxVecs.idPlt_value.resize(generalParams.maxPltCount);
+	auxVecs.idPlt_bucket_expanded.resize(27 *( generalParams.maxPltCount ));
+	auxVecs.idPlt_value_expanded.resize(27 * (generalParams.maxPltCount));
 
 };
 
@@ -373,8 +374,8 @@ void NodeSystemDevice::setWLCVecs(
 	wlcInfoVecs.lengthZero.resize(generalParams.maxNodeCount * generalParams.maxNeighborCount);
 	wlcInfoVecs.numOriginalNeighborsNodeVector.resize(generalParams.maxNodeCount);
 
-
-	thrust::fill(wlcInfoVecs.globalNeighbors.begin(), wlcInfoVecs.globalNeighbors.end(), ULONG_MAX);
+	//default value is maxNodeCount
+	thrust::fill(wlcInfoVecs.globalNeighbors.begin(), wlcInfoVecs.globalNeighbors.end(), generalParams.maxNodeCount);
 	thrust::fill(wlcInfoVecs.currentNodeEdgeCountVector.begin(), wlcInfoVecs.currentNodeEdgeCountVector.end(),0);
 	thrust::fill(wlcInfoVecs.lengthZero.begin(), wlcInfoVecs.lengthZero.end(), 0.0);
 

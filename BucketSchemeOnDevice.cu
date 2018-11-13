@@ -36,7 +36,7 @@ void initDimensionBucketScheme(
 	domainParams.XBucketCount = (ceil(domainParams.maxX - domainParams.minX) / domainParams.gridSpacing) + 1;
 	domainParams.YBucketCount = (ceil(domainParams.maxY - domainParams.minY) / domainParams.gridSpacing) + 1;
 	domainParams.ZBucketCount = (ceil(domainParams.maxZ - domainParams.minZ) / domainParams.gridSpacing) + 1;
-	
+
 	if ( (domainParams.XBucketCount * domainParams.YBucketCount * domainParams.ZBucketCount) != domainParams.totalBucketCount	) {
 
 		//double amount of buckets in case of resizing networks
@@ -73,12 +73,12 @@ void extendBucketScheme(
 	unsigned endIndexPltExpanded = (auxVecs.endIndexBucketPltKeys) * 27;
 
 	//test for removing copies.
-	unsigned valuesCount = auxVecs.bucketValues.size();
-	thrust::fill(auxVecs.bucketKeysExpanded.begin(),auxVecs.bucketKeysExpanded.end(),0);
-	thrust::fill(auxVecs.bucketValuesIncludingNeighbor.begin(),auxVecs.bucketValuesIncludingNeighbor.end(),0);
+	unsigned valuesCount = auxVecs.id_value.size();
+	thrust::fill(auxVecs.id_bucket_expanded.begin(),auxVecs.id_bucket_expanded.end(),0);
+	thrust::fill(auxVecs.id_value_expanded.begin(),auxVecs.id_value_expanded.end(),0);
 
-	thrust::fill(auxVecs.bucketPltKeysExpanded.begin(),auxVecs.bucketPltKeysExpanded.end(),0);
-	thrust::fill(auxVecs.bucketPltValuesIncludingNeighbor.begin(),auxVecs.bucketPltValuesIncludingNeighbor.end(),0);
+	thrust::fill(auxVecs.idPlt_bucket_expanded.begin(),auxVecs.idPlt_bucket_expanded.end(),0);
+	thrust::fill(auxVecs.idPlt_value_expanded.begin(),auxVecs.idPlt_value_expanded.end(),0);
 
 
 
@@ -98,12 +98,12 @@ void extendBucketScheme(
 	expand(first, last,
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
-				auxVecs.bucketKeys.begin(),
-				auxVecs.bucketValues.begin())),
+				auxVecs.id_bucket.begin(),
+				auxVecs.id_value.begin())),
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
-				auxVecs.bucketKeysExpanded.begin(),
-				auxVecs.bucketValuesIncludingNeighbor.begin())));
+				auxVecs.id_bucket_expanded.begin(),
+				auxVecs.id_value_expanded.begin())));
 
 
 	thrust::counting_iterator<unsigned> countingBegin(0);
@@ -111,15 +111,15 @@ void extendBucketScheme(
 	thrust::transform(
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
-				auxVecs.bucketKeysExpanded.begin(),
+				auxVecs.id_bucket_expanded.begin(),
 				countingBegin)),
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
-				auxVecs.bucketKeysExpanded.begin(),
+				auxVecs.id_bucket_expanded.begin(),
 				countingBegin)) + endIndexExpanded,
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
-				auxVecs.bucketKeysExpanded.begin(),
+				auxVecs.id_bucket_expanded.begin(),
 				countingBegin)),
 		NeighborFunctor(
 			domainParams.XBucketCount,
@@ -128,48 +128,47 @@ void extendBucketScheme(
 
 
 
-	unsigned numberOfOutOfRange = thrust::count_if(auxVecs.bucketKeysExpanded.begin(),
-		auxVecs.bucketKeysExpanded.end(), is_greater_than(domainParams.totalBucketCount) );
+	unsigned numberOfOutOfRange = thrust::count_if(auxVecs.id_bucket_expanded.begin(),
+		auxVecs.id_bucket_expanded.end(), is_greater_than(domainParams.totalBucketCount) );
 	unsigned numberInsideRange = endIndexExpanded - numberOfOutOfRange;
 
 	//unsigned endIndexSearch = endIndexExpanded - numberOfOutOfRange;
 
-	thrust::stable_sort_by_key(auxVecs.bucketKeysExpanded.begin(),
-		auxVecs.bucketKeysExpanded.begin() + endIndexExpanded,
-		auxVecs.bucketValuesIncludingNeighbor.begin());
-	
-	numberInsideRange = 
-		thrust::get<0>(thrust::unique_by_key(auxVecs.bucketValuesIncludingNeighbor.begin(),
-			auxVecs.bucketValuesIncludingNeighbor.begin() + endIndexExpanded,
-			auxVecs.bucketKeysExpanded.begin())) - auxVecs.bucketValuesIncludingNeighbor.begin();
+	thrust::stable_sort_by_key(auxVecs.id_bucket_expanded.begin(),
+		auxVecs.id_bucket_expanded.begin() + endIndexExpanded,
+		auxVecs.id_value_expanded.begin());
 
-	auxVecs.bucketKeysExpanded.erase(
-			auxVecs.bucketKeysExpanded.begin() + numberInsideRange,
-			auxVecs.bucketKeysExpanded.end());
+	numberInsideRange =
+		thrust::get<0>(thrust::unique_by_key(auxVecs.id_value_expanded.begin(),
+			auxVecs.id_value_expanded.begin() + endIndexExpanded,
+			auxVecs.id_bucket_expanded.begin())) - auxVecs.id_value_expanded.begin();
 
-	auxVecs.bucketValuesIncludingNeighbor.erase(
-			auxVecs.bucketValuesIncludingNeighbor.begin() + numberInsideRange,
-			auxVecs.bucketValuesIncludingNeighbor.end());
+	auxVecs.id_bucket_expanded.erase(
+			auxVecs.id_bucket_expanded.begin() + numberInsideRange,
+			auxVecs.id_bucket_expanded.end());
 
+	auxVecs.id_value_expanded.erase(
+			auxVecs.id_value_expanded.begin() + numberInsideRange,
+			auxVecs.id_value_expanded.end());
 
 
 
 	thrust::counting_iterator<unsigned> search_begin(0);
 
-	thrust::lower_bound(auxVecs.bucketKeysExpanded.begin(),
-		auxVecs.bucketKeysExpanded.end(), search_begin,
+	thrust::lower_bound(auxVecs.id_bucket_expanded.begin(),
+		auxVecs.id_bucket_expanded.end(), search_begin,
 		search_begin + domainParams.totalBucketCount,
 		auxVecs.keyBegin.begin());
 
-	thrust::upper_bound(auxVecs.bucketKeysExpanded.begin(),
-		auxVecs.bucketKeysExpanded.end(),search_begin,
+	thrust::upper_bound(auxVecs.id_bucket_expanded.begin(),
+		auxVecs.id_bucket_expanded.end(),search_begin,
 		search_begin + domainParams.totalBucketCount,
 		auxVecs.keyEnd.begin());
 
 	//platelets
-	/*unsigned valuesPltCount = auxVecs.bucketPltValues.size();
-	thrust::fill(auxVecs.bucketPltKeysExpanded.begin(),auxVecs.bucketPltKeysExpanded.end(),0);
-	thrust::fill(auxVecs.bucketPltValuesIncludingNeighbor.begin(),auxVecs.bucketPltValuesIncludingNeighbor.end(),0);
+	/*unsigned valuesPltCount = auxVecs.idPlt_value.size();
+	thrust::fill(auxVecs.idPlt_bucket_expanded.begin(),auxVecs.idPlt_bucket_expanded.end(),0);
+	thrust::fill(auxVecs.idPlt_value_expanded.begin(),auxVecs.idPlt_value_expanded.end(),0);
 */
 
 
@@ -184,19 +183,19 @@ void extendBucketScheme(
 	* e.g. movement is 5 and first iterator is initialized as 9
 	* result array is [9,9,9,9,9];
 	*/
-	
-	
+
+
 	thrust::constant_iterator<unsigned> pltlast = pltfirst + (auxVecs.endIndexBucketPltKeys); // this is NOT numerical addition!
 
 	expand(pltfirst, pltlast,
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
-				auxVecs.bucketPltKeys.begin(),
-				auxVecs.bucketPltValues.begin())),
+				auxVecs.idPlt_bucket.begin(),
+				auxVecs.idPlt_value.begin())),
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
-				auxVecs.bucketPltKeysExpanded.begin(),
-				auxVecs.bucketPltValuesIncludingNeighbor.begin())));
+				auxVecs.idPlt_bucket_expanded.begin(),
+				auxVecs.idPlt_value_expanded.begin())));
 
 
 	thrust::counting_iterator<unsigned> pltcountingBegin(0);
@@ -204,15 +203,15 @@ void extendBucketScheme(
 	thrust::transform(
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
-				auxVecs.bucketPltKeysExpanded.begin(),
+				auxVecs.idPlt_bucket_expanded.begin(),
 				pltcountingBegin)),
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
-				auxVecs.bucketPltKeysExpanded.begin(),
+				auxVecs.idPlt_bucket_expanded.begin(),
 				pltcountingBegin)) + endIndexPltExpanded,
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
-				auxVecs.bucketPltKeysExpanded.begin(),
+				auxVecs.idPlt_bucket_expanded.begin(),
 				pltcountingBegin)),
 		NeighborFunctor(
 			domainParams.XBucketCount,
@@ -221,41 +220,41 @@ void extendBucketScheme(
 
 
 
-	unsigned pltnumberOfOutOfRange = thrust::count_if(auxVecs.bucketPltKeysExpanded.begin(),
-		auxVecs.bucketPltKeysExpanded.end(), is_greater_than(domainParams.totalBucketCount) );
+	unsigned pltnumberOfOutOfRange = thrust::count_if(auxVecs.idPlt_bucket_expanded.begin(),
+		auxVecs.idPlt_bucket_expanded.end(), is_greater_than(domainParams.totalBucketCount) );
 	unsigned pltnumberInsideRange = endIndexPltExpanded - pltnumberOfOutOfRange;
 
 	//unsigned endIndexPltSearch = endIndexPltExpanded - pltnumberOfOutOfRange;
 
-	thrust::sort_by_key(auxVecs.bucketPltKeysExpanded.begin(),
-		auxVecs.bucketPltKeysExpanded.begin() + endIndexPltExpanded,
-		auxVecs.bucketPltValuesIncludingNeighbor.begin());
-	
-	pltnumberInsideRange = 
-		thrust::get<0>(thrust::unique_by_key(auxVecs.bucketPltValuesIncludingNeighbor.begin(),
-			auxVecs.bucketPltValuesIncludingNeighbor.begin() + endIndexExpanded,
-			auxVecs.bucketPltKeysExpanded.begin())) - auxVecs.bucketPltValuesIncludingNeighbor.begin();
+	thrust::sort_by_key(auxVecs.idPlt_bucket_expanded.begin(),
+		auxVecs.idPlt_bucket_expanded.begin() + endIndexPltExpanded,
+		auxVecs.idPlt_value_expanded.begin());
 
-	auxVecs.bucketPltKeysExpanded.erase(
-			auxVecs.bucketPltKeysExpanded.begin() + pltnumberInsideRange,
-			auxVecs.bucketPltKeysExpanded.end());
+	pltnumberInsideRange =
+		thrust::get<0>(thrust::unique_by_key(auxVecs.idPlt_value_expanded.begin(),
+			auxVecs.idPlt_value_expanded.begin() + endIndexExpanded,
+			auxVecs.idPlt_bucket_expanded.begin())) - auxVecs.idPlt_value_expanded.begin();
 
-	auxVecs.bucketPltValuesIncludingNeighbor.erase(
-			auxVecs.bucketPltValuesIncludingNeighbor.begin() + pltnumberInsideRange,
-			auxVecs.bucketPltValuesIncludingNeighbor.end());
+	auxVecs.idPlt_bucket_expanded.erase(
+			auxVecs.idPlt_bucket_expanded.begin() + pltnumberInsideRange,
+			auxVecs.idPlt_bucket_expanded.end());
+
+	auxVecs.idPlt_value_expanded.erase(
+			auxVecs.idPlt_value_expanded.begin() + pltnumberInsideRange,
+			auxVecs.idPlt_value_expanded.end());
 
 
 
 
 	thrust::counting_iterator<unsigned> pltsearch_begin(0);
 
-	thrust::lower_bound(auxVecs.bucketPltKeysExpanded.begin(),
-		auxVecs.bucketPltKeysExpanded.end(), pltsearch_begin,
+	thrust::lower_bound(auxVecs.idPlt_bucket_expanded.begin(),
+		auxVecs.idPlt_bucket_expanded.end(), pltsearch_begin,
 		pltsearch_begin + domainParams.totalBucketCount,
 		auxVecs.keyPltBegin.begin());
 
-	thrust::upper_bound(auxVecs.bucketPltKeysExpanded.begin(),
-		auxVecs.bucketPltKeysExpanded.end(),pltsearch_begin,
+	thrust::upper_bound(auxVecs.idPlt_bucket_expanded.begin(),
+		auxVecs.idPlt_bucket_expanded.end(),pltsearch_begin,
 		pltsearch_begin + domainParams.totalBucketCount,
 		auxVecs.keyPltEnd.begin());
 
@@ -275,7 +274,7 @@ void buildBucketScheme(
 	// takes counting iterator and coordinates
 	// return tuple of keys and values
 	// transform the points to their bucket indices
-	
+
 	//std::cout<<"bucket nodes"<<std::endl;
 	thrust::for_each(
 		thrust::make_zip_iterator(
@@ -294,15 +293,15 @@ void buildBucketScheme(
 			domainParams.minX, domainParams.maxX, domainParams.minY,
 			domainParams.maxY, domainParams.minZ, domainParams.maxZ,
 			domainParams.gridSpacing,
-			thrust::raw_pointer_cast(auxVecs.bucketKeys.data()),
-			thrust::raw_pointer_cast(auxVecs.bucketValues.data())));
+			thrust::raw_pointer_cast(auxVecs.id_bucket.data()),
+			thrust::raw_pointer_cast(auxVecs.id_value.data())));
 
 //test sorting by node instaed of bucket index
-thrust::sort_by_key(auxVecs.bucketValues.begin(),
-		auxVecs.bucketValues.begin() + generalParams.maxNodeCount,
-		auxVecs.bucketKeys.begin());
-unsigned numberOutOfRange = thrust::count(auxVecs.bucketKeys.begin(),
-			auxVecs.bucketKeys.begin() + generalParams.maxNodeCount, ULONG_MAX);
+thrust::sort_by_key(auxVecs.id_value.begin(),
+		auxVecs.id_value.begin() + generalParams.maxNodeCount,
+		auxVecs.id_bucket.begin());
+unsigned numberOutOfRange = thrust::count(auxVecs.id_bucket.begin(),
+			auxVecs.id_bucket.begin() + generalParams.maxNodeCount, ULONG_MAX);
 
 	auxVecs.endIndexBucketKeys = generalParams.maxNodeCount - numberOutOfRange;
 
@@ -326,18 +325,18 @@ unsigned numberOutOfRange = thrust::count(auxVecs.bucketKeys.begin(),
 			domainParams.minX, domainParams.maxX, domainParams.minY,
 			domainParams.maxY, domainParams.minZ, domainParams.maxZ,
 			domainParams.gridSpacing,
-			thrust::raw_pointer_cast(auxVecs.bucketPltKeys.data()),
-			thrust::raw_pointer_cast(auxVecs.bucketPltValues.data())));
+			thrust::raw_pointer_cast(auxVecs.idPlt_bucket.data()),
+			thrust::raw_pointer_cast(auxVecs.idPlt_value.data())));
 
-			
+
 	//std::cout<<"end bucket platelet"<<std::endl;
 //test sorting by node instaed of bucket index
-thrust::sort_by_key(auxVecs.bucketPltValues.begin(),
-		auxVecs.bucketPltValues.begin() + generalParams.maxPltCount,
-		auxVecs.bucketPltKeys.begin());
-	
-unsigned numberPltOutOfRange = thrust::count(auxVecs.bucketPltKeys.begin(),
-			auxVecs.bucketPltKeys.begin() + generalParams.maxPltCount, ULONG_MAX);
+thrust::sort_by_key(auxVecs.idPlt_value.begin(),
+		auxVecs.idPlt_value.begin() + generalParams.maxPltCount,
+		auxVecs.idPlt_bucket.begin());
+
+unsigned numberPltOutOfRange = thrust::count(auxVecs.idPlt_bucket.begin(),
+			auxVecs.idPlt_bucket.begin() + generalParams.maxPltCount, ULONG_MAX);
 
 	auxVecs.endIndexBucketPltKeys = generalParams.maxPltCount - numberPltOutOfRange;
 

@@ -254,8 +254,8 @@ struct BucketIndexer {
 	double unitLen;
 	unsigned XSize;
 	unsigned YSize;
-	unsigned* bucketKeysAddr;
-	unsigned* bucketValuesAddr;
+	unsigned* id_bucket;
+	unsigned* id_value;
 
 	__host__ __device__
 
@@ -267,16 +267,16 @@ struct BucketIndexer {
 		double _minZ,
 		double _maxZ,
 		double _unitLen,
-		unsigned* _bucketKeysAddr,
-		unsigned* _bucketValuesAddr) :
+		unsigned* _id_bucket,
+		unsigned* _id_value) :
 		minX(_minX),
 		maxX(_maxX),
 		minY(_minY),
 		maxY(_maxY),
 		minZ(_minZ),
 		maxZ(_maxZ),
-		bucketKeysAddr(_bucketKeysAddr),
-		bucketValuesAddr(_bucketValuesAddr),
+		id_bucket(_id_bucket),
+		id_value(_id_value),
 		unitLen(_unitLen),
 		XSize((_maxX - _minX) / unitLen),
 		YSize((_maxY - _minY) / unitLen) {}
@@ -296,8 +296,8 @@ struct BucketIndexer {
 			if (bucket == ULONG_MAX) {
 				bucket = 0;
 			}
-			bucketKeysAddr[id] = bucket;
-			bucketValuesAddr[id] = id;
+			id_bucket[id] = bucket;
+			id_value[id] = id;
 
 	}
 };

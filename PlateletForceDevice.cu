@@ -19,10 +19,10 @@ void PltForceOnDevice(
 
 		//fill for image sort
     	thrust::fill(pltInfoVecs.nodeUnreducedId.begin(),pltInfoVecs.nodeUnreducedId.end(), generalParams.maxNodeCount);
-	/*	unsigned begin = auxVecs.keyBegin[auxVecs.bucketPltKeys[0]];
-		unsigned end = auxVecs.keyEnd[auxVecs.bucketPltKeys[0]];
+	/*	unsigned begin = auxVecs.keyBegin[auxVecs.idPlt_bucket[0]];
+		unsigned end = auxVecs.keyEnd[auxVecs.idPlt_bucket[0]];
 		for (unsigned i = begin; i < end; i++) {
-			unsigned id = auxVecs.bucketValuesIncludingNeighbor[i];
+			unsigned id = auxVecs.id_bucket_expanded[i];
 			std::cout<<id<< std::endl;
 		}*/
 
@@ -30,15 +30,15 @@ void PltForceOnDevice(
         thrust::transform(
         	thrust::make_zip_iterator(
         		thrust::make_tuple(
-   					auxVecs.bucketPltKeys.begin(),
-   					auxVecs.bucketPltValues.begin(),
+   					auxVecs.idPlt_bucket.begin(),
+   					auxVecs.idPlt_value.begin(),
         			pltInfoVecs.pltLocX.begin(),
         			pltInfoVecs.pltLocY.begin(),
         			pltInfoVecs.pltLocZ.begin())),
         	thrust::make_zip_iterator(
         		thrust::make_tuple(
-        			auxVecs.bucketPltKeys.begin(),
-    				auxVecs.bucketPltValues.begin(),
+        			auxVecs.idPlt_bucket.begin(),
+    				auxVecs.idPlt_value.begin(),
         		 	pltInfoVecs.pltLocX.begin(),
         		 	pltInfoVecs.pltLocY.begin(),
         		 	pltInfoVecs.pltLocZ.begin())) + generalParams.maxPltCount,
@@ -57,7 +57,7 @@ void PltForceOnDevice(
                  generalParams.maxPltCount,
                  generalParams.fiberDiameter,
 				 generalParams.maxNodeCount,
-				 
+
                  thrust::raw_pointer_cast(nodeInfoVecs.nodeLocX.data()),
                  thrust::raw_pointer_cast(nodeInfoVecs.nodeLocY.data()),
                  thrust::raw_pointer_cast(nodeInfoVecs.nodeLocZ.data()),
@@ -68,27 +68,27 @@ void PltForceOnDevice(
                  thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedId.data()),
                  thrust::raw_pointer_cast(pltInfoVecs.pltImagingConnection.data()),
 
-                 thrust::raw_pointer_cast(auxVecs.bucketValuesIncludingNeighbor.data()),
+                 thrust::raw_pointer_cast(auxVecs.id_bucket_expanded.data()),
                  thrust::raw_pointer_cast(auxVecs.keyBegin.data()),
                  thrust::raw_pointer_cast(auxVecs.keyEnd.data()) ) );
 
         //now call a sort by key followed by a reduce by key to figure out which nodes are have force applied.
         //then make a functor that takes the id and force (4 tuple) and takes that force and adds it to the id'th entry in nodeInfoVecs.nodeForceX,Y,Z
         thrust::sort_by_key(pltInfoVecs.nodeUnreducedId.begin(), pltInfoVecs.nodeUnreducedId.end(),
-        			thrust::make_zip_iterator( 
+        			thrust::make_zip_iterator(
         				thrust::make_tuple(
 							pltInfoVecs.pltImagingConnection.begin(),
         					pltInfoVecs.nodeUnreducedForceX.begin(),
         					pltInfoVecs.nodeUnreducedForceY.begin(),
         					pltInfoVecs.nodeUnreducedForceZ.begin())), thrust::less<unsigned>());
-		
+
     thrust::copy(pltInfoVecs.nodeUnreducedId.begin(),pltInfoVecs.nodeUnreducedId.end(), pltInfoVecs.nodeImagingConnection.begin());
 
     pltInfoVecs.numConnections = thrust::count_if(
         pltInfoVecs.nodeImagingConnection.begin(),
         pltInfoVecs.nodeImagingConnection.end(), is_less_than(generalParams.maxNodeCount) );
 
-	//std::cout<<pltInfoVecs.numConnections<<std::endl; 
+	//std::cout<<pltInfoVecs.numConnections<<std::endl;
 	/*for (unsigned i = 0; i < pltInfoVecs.nodeImagingConnection.size(); i ++) {
 		std::cout<<pltInfoVecs.nodeImagingConnection[i]<<std::endl;
 	}*/
@@ -159,15 +159,15 @@ void PltInteractionOnDevice(
     thrust::for_each(
       	thrust::make_zip_iterator(
         	thrust::make_tuple(
-        		auxVecs.bucketPltKeys.begin(),
-        		auxVecs.bucketPltValues.begin(),
+        		auxVecs.idPlt_bucket.begin(),
+        		auxVecs.idPlt_value.begin(),
           		pltInfoVecs.pltLocX.begin(),
           		pltInfoVecs.pltLocY.begin(),
           		pltInfoVecs.pltLocZ.begin())),
     thrust::make_zip_iterator(
         thrust::make_tuple(
-          		auxVecs.bucketPltKeys.begin(),
-        		auxVecs.bucketPltValues.begin(),
+          		auxVecs.idPlt_bucket.begin(),
+        		auxVecs.idPlt_value.begin(),
           		pltInfoVecs.pltLocX.begin(),
           		pltInfoVecs.pltLocY.begin(),
           		pltInfoVecs.pltLocZ.begin())) + generalParams.maxPltCount,
@@ -184,7 +184,7 @@ void PltInteractionOnDevice(
              thrust::raw_pointer_cast(pltInfoVecs.pltForceX.data()),
              thrust::raw_pointer_cast(pltInfoVecs.pltForceY.data()),
              thrust::raw_pointer_cast(pltInfoVecs.pltForceZ.data()),
-             thrust::raw_pointer_cast(auxVecs.bucketPltValuesIncludingNeighbor.data()),
+             thrust::raw_pointer_cast(auxVecs.idPlt_value_expanded.data()),
              thrust::raw_pointer_cast(auxVecs.keyPltBegin.data()),
              thrust::raw_pointer_cast(auxVecs.keyPltEnd.data()) ) );
 };

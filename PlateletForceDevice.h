@@ -308,7 +308,7 @@ struct PltonPltForceFunctor : public thrust::unary_function<U2CVec6, CVec3>  {
           //Choose a neighbor.
           unsigned pullPlt_id = i;//bucketNbrsExp[i];
           //
-          if ( (pullPlt_id != pltId) && (pullPlt_id < maxPltCount)) {
+          if ( (pullPlt_id != pltId) && (pullPlt_id < maxPltCount) ) {
             //Get position of plt
             double vecN_PX = pltLocX - pltLocXAddr[pullPlt_id];
             double vecN_PY = pltLocY - pltLocYAddr[pullPlt_id];
@@ -324,7 +324,7 @@ struct PltonPltForceFunctor : public thrust::unary_function<U2CVec6, CVec3>  {
             if (interactionCounter < pltmaxConn) {
                 //attraction if platelet and fiber are within interaction distance but not overlapping
 
-                  if ((dist < 2.0*pltRForce) && (dist > 2*pltR) ) {
+                  if ((dist < 2.0 * pltRForce) && (dist > 2.0 * pltR) ) {
                       //plt only affects plt position if it is pulled.
                       //Determine direction of force based on positions and multiply magnitude force
                       double forcePltX = (vecN_PX / dist) * (pltForce);
@@ -332,23 +332,23 @@ struct PltonPltForceFunctor : public thrust::unary_function<U2CVec6, CVec3>  {
                       double forcePltZ = (vecN_PZ / dist) * (pltForce);
 
                       //count force for plt.
-                      sumPltForceX += 2*(-1.0) * forcePltX;
-                      sumPltForceY += 2*(-1.0) * forcePltY;
-                      sumPltForceZ += 2*(-1.0) * forcePltZ;
+                      sumPltForceX += 2.0 * (-1.0) * forcePltX;
+                      sumPltForceY += 2.0 * (-1.0) * forcePltY;
+                      sumPltForceZ += 2.0 * (-1.0) * forcePltZ;
 
                   }
                   //repulsion if fiber and platelet overlap
-                  else if (dist < 2*pltR )  {
+                  else if (dist < 2 * pltR )  {
                       //plt only affects plt position if it is pulled.
                       //Determine direction of force based on positions and multiply magnitude force
-                      double forcePltX = -(vecN_PX / dist) * (pltForce);
-                      double forcePltY = -(vecN_PY / dist) * (pltForce);
-                      double forcePltZ = -(vecN_PZ / dist) * (pltForce);
+                      double forcePltX = - (vecN_PX / dist) * (pltForce);
+                      double forcePltY = - (vecN_PY / dist) * (pltForce);
+                      double forcePltZ = - (vecN_PZ / dist) * (pltForce);
 
                       //count force for plt.
-                      sumPltForceX += 2*(-1.0) * forcePltX;
-                      sumPltForceY += 2*(-1.0) * forcePltY;
-                      sumPltForceZ += 2*(-1.0) * forcePltZ;
+                      sumPltForceX += 2.0 * (-1.0) * forcePltX;
+                      sumPltForceY += 2.0 * (-1.0) * forcePltY;
+                      sumPltForceZ += 2.0 * (-1.0) * forcePltZ;
 
                   }
             }
@@ -360,4 +360,4 @@ struct PltonPltForceFunctor : public thrust::unary_function<U2CVec6, CVec3>  {
       pltForceZAddr[pltId] += sumPltForceZ;
     }
 };
-#endif /*PLATELETFORCEDEVICE_H_*/
+#endif
