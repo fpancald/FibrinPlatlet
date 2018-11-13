@@ -49,7 +49,7 @@ struct PltInfoVecs {
 	//
 	// thrust::host_vector<unsigned> idEdgesMadeHost;
 	//
-	// thrust::device_vector<unsigned> idEdgesMadeTemp; 
+	// thrust::device_vector<unsigned> idEdgesMadeTemp;
 
 	thrust::device_vector<double> sumForcesOnPlt;
 
@@ -76,7 +76,7 @@ struct PltInfoVecs {
 	unsigned numConnections=0;
 	thrust::device_vector<unsigned> pltImagingConnection;//used for imaging
 	thrust::device_vector<unsigned> nodeImagingConnection;//used for imaging
-	
+
 	thrust::device_vector<unsigned> nodeUnreducedId;
 	thrust::device_vector<double> nodeUnreducedForceX;
 	thrust::device_vector<double> nodeUnreducedForceY;
@@ -96,36 +96,36 @@ struct PltInfoVecs {
 struct AuxVecs {
 
 	// bucket key means which bucket ID does a certain point fit into
-	thrust::device_vector<unsigned> bucketKeys;	//bucket id
+	thrust::device_vector<unsigned> id_bucket;	//bucket id
 	// bucket value means global rank of a certain point
-	thrust::device_vector<unsigned> bucketValues;//node id
+	thrust::device_vector<unsigned> id_value;//node id
 	// bucket key expanded means what are the bucket IDs are the neighbors of a certain point
-	thrust::device_vector<unsigned> bucketKeysExpanded;
+	thrust::device_vector<unsigned> id_bucket_expanded;
 	// bucket value expanded means each point ( represented by its global rank) will have multiple copies
-	thrust::device_vector<unsigned> bucketValuesIncludingNeighbor;
+	thrust::device_vector<unsigned> id_value_expanded;
 
-	// begin position of a keys in bucketKeysExpanded and bucketValuesIncludingNeighbor
+	// begin position of a keys in id_bucket_expanded and id_value_expanded
 	//entry keyBegin[bucketKey] returns start of indices to link
 	thrust::device_vector<unsigned> keyBegin;
-	// end position of a keys in bucketKeysExpanded and bucketValuesIncludingNeighbor
+	// end position of a keys in id_bucket_expanded and id_value_expanded
 	thrust::device_vector<unsigned> keyEnd;
 
 	unsigned endIndexBucketKeys;
 
   //platelets
   // bucket key means which bucket ID does a certain point fit into
-    thrust::device_vector<unsigned> bucketPltKeys;	//bucket id
+    thrust::device_vector<unsigned> idPlt_bucket;	//bucket id
     // bucket value means global rank of a certain point
-    thrust::device_vector<unsigned> bucketPltValues;//node id
+    thrust::device_vector<unsigned> idPlt_value;//node id
     // bucket key expanded means what are the bucket IDs are the neighbors of a certain point
-  	thrust::device_vector<unsigned> bucketPltKeysExpanded;
+  	thrust::device_vector<unsigned> idPlt_bucket_expanded;
   	// bucket value expanded means each point ( represented by its global rank) will have multiple copies
-  	thrust::device_vector<unsigned> bucketPltValuesIncludingNeighbor;
+  	thrust::device_vector<unsigned> idPlt_value_expanded;
 
-  	// begin position of a keys in bucketKeysExpanded and bucketValuesIncludingNeighbor
+  	// begin position of a keys in id_bucket_expanded and id_value_expanded
   	//entry keyBegin[bucketKey] returns start of indices to link
   	thrust::device_vector<unsigned> keyPltBegin;
-  	// end position of a keys in bucketKeysExpanded and bucketValuesIncludingNeighbor
+  	// end position of a keys in id_bucket_expanded and id_value_expanded
   	thrust::device_vector<unsigned> keyPltEnd;
 
   	unsigned endIndexBucketPltKeys;
