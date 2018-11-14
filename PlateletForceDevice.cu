@@ -250,7 +250,7 @@ void PltTndrlOnDevice(
                  generalParams.pltR,
                  generalParams.maxPltCount,
                  generalParams.fiberDiameter,
-		             generalParams.maxNodeCount,
+		         generalParams.maxNodeCount,
                  generalParams.maxNeighborCount,
 
                  thrust::raw_pointer_cast(nodeInfoVecs.nodeLocX.data()),
@@ -268,10 +268,10 @@ void PltTndrlOnDevice(
                  thrust::raw_pointer_cast(auxVecs.keyEnd.data()),
 
                  thrust::raw_pointer_cast(pltInfoVecs.tndrlNodeId.data()),
-                 thrust::raw_pointer_cast(wlcInfoVecs.globalNeighbors.data())
-                 thrust::raw_pointer_cast(nodeInfoVecs.pltLocX.data()),
-                 thrust::raw_pointer_cast(nodeInfoVecs.pltLocY.data()),
-                 thrust::raw_pointer_cast(nodeInfoVecs.pltLocZ.data()),) );
+                 thrust::raw_pointer_cast(wlcInfoVecs.globalNeighbors.data()),
+                 thrust::raw_pointer_cast(pltInfoVecs.pltLocX.data()),
+                 thrust::raw_pointer_cast(pltInfoVecs.pltLocY.data()),
+                 thrust::raw_pointer_cast(pltInfoVecs.pltLocZ.data())) );
 
         //now call a sort by key followed by a reduce by key to figure out which nodes are have force applied.
         //then make a functor that takes the id and force (4 tuple) and takes that force and adds it to the id'th entry in nodeInfoVecs.nodeForceX,Y,Z

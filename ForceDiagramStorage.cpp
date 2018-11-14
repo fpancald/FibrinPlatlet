@@ -109,7 +109,7 @@ void ForceDiagramStorage::print_VTK_File() {
 
 
 		unsigned maxNodeCount = sys->generalParams.maxNodeCount;
-		unsigned maxNeighborCount = (sys->generalParams).maxNeighborCount;
+		__attribute__ ((unused)) unsigned maxNeighborCount = (sys->generalParams).maxNeighborCount;
 
 		unsigned numEdges = sys->generalParams.currentEdgeCount;
 

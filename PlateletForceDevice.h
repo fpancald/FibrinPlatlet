@@ -97,8 +97,8 @@ struct PltonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3>  {
         unsigned pltId = thrust::get<1>(u2d3);
 
         //beginning and end of attempted interaction network nodes.
-		    unsigned beginIndex = keyBegin[bucketId];
-		    unsigned endIndex = keyEnd[bucketId];
+		    __attribute__ ((unused)) unsigned beginIndex = keyBegin[bucketId];
+		    __attribute__ ((unused)) unsigned endIndex = keyEnd[bucketId];
 
 
         unsigned storageLocation = pltId * pltmaxConn;
@@ -257,8 +257,8 @@ struct PltonPltForceFunctor : public thrust::unary_function<U2CVec6, CVec3>  {
         unsigned pltId = thrust::get<1>(u2d3);
 
         //beginning and end of attempted interaction network nodes.
-		    unsigned beginIndex = keyBegin[bucketId];
-		    unsigned endIndex = keyEnd[bucketId];
+		    __attribute__ ((unused)) unsigned beginIndex = keyBegin[bucketId];
+		    __attribute__ ((unused)) unsigned endIndex = keyEnd[bucketId];
 
         double pltLocX = thrust::get<2>(u2d3);
         double pltLocY = thrust::get<3>(u2d3);
@@ -365,7 +365,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
 	unsigned* keyEnd;
 
   unsigned* tndrlNodeId;
-  double* glblNghbrsId;
+  unsigned* glblNghbrsId;
   double* pltLocXAddr;
 	double* pltLocYAddr;
 	double* pltLocZAddr;
@@ -397,7 +397,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
       			unsigned* _keyEnd,
 
             unsigned* _tndrlNodeId,
-            double* _glblNghbrsId,
+            unsigned* _glblNghbrsId,
             double* _pltLocXAddr,
             double* _pltLocYAddr,
             double* _pltLocZAddr) :
@@ -437,8 +437,8 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
         unsigned pltId = thrust::get<1>(u2d3);
 
         //beginning and end of attempted interaction network nodes.
-		    unsigned beginIndex = keyBegin[bucketId];
-		    unsigned endIndex = keyEnd[bucketId];
+		    __attribute__ ((unused)) unsigned beginIndex = keyBegin[bucketId];
+		    __attribute__ ((unused)) unsigned endIndex = keyEnd[bucketId];
 
 
         unsigned storageLocation = pltId * pltmaxConn;
@@ -451,10 +451,15 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
         double sumPltForceX = 0.0;
         double sumPltForceY = 0.0;
         double sumPltForceZ = 0.0;
+		
+		double vecN_PX = 0.0;
+		double vecN_PY = 0.0;
+		double vecN_PZ = 0.0;
+		double dist = 0.0;
 
         //pulling
         //Loop through the number of available tendrils
-        for(unsigned interactionCounter = 0; i < pltmaxConn; i++) {
+        for(unsigned interactionCounter = 0; interactionCounter < pltmaxConn; interactionCounter++) {
 
           //check if current tendril is still connected to a node (i.e. <maxNodecount)
           if (tndrlNodeId[storageLocation + interactionCounter]<maxNodeCount){
@@ -475,7 +480,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
               //empty tendril
               tndrlNodeId[storageLocation + interactionCounter]=maxNodeCount+maxPltCount;
               //try to find a new node to pull within connections of previous node
-              for (j=0; j<maxNodeCount, j++){
+              for (unsigned j=0; j<maxNodeCount; j++){
                 unsigned newpullNode_id=glblNghbrsId[pullNode_id*maxNodeCount+j];
                 if (newpullNode_id!=maxNodeCount){
                    vecN_PX = pltLocX - nodeLocXAddr[newpullNode_id];
@@ -500,14 +505,14 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
           }
 
           //check if tendril instead still pulls a plt
-          else if (tndrlNodeId[storageLocation + interactionCounter]<maxPltcount){
+          else if (tndrlNodeId[storageLocation + interactionCounter]<maxPltCount){
 
             //Calculate distance from plt to node.
             unsigned pullPlt_id = tndrlNodeId[storageLocation + interactionCounter];//bucketNbrsExp[i];
             //Get position of plt
-            double vecN_PX = pltLocX - pltLocXAddr[pullNode_id];
-            double vecN_PY = pltLocY - pltLocYAddr[pullNode_id];
-            double vecN_PZ = pltLocZ - pltLocZAddr[pullNode_id];
+            double vecN_PX = pltLocX - pltLocXAddr[pullPlt_id];
+            double vecN_PY = pltLocY - pltLocYAddr[pullPlt_id];
+            double vecN_PZ = pltLocZ - pltLocZAddr[pullPlt_id];
             double dist = sqrt(
                 (vecN_PX) * (vecN_PX) +
                 (vecN_PY) * (vecN_PY) +
@@ -524,12 +529,12 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
           if (tndrlNodeId[storageLocation + interactionCounter]==maxNodeCount+maxPltCount){
 
             //try to find a node to pull
-            for (newpullNode_id=0; newpullNode_id<maxNodeCount, newpullNode_id++){
-                 vecN_PX = pltLocX - nodeLocXAddr[newpullNode_id];
-                 vecN_PY = pltLocY - nodeLocYAddr[newpullNode_id];
-                 vecN_PZ = pltLocZ - nodeLocZAddr[newpullNode_id];
+            for (unsigned newpullNode_id=0; newpullNode_id<maxNodeCount; newpullNode_id++){
+                 double vecN_PX = pltLocX - nodeLocXAddr[newpullNode_id];
+                 double vecN_PY = pltLocY - nodeLocYAddr[newpullNode_id];
+                 double vecN_PZ = pltLocZ - nodeLocZAddr[newpullNode_id];
                 //Calculate distance from plt to node.
-                 dist = sqrt(
+                 double dist = sqrt(
                     (vecN_PX) * (vecN_PX) +
                     (vecN_PY) * (vecN_PY) +
                     (vecN_PZ) * (vecN_PZ));
@@ -544,14 +549,14 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
             // if still empty go to platelets
             if (tndrlNodeId[storageLocation + interactionCounter]==maxNodeCount+maxPltCount){
               //try to find a platelet to pull
-              for (j=0; j<maxPltCount, j++){
+              for (unsigned j=0; j<maxPltCount; j++){
                 unsigned newpullPlt_id=j;
 
-                   vecN_PX = pltLocX - pltLocXAddr[newpullPlt_id];
-                   vecN_PY = pltLocY - pltLocYAddr[newpullPlt_id];
-                   vecN_PZ = pltLocZ - pltLocZAddr[newpullPlt_id];
+                   double vecN_PX = pltLocX - pltLocXAddr[newpullPlt_id];
+                   double vecN_PY = pltLocY - pltLocYAddr[newpullPlt_id];
+                   double vecN_PZ = pltLocZ - pltLocZAddr[newpullPlt_id];
                   //Calculate distance from plt to node.
-                   dist = sqrt(
+                   double dist = sqrt(
                       (vecN_PX) * (vecN_PX) +
                       (vecN_PY) * (vecN_PY) +
                       (vecN_PZ) * (vecN_PZ));
@@ -569,6 +574,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
           //check if tendril has been filled and apply pulling forces. Note if filled direction and distence of forces are already calculated
           if (tndrlNodeId[storageLocation + interactionCounter]!=maxNodeCount+maxPltCount){
             //node only affects plt position if it is pulled.
+			unsigned pullNode_id=tndrlNodeId[storageLocation + interactionCounter];
             //Determine direction of force based on positions and multiply magnitude force
             double forceNodeX = (vecN_PX / dist) * (pltForce);
             double forceNodeY = (vecN_PY / dist) * (pltForce);
@@ -592,10 +598,10 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
         }
 
         //pushing
-        doulble pushCounter=0;
+        unsigned pushCounter=0;
         //go through all nodes that might be pushed
-        for( i = 0; i < maxNodeCount; i++){
-          double pushNode_id=i;
+        for( unsigned i = 0; i < maxNodeCount; i++){
+          unsigned pushNode_id=i;
           //
           //Get position of node
           double vecN_PX = pltLocX - nodeLocXAddr[pushNode_id];
@@ -637,13 +643,13 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
         }
 
         //go through all plts that might be pushed
-        for( i = 0; i < maxPltCount; i++){
-          double pushPlt_id=i;
+        for( unsigned i = 0; i < maxPltCount; i++){
+          unsigned pushPlt_id=i;
           //
           //Get position of node
-          double vecN_PX = pltLocX - pltLocXAddr[pushNode_id];
-          double vecN_PY = pltLocY - pltLocYAddr[pushNode_id];
-          double vecN_PZ = pltLocZ - pltLocZAddr[pushNode_id];
+          double vecN_PX = pltLocX - pltLocXAddr[pushPlt_id];
+          double vecN_PY = pltLocY - pltLocYAddr[pushPlt_id];
+          double vecN_PZ = pltLocZ - pltLocZAddr[pushPlt_id];
           //Calculate distance from plt to node.
           double dist = sqrt(
               (vecN_PX) * (vecN_PX) +

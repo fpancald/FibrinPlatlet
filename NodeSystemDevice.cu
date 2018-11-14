@@ -60,11 +60,11 @@ void NodeSystemDevice::solveForcesOnDevice() {
 	}
 	else if (generalParams.plttndrl == true) { //note for now force-field type has priority over tndrl-type
 		PltTndrlOnDevice(
-		  NodeInfoVecs& nodeInfoVecs,
-			WLCInfoVecs& wlcInfoVecs,
-			GeneralParams& generalParams,
-		  PltInfoVecs& pltInfoVecs,
-		  AuxVecs& auxVecs);
+		  nodeInfoVecs,
+		  wlcInfoVecs,
+		  generalParams,
+		  pltInfoVecs,
+		  auxVecs);
 	}
 
 
