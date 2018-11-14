@@ -46,17 +46,13 @@ void NodeSystemDevice::solveForcesOnDevice() {
 	//platetelet-node forces
 	//RESETS PLATELET FORCES
 	if (generalParams.pltfrcfld == true) {
-		PltForceOnDevice(
+		PltForceFieldOnDevice(
 			nodeInfoVecs,
 			wlcInfoVecs,
 			generalParams,
 			pltInfoVecs,
 			auxVecs);
 
-		PltInteractionOnDevice(
-				generalParams,
-				pltInfoVecs,
-				auxVecs);
 	}
 	else if (generalParams.plttndrl == true) { //note for now force-field type has priority over tndrl-type
 		PltTndrlOnDevice(
@@ -66,6 +62,11 @@ void NodeSystemDevice::solveForcesOnDevice() {
 		  pltInfoVecs,
 		  auxVecs);
 	}
+
+	PltInteractionPltOnDevice(
+		generalParams,
+		pltInfoVecs,
+		auxVecs);
 
 
 };
