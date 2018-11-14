@@ -64,7 +64,7 @@ struct NeighborFunctor : public thrust::unary_function<Tuu, Tuu> {
 
 		}
 		unsigned area = numOfBucketsInXDim * numOfBucketsInYDim;
-		unsigned volume = area * numOfBucketsInZDim;
+		__attribute__ ((unused)) unsigned volume = area * numOfBucketsInZDim;
 
 		unsigned xPos = thrust::get<0>(v) % numOfBucketsInXDim;	//col
 		unsigned xPosLeft = xPos - 1;
@@ -105,16 +105,16 @@ struct NeighborFunctor : public thrust::unary_function<Tuu, Tuu> {
 		//middle cases
 		case 0:
 			return thrust::get<0>(v);
-			break;
+			//break;
 		case 1:{
 				unsigned topLeft = xPosLeft + yPosTop * numOfBucketsInXDim + zPos * area;
 				return (topLeft);
-				break;
+				//break;
 		}
 		case 2:{
 				unsigned top = xPos + yPosTop * numOfBucketsInXDim + zPos * area;
 			return (top);
-			break;
+			//break;
 		}
 		case 3:{
 				unsigned topRight = xPosRight + yPosTop * numOfBucketsInXDim + zPos * area;
@@ -170,17 +170,17 @@ struct NeighborFunctor : public thrust::unary_function<Tuu, Tuu> {
 		case 13:{
 				unsigned lowerRight = xPosRight + yPos * numOfBucketsInXDim + zPosLow * area;
 			return (lowerRight);
-			break;
+			//break;
 		}
 		case 14:{
 				unsigned lowerBottomRight = xPosRight + yPosBottom * numOfBucketsInXDim + zPosLow * area;
 			return (lowerBottomRight);
-			break;
+			//break;
 		}
 		case 15:{
 				unsigned lowerBottom = xPos + yPosBottom * numOfBucketsInXDim + zPosLow * area;
 			return lowerBottom;
-			break;
+			//break;
 		}
 		case 16:{
 				unsigned lowerBottomLeft = xPosLeft + yPosBottom * numOfBucketsInXDim  + zPosLow * area;
@@ -238,8 +238,10 @@ struct NeighborFunctor : public thrust::unary_function<Tuu, Tuu> {
 			return (upperLeft);
 			//break;
 		}
-		default:
-			return (ULONG_MAX);
+		default:{
+			unsigned default_Id=ULONG_MAX;
+			return (default_Id);
+		}
 
 		}
 	}
