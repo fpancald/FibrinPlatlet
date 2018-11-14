@@ -1,6 +1,7 @@
 #include "PlateletForceDevice.h"
 #include "NodeSystemDevice.h"
 
+//for a given platelet, search for network nodes, pull and push them
 void PltForceOnDevice(
   	NodeInfoVecs& nodeInfoVecs,
 	WLCInfoVecs& wlcInfoVecs,
@@ -19,25 +20,22 @@ void PltForceOnDevice(
 
 		//fill for image sort
     	thrust::fill(pltInfoVecs.nodeUnreducedId.begin(),pltInfoVecs.nodeUnreducedId.end(), generalParams.maxNodeCount);
-	/*	unsigned begin = auxVecs.keyBegin[auxVecs.idPlt_bucket[0]];
-		unsigned end = auxVecs.keyEnd[auxVecs.idPlt_bucket[0]];
-		for (unsigned i = begin; i < end; i++) {
-			unsigned id = auxVecs.id_bucket_expanded[i];
-			std::cout<<id<< std::endl;
-		}*/
+
 
         //Call the plt force on nodes functor
+		thrust::counting_iterator<unsigned> counter(0);
+		
         thrust::transform(
         	thrust::make_zip_iterator(
         		thrust::make_tuple(
-   					auxVecs.idPlt_bucket.begin(),
+					counter,
    					auxVecs.idPlt_value.begin(),
         			pltInfoVecs.pltLocX.begin(),
         			pltInfoVecs.pltLocY.begin(),
         			pltInfoVecs.pltLocZ.begin())),
         	thrust::make_zip_iterator(
         		thrust::make_tuple(
-        			auxVecs.idPlt_bucket.begin(),
+					counter,
     				auxVecs.idPlt_value.begin(),
         		 	pltInfoVecs.pltLocX.begin(),
         		 	pltInfoVecs.pltLocY.begin(),
@@ -68,7 +66,7 @@ void PltForceOnDevice(
                  thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedId.data()),
                  thrust::raw_pointer_cast(pltInfoVecs.pltImagingConnection.data()),
 
-                 thrust::raw_pointer_cast(auxVecs.id_bucket_expanded.data()),
+                 thrust::raw_pointer_cast(auxVecs.id_value_expanded.data()),//network neighbors
                  thrust::raw_pointer_cast(auxVecs.keyBegin.data()),
                  thrust::raw_pointer_cast(auxVecs.keyEnd.data()) ) );
 
@@ -113,7 +111,7 @@ void PltForceOnDevice(
 //	std::cout<<"plt Loc "<< pltInfoVecs.pltLocX[1] << " " << pltInfoVecs.pltLocY[1] <<" "<< pltInfoVecs.pltLocZ[1] << std::endl;
 
 
-//reduce and apply force
+		//reduce network force
  		unsigned endKey = thrust::get<0>(
  			thrust::reduce_by_key(
  				pltInfoVecs.nodeUnreducedId.begin(),
@@ -131,7 +129,7 @@ void PltForceOnDevice(
  					pltInfoVecs.nodeReducedForceZ.begin())),
  			thrust::equal_to<unsigned>(), CVec3Add())) - pltInfoVecs.nodeReducedId.begin();//binary_pred, binary_op
 
-
+		//apply force to network
         thrust::for_each(
         	thrust::make_zip_iterator(//1st begin
         		thrust::make_tuple(
@@ -151,22 +149,25 @@ void PltForceOnDevice(
         		thrust::raw_pointer_cast(nodeInfoVecs.nodeForceZ.data())));
 };
 
+//for a given platelet, apply force from other platelets
 void PltInteractionOnDevice(
   	GeneralParams& generalParams,
   	PltInfoVecs& pltInfoVecs,
   	AuxVecs& auxVecs) {
 
+
+	thrust::counting_iterator<unsigned> counter(0);
     thrust::for_each(
       	thrust::make_zip_iterator(
         	thrust::make_tuple(
-        		auxVecs.idPlt_bucket.begin(),
+				counter,
         		auxVecs.idPlt_value.begin(),
           		pltInfoVecs.pltLocX.begin(),
           		pltInfoVecs.pltLocY.begin(),
           		pltInfoVecs.pltLocZ.begin())),
     thrust::make_zip_iterator(
         thrust::make_tuple(
-          		auxVecs.idPlt_bucket.begin(),
+				counter,
         		auxVecs.idPlt_value.begin(),
           		pltInfoVecs.pltLocX.begin(),
           		pltInfoVecs.pltLocY.begin(),
@@ -184,13 +185,7 @@ void PltInteractionOnDevice(
              thrust::raw_pointer_cast(pltInfoVecs.pltForceX.data()),
              thrust::raw_pointer_cast(pltInfoVecs.pltForceY.data()),
              thrust::raw_pointer_cast(pltInfoVecs.pltForceZ.data()),
-             thrust::raw_pointer_cast(auxVecs.idPlt_value_expanded.data()),
+             thrust::raw_pointer_cast(auxVecs.idPlt_value_expanded.data()),//plt neighbors
              thrust::raw_pointer_cast(auxVecs.keyPltBegin.data()),
              thrust::raw_pointer_cast(auxVecs.keyPltEnd.data()) ) );
 };
-
-
-
-    // void AdvancePltPosition(//stuff here) {
-    //     //stuff here
-    // };

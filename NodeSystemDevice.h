@@ -8,14 +8,16 @@
 
 //Data Structure for node location. velocity and force
 struct NodeInfoVecs {
-	//holds sum of forces for node on given time_step
 	thrust::device_vector<unsigned> deviceEdgeLeft;
 	thrust::device_vector<unsigned> deviceEdgeRight;
 
-	thrust::host_vector<unsigned> idEdgesMadeHost;
 
-	thrust::device_vector<unsigned> idEdgesMadeTemp;
+	thrust::device_vector<unsigned> idMadeTempLeft;//left id linked
+	thrust::device_vector<unsigned> idMadeTempRight;//right id linked
+	thrust::device_vector<unsigned> linksThreadMade;//max links each thread has made each timestep
+	thrust::device_vector<unsigned> delinksThreadMade;//max de-links each thread has made each timestep
 
+	//holds sum of forces for node on given time_step
 	thrust::device_vector<double> sumForcesOnNode;
 
 	thrust::device_vector<double> discretizedEdgeStrain; //counts strain of edge

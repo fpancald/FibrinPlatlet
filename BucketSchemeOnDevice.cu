@@ -33,9 +33,9 @@ void initDimensionBucketScheme(
 	domainParams.minZ = min(minZTemp, domainParams.pltminZ) - space;
 	domainParams.maxZ = max(maxZTemp, domainParams.pltmaxZ) + space;
 
-	domainParams.XBucketCount = (ceil(domainParams.maxX - domainParams.minX) / domainParams.gridSpacing) + 1;
-	domainParams.YBucketCount = (ceil(domainParams.maxY - domainParams.minY) / domainParams.gridSpacing) + 1;
-	domainParams.ZBucketCount = (ceil(domainParams.maxZ - domainParams.minZ) / domainParams.gridSpacing) + 1;
+	domainParams.XBucketCount = ceil((domainParams.maxX - domainParams.minX) / domainParams.gridSpacing) + 1;
+	domainParams.YBucketCount = ceil((domainParams.maxY - domainParams.minY) / domainParams.gridSpacing) + 1;
+	domainParams.ZBucketCount = ceil((domainParams.maxZ - domainParams.minZ) / domainParams.gridSpacing) + 1;
 
 	if ( (domainParams.XBucketCount * domainParams.YBucketCount * domainParams.ZBucketCount) != domainParams.totalBucketCount	) {
 
@@ -47,9 +47,9 @@ void initDimensionBucketScheme(
 		auxVecs.keyBegin.resize(domainParams.totalBucketCount);
 		auxVecs.keyEnd.resize(domainParams.totalBucketCount);
 		//platelets
-		auxVecs.keyPltBegin.resize(domainParams.totalBucketCount);
-		auxVecs.keyPltEnd.resize(domainParams.totalBucketCount);
-
+		auxVecs.keyPltBegin.resize(domainParams.totalBucketCount); 
+		auxVecs.keyPltEnd.resize(domainParams.totalBucketCount); 
+ 
 	}
 
 	thrust::fill(auxVecs.keyBegin.begin(),auxVecs.keyBegin.end(),0);
@@ -87,7 +87,7 @@ void extendBucketScheme(
 	* beginning of constant iterator
 	*/
 	thrust::constant_iterator<unsigned> first(27);
-	/**
+	/*
 	* end of constant iterator.
 	* the plus sign only indicate movement of position, not value.
 	* e.g. movement is 5 and first iterator is initialized as 9
@@ -105,9 +105,8 @@ void extendBucketScheme(
 				auxVecs.id_bucket_expanded.begin(),
 				auxVecs.id_value_expanded.begin())));
 
-
 	thrust::counting_iterator<unsigned> countingBegin(0);
-
+ 
 	thrust::transform(
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
@@ -117,22 +116,23 @@ void extendBucketScheme(
 			thrust::make_tuple(
 				auxVecs.id_bucket_expanded.begin(),
 				countingBegin)) + endIndexExpanded,
-		thrust::make_zip_iterator(
-			thrust::make_tuple(
-				auxVecs.id_bucket_expanded.begin(),
-				countingBegin)),
+		
+		auxVecs.id_bucket_expanded.begin(),
 		NeighborFunctor(
 			domainParams.XBucketCount,
 			domainParams.YBucketCount,
-			domainParams.ZBucketCount));
+			domainParams.ZBucketCount)); 
 
+/*	unsigned choice = 479;
 
-
+	for (unsigned i = choice*27; i < choice*27+27; i++)
+		std::cout<<auxVecs.id_bucket_expanded[i]<< " "<< auxVecs.id_value_expanded[i] <<std::endl;
+*/
 	unsigned numberOfOutOfRange = thrust::count_if(auxVecs.id_bucket_expanded.begin(),
 		auxVecs.id_bucket_expanded.end(), is_greater_than(domainParams.totalBucketCount) );
 	unsigned numberInsideRange = endIndexExpanded - numberOfOutOfRange;
 
-	//unsigned endIndexSearch = endIndexExpanded - numberOfOutOfRange;
+	unsigned endIndexSearch = endIndexExpanded - numberOfOutOfRange;
 
 	thrust::stable_sort_by_key(auxVecs.id_bucket_expanded.begin(),
 		auxVecs.id_bucket_expanded.begin() + endIndexExpanded,
@@ -144,12 +144,12 @@ void extendBucketScheme(
 			auxVecs.id_bucket_expanded.begin())) - auxVecs.id_value_expanded.begin();
 
 	auxVecs.id_bucket_expanded.erase(
-			auxVecs.id_bucket_expanded.begin() + numberInsideRange,
+			auxVecs.id_bucket_expanded.begin() + numberInsideRange, 
 			auxVecs.id_bucket_expanded.end());
 
 	auxVecs.id_value_expanded.erase(
 			auxVecs.id_value_expanded.begin() + numberInsideRange,
-			auxVecs.id_value_expanded.end());
+			auxVecs.id_value_expanded.end());  
 
 
 
@@ -165,7 +165,39 @@ void extendBucketScheme(
 		search_begin + domainParams.totalBucketCount,
 		auxVecs.keyEnd.begin());
 
-	//platelets
+/*	unsigned bucket = auxVecs.id_bucket[choice];
+	unsigned begin = auxVecs.keyBegin[bucket];
+	unsigned end = auxVecs.keyEnd[bucket];
+	
+	std::cout<<"from bucket scheme:"<<std::endl;
+	for (unsigned i = begin; i < end; i++){
+		
+		unsigned nbr = auxVecs.id_value_expanded[i];
+		unsigned buck = auxVecs.id_bucket[nbr];
+		double x_dist=nodeInfoVecs.nodeLocX[nbr] - nodeInfoVecs.nodeLocX[choice];
+		double y_dist=nodeInfoVecs.nodeLocY[nbr] - nodeInfoVecs.nodeLocY[choice];
+		double z_dist=nodeInfoVecs.nodeLocZ[nbr] - nodeInfoVecs.nodeLocZ[choice];
+		double dist = std::sqrt(std::pow(x_dist,2.0)+std::pow(y_dist,2.0)+std::pow(z_dist,2.0));
+		if (dist < 1.0){
+			std::cout<<"dist: "<< dist<< " between: "<< choice << " and nbr: "<< nbr<<std::endl; 
+			std::cout<<"nbr: "<< nbr<< " is in bucket: "<< buck <<std::endl;
+		}
+	}
+	std::cout<<"from all nodes:"<<std::endl;
+	for (unsigned i = 0; i < 3988; i++){
+		unsigned nbr = i;//auxVecs.id_value_expanded[i];
+		unsigned buck = auxVecs.id_bucket[nbr];
+		double x_dist=nodeInfoVecs.nodeLocX[nbr] - nodeInfoVecs.nodeLocX[choice];
+		double y_dist=nodeInfoVecs.nodeLocY[nbr] - nodeInfoVecs.nodeLocY[choice];
+		double z_dist=nodeInfoVecs.nodeLocZ[nbr] - nodeInfoVecs.nodeLocZ[choice];
+		double dist = std::sqrt(std::pow(x_dist,2.0)+std::pow(y_dist,2.0)+std::pow(z_dist,2.0));
+		if (dist < 1.0){
+			std::cout<<"dist: "<< dist<< " between: "<< choice << " and nbr: "<< nbr<<std::endl; 
+			std::cout<<"nbr: "<< nbr<< " is in bucket: "<< buck <<std::endl;
+		} 
+	} */
+  
+	//platelets 
 	/*unsigned valuesPltCount = auxVecs.idPlt_value.size();
 	thrust::fill(auxVecs.idPlt_bucket_expanded.begin(),auxVecs.idPlt_bucket_expanded.end(),0);
 	thrust::fill(auxVecs.idPlt_value_expanded.begin(),auxVecs.idPlt_value_expanded.end(),0);
@@ -209,10 +241,7 @@ void extendBucketScheme(
 			thrust::make_tuple(
 				auxVecs.idPlt_bucket_expanded.begin(),
 				pltcountingBegin)) + endIndexPltExpanded,
-		thrust::make_zip_iterator(
-			thrust::make_tuple(
-				auxVecs.idPlt_bucket_expanded.begin(),
-				pltcountingBegin)),
+			auxVecs.idPlt_bucket_expanded.begin(),
 		NeighborFunctor(
 			domainParams.XBucketCount,
 			domainParams.YBucketCount,
@@ -276,7 +305,8 @@ void buildBucketScheme(
 	// transform the points to their bucket indices
 
 	//std::cout<<"bucket nodes"<<std::endl;
-	thrust::for_each(
+
+	thrust::transform(
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
 				nodeInfoVecs.nodeLocX.begin(),
@@ -289,12 +319,15 @@ void buildBucketScheme(
 				nodeInfoVecs.nodeLocY.begin(),
 				nodeInfoVecs.nodeLocZ.begin(),
 				indexBucketBegin)) + generalParams.maxNodeCount,
+		thrust::make_zip_iterator(
+			thrust::make_tuple(
+				auxVecs.id_bucket.begin(),
+				auxVecs.id_value.begin())),
 		BucketIndexer(
 			domainParams.minX, domainParams.maxX, domainParams.minY,
 			domainParams.maxY, domainParams.minZ, domainParams.maxZ,
-			domainParams.gridSpacing,
-			thrust::raw_pointer_cast(auxVecs.id_bucket.data()),
-			thrust::raw_pointer_cast(auxVecs.id_value.data())));
+			domainParams.XBucketCount,domainParams.YBucketCount,domainParams.ZBucketCount,
+			domainParams.gridSpacing));
 
 //test sorting by node instaed of bucket index
 thrust::sort_by_key(auxVecs.id_value.begin(),
@@ -308,7 +341,7 @@ unsigned numberOutOfRange = thrust::count(auxVecs.id_bucket.begin(),
 	//platelets
 	//std::cout<<"bucket platelet"<<std::endl;
 	thrust::counting_iterator<unsigned> indexBucketBegin1(0);
-	thrust::for_each(
+	thrust::transform(
 		thrust::make_zip_iterator(
 			thrust::make_tuple(
 				pltInfoVecs.pltLocX.begin(),
@@ -321,12 +354,15 @@ unsigned numberOutOfRange = thrust::count(auxVecs.id_bucket.begin(),
 				pltInfoVecs.pltLocY.begin(),
 				pltInfoVecs.pltLocZ.begin(),
 				indexBucketBegin1)) + generalParams.maxPltCount,
+		thrust::make_zip_iterator(
+			thrust::make_tuple(
+				auxVecs.idPlt_bucket.begin(),
+				auxVecs.idPlt_value.begin())),
 		BucketIndexer(
 			domainParams.minX, domainParams.maxX, domainParams.minY,
 			domainParams.maxY, domainParams.minZ, domainParams.maxZ,
-			domainParams.gridSpacing,
-			thrust::raw_pointer_cast(auxVecs.idPlt_bucket.data()),
-			thrust::raw_pointer_cast(auxVecs.idPlt_value.data())));
+			domainParams.XBucketCount,domainParams.YBucketCount,domainParams.ZBucketCount,
+			domainParams.gridSpacing));
 
 
 	//std::cout<<"end bucket platelet"<<std::endl;

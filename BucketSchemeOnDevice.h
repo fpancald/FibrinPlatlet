@@ -55,20 +55,23 @@ struct NeighborFunctor : public thrust::unary_function<Tuu, Tuu> {
 		numOfBucketsInYDim(_numOfBucketsInYDim),
 		numOfBucketsInZDim(_numOfBucketsInZDim) {}
 
-	__device__ Tuu operator()(const Tuu &v) {
+	__device__ unsigned operator()(const Tuu &v) {
 		unsigned relativeRank = thrust::get<1>(v) % 27;	//27 = 3^3. Takes global node id for calculation
 
 		//takes global bucket id for calculation
+		if ((thrust::get<1>(v) == (27*479+1))) {
+			//coment
 
+		}
 		unsigned area = numOfBucketsInXDim * numOfBucketsInYDim;
 		unsigned volume = area * numOfBucketsInZDim;
 
 		unsigned xPos = thrust::get<0>(v) % numOfBucketsInXDim;	//col
 		unsigned xPosLeft = xPos - 1;
 		unsigned xPosRight = xPos + 1;
-		if (xPosLeft > volume) {
+		if (xPos == 0) {
 			//wraparound unsigned
-			xPosLeft = numOfBucketsInXDim - 1;
+			xPosLeft = numOfBucketsInXDim-1;
 		}
 		if (xPosRight >= numOfBucketsInXDim) {
 			xPosRight = 0;
@@ -78,9 +81,9 @@ struct NeighborFunctor : public thrust::unary_function<Tuu, Tuu> {
 		unsigned zPos = thrust::get<0>(v) / area; //z divide by area
 		unsigned zPosUp = zPos + 1;
 		unsigned zPosLow = zPos - 1;
-		if (zPosLow > volume ) {
+		if (zPos == 0 ) {
 			//wraparound unsigned
-			zPosLow = numOfBucketsInZDim - 1;
+			zPosLow = numOfBucketsInZDim-1;
 		}
 		if (zPosUp >= numOfBucketsInZDim) {
 			zPosUp = 0;
@@ -90,9 +93,9 @@ struct NeighborFunctor : public thrust::unary_function<Tuu, Tuu> {
 		unsigned yPosTop = yPos + 1;
 		unsigned yPosBottom = yPos - 1;
 
-		if (yPosBottom > volume) {
+		if (yPos == 0) {
 			//wraparound unsigend
-			yPosBottom = numOfBucketsInYDim - 1;
+			yPosBottom = numOfBucketsInYDim-1;
 		}
 		if (yPosTop >= numOfBucketsInYDim) {
 			yPosTop = 0;
@@ -101,142 +104,142 @@ struct NeighborFunctor : public thrust::unary_function<Tuu, Tuu> {
 		switch (relativeRank) {
 		//middle cases
 		case 0:
-			return thrust::make_tuple(thrust::get<0>(v), thrust::get<1>(v));
-			//break;
+			return thrust::get<0>(v);
+			break;
 		case 1:{
 				unsigned topLeft = xPosLeft + yPosTop * numOfBucketsInXDim + zPos * area;
-			return thrust::make_tuple(topLeft, thrust::get<1>(v));
-			//break;
+				return (topLeft);
+				break;
 		}
 		case 2:{
 				unsigned top = xPos + yPosTop * numOfBucketsInXDim + zPos * area;
-			return thrust::make_tuple(top, thrust::get<1>(v));
-			//break;
+			return (top);
+			break;
 		}
 		case 3:{
 				unsigned topRight = xPosRight + yPosTop * numOfBucketsInXDim + zPos * area;
-			return thrust::make_tuple(topRight, thrust::get<1>(v));
+			return topRight;
 			//break;
 		}
 		case 4:{
 				unsigned right = xPosRight + yPos * numOfBucketsInXDim + zPos * area;
-			return thrust::make_tuple(right, thrust::get<1>(v));
+			return right;
 			//break;
 		}
 		case 5:{
 				unsigned bottomRight = xPosRight + yPosBottom * numOfBucketsInXDim + zPos * area;
-			return thrust::make_tuple(bottomRight, thrust::get<1>(v));
+			return bottomRight;
 			//break;
 		}
 		case 6:{
 				unsigned bottom = xPos + yPosBottom * numOfBucketsInXDim + zPos * area;
-			return thrust::make_tuple(bottom, thrust::get<1>(v));
+			return bottom;
 			//break;
 		}
 		case 7:{
 				unsigned bottomLeft = xPosLeft + yPosBottom * numOfBucketsInXDim + zPos * area;
-			return thrust::make_tuple(bottomLeft, thrust::get<1>(v));
+			return bottomLeft;
 			//break;
 		}
 		case 8:{
 				unsigned left = xPosLeft + yPos * numOfBucketsInXDim + zPos * area;
-			return thrust::make_tuple(left, thrust::get<1>(v));
+			return left;
 			//break;
 		}
 		//lower Z cases
 		case 9:{
 				unsigned lowerCenter = xPos + yPos * numOfBucketsInXDim +  zPosLow * area;
-			return thrust::make_tuple(lowerCenter, thrust::get<1>(v));
+			return lowerCenter;
 			//break;
 		}
 		case 10:{
 				unsigned lowerTopLeft = xPosLeft + yPosTop * numOfBucketsInXDim + zPosLow* area;
-			return thrust::make_tuple(lowerTopLeft, thrust::get<1>(v));
+			return lowerTopLeft;
 			//break;
 		}
 		case 11:{
 				unsigned lowerTop = xPos + yPosTop * numOfBucketsInXDim + zPosLow * area;
-			return thrust::make_tuple(lowerTop, thrust::get<1>(v));
+			return (lowerTop);
 			//break;
 		}
 		case 12:{
 				unsigned lowerTopRight = xPosRight + yPosTop * numOfBucketsInXDim  + zPosLow * area;
-			return thrust::make_tuple(lowerTopRight, thrust::get<1>(v));
+			return lowerTopRight;
 			//break;
 		}
 		case 13:{
 				unsigned lowerRight = xPosRight + yPos * numOfBucketsInXDim + zPosLow * area;
-			return thrust::make_tuple(lowerRight, thrust::get<1>(v));
-			//break;
+			return (lowerRight);
+			break;
 		}
 		case 14:{
 				unsigned lowerBottomRight = xPosRight + yPosBottom * numOfBucketsInXDim + zPosLow * area;
-			return thrust::make_tuple(lowerBottomRight, thrust::get<1>(v));
-			//break;
+			return (lowerBottomRight);
+			break;
 		}
 		case 15:{
 				unsigned lowerBottom = xPos + yPosBottom * numOfBucketsInXDim + zPosLow * area;
-			return thrust::make_tuple(lowerBottom, thrust::get<1>(v));
-			//break;
+			return lowerBottom;
+			break;
 		}
 		case 16:{
 				unsigned lowerBottomLeft = xPosLeft + yPosBottom * numOfBucketsInXDim  + zPosLow * area;
-			return thrust::make_tuple(lowerBottomLeft, thrust::get<1>(v));
+			return lowerBottomLeft;
 			//break;
 		}
 		case 17:{
 				unsigned lowerLeft = xPosLeft + yPos * numOfBucketsInXDim + zPosLow * area;
-			return thrust::make_tuple(lowerLeft, thrust::get<1>(v));
+			return lowerLeft;
 			//break;
 		}
 		//upper Z cases
 		case 18:{
 				unsigned upperCenter = xPos + yPos * numOfBucketsInXDim +  zPosUp * area;
-			return thrust::make_tuple(upperCenter, thrust::get<1>(v));
+			return (upperCenter);
 			//break;
 		}
 		case 19:{
 				unsigned upperTopLeft = xPosLeft + yPosTop * numOfBucketsInXDim + zPosUp * area;
-			return thrust::make_tuple(upperTopLeft, thrust::get<1>(v));
+			return (upperTopLeft);
 			//break;
 		}
 		case 20:{
 				unsigned upperTop = xPos + yPosTop * numOfBucketsInXDim + zPosUp * area;
-			return thrust::make_tuple(upperTop, thrust::get<1>(v));
+			return (upperTop);
 			//break;
 		}
 		case 21:{
 				unsigned upperTopRight = xPosRight + yPosTop * numOfBucketsInXDim  + zPosUp * area;
-			return thrust::make_tuple(upperTopRight, thrust::get<1>(v));
+			return (upperTopRight);
 			//break;
 		}
 		case 22:{
 				unsigned upperRight = xPosRight + yPos * numOfBucketsInXDim + zPosUp * area;
-			return thrust::make_tuple(upperRight, thrust::get<1>(v));
+			return (upperRight);
 			//break;
 		}
 		case 23:{
 				unsigned upperBottomRight = xPosRight + yPosBottom * numOfBucketsInXDim + zPosUp * area;
-			return thrust::make_tuple(upperBottomRight, thrust::get<1>(v));
+			return (upperBottomRight);
 			//break;
 		}
 		case 24:{
 				unsigned upperBottom = xPos + yPosBottom * numOfBucketsInXDim + zPosUp * area;
-			return thrust::make_tuple(upperBottom, thrust::get<1>(v));
+			return (upperBottom);
 			//break;
 		}
 		case 25:{
 				unsigned upperBottomLeft = xPosLeft + yPosBottom * numOfBucketsInXDim  + zPosUp * area;
-			return thrust::make_tuple(upperBottomLeft, thrust::get<1>(v));
+			return (upperBottomLeft);
 			//break;
 		}
 		case 26:{
 				unsigned upperLeft = xPosLeft + yPos * numOfBucketsInXDim + zPosUp * area;
-			return thrust::make_tuple(upperLeft, thrust::get<1>(v));
+			return (upperLeft);
 			//break;
 		}
 		default:
-			return thrust::make_tuple(ULONG_MAX, ULONG_MAX);
+			return (ULONG_MAX);
 
 		}
 	}
@@ -251,11 +254,10 @@ struct BucketIndexer {
 	double minZ;
 	double maxZ;
 
+	unsigned XBucketCount;
+	unsigned YBucketCount;
+	unsigned ZBucketCount;
 	double unitLen;
-	unsigned XSize;
-	unsigned YSize;
-	unsigned* id_bucket;
-	unsigned* id_value;
 
 	__host__ __device__
 
@@ -266,24 +268,29 @@ struct BucketIndexer {
 		double _maxY,
 		double _minZ,
 		double _maxZ,
-		double _unitLen,
-		unsigned* _id_bucket,
-		unsigned* _id_value) :
+		unsigned _XBucketCount,
+		unsigned _YBucketCount,
+		unsigned _ZBucketCount,
+		double _unitLen) :
+
 		minX(_minX),
 		maxX(_maxX),
 		minY(_minY),
 		maxY(_maxY),
 		minZ(_minZ),
 		maxZ(_maxZ),
-		id_bucket(_id_bucket),
-		id_value(_id_value),
-		unitLen(_unitLen),
-		XSize((_maxX - _minX) / unitLen),
-		YSize((_maxY - _minY) / unitLen) {}
+		XBucketCount(_XBucketCount),
+		YBucketCount(_YBucketCount),
+		ZBucketCount(_ZBucketCount),
+		unitLen(_unitLen) {}
 
-	__device__ void operator()(const Tdddu& v) {
-			//static cast double into unsigned
+	__device__ 
+	Tuu operator()(const Tdddu& v) {
+
 			unsigned id = thrust::get<3>(v);
+			if (id == 479){
+				//comment
+			}
 			unsigned x = static_cast<unsigned>((thrust::get<0>(v) - minX) / unitLen);
 			unsigned y = static_cast<unsigned>((thrust::get<1>(v) - minY) / unitLen);
 			unsigned z = static_cast<unsigned>((thrust::get<2>(v) - minZ) / unitLen);
@@ -291,13 +298,12 @@ struct BucketIndexer {
 
 			// return the bucket's linear index and node's global index
 			//return thrust::make_tuple(z * XSize * YSize + y * XSize + x, thrust::get<4>(v));
-			unsigned bucket = z * XSize * YSize + y * XSize + x;
+			unsigned bucket = z * XBucketCount * YBucketCount + y * XBucketCount + x;
 			//try to make it so bucket does not return unsigned32Max
 			if (bucket == ULONG_MAX) {
 				bucket = 0;
 			}
-			id_bucket[id] = bucket;
-			id_value[id] = id;
+			return thrust::make_tuple(bucket, id);
 
 	}
 };

@@ -230,8 +230,11 @@ void NodeSystemDevice::setNodeVecs(
 	//copy fixed positions
 	nodeInfoVecs.isNodeFixed.resize(generalParams.maxNodeCount);
 	thrust::copy(hostIsNodeFixed.begin(), hostIsNodeFixed.end(), nodeInfoVecs.isNodeFixed.begin());
-
-	nodeInfoVecs.idEdgesMadeTemp.resize(generalParams.maxNodeCount * generalParams.maxLinksPerIteration);
+	
+	nodeInfoVecs.linksThreadMade.resize(generalParams.maxNodeCount);
+	nodeInfoVecs.delinksThreadMade.resize(generalParams.maxNodeCount);
+	nodeInfoVecs.idMadeTempLeft.resize(generalParams.maxNodeCount * generalParams.maxLinksPerIteration);
+	nodeInfoVecs.idMadeTempRight.resize(generalParams.maxNodeCount * generalParams.maxLinksPerIteration);
 
 	//at this point all nodes are filled, so we can generate domainParams
 	initDimensionBucketScheme(
