@@ -95,9 +95,9 @@ struct LinkNodesFunctor {
 			__attribute__ ((unused)) unsigned beginIndex = keyBegin[bucketId];
 			__attribute__ ((unused)) unsigned endIndex = keyEnd[bucketId];
 
-			for (unsigned iter = 0; iter < maxNodeCount; iter++ ) {
+			for (unsigned iter = beginIndex; iter < endIndex; iter++ ) {
 
-				unsigned candidateId = iter;//id_value_expanded[iter];//test id
+				unsigned candidateId = id_value_expanded[iter];//test id
 
 				if ( (candidateId < maxNodeCount) && (save_index < save_index_end) ) {
 					//then candidateId is not a dpd particle.
@@ -127,46 +127,30 @@ struct LinkNodesFunctor {
 								//must regenerate for each new candidate
 								//unsigned currentEdgeCount = currentEdgeCountVec[nodeId];
 
-								//if (currentEdgeCount < maxNbrCount) {
-									//then the new edge can be placed
-									unsigned location;
-									//decide placement of nbr only in row of nodeId,
-									//another thread will place for candidateId
-									for (unsigned place = possibleEdgeBegin; place < possibleEdgeEnd; place++ ) {
-
-										if (maxNodeCount == globalNeighbors[place]) {
-											//maxNodeCount is the default value of the matrix
-											//then we have found location where we can place a node scine global neighbors default is maxNodeCount
-											location = place;
-											break;
-										}
-
+								//then the new edge can be placed
+								unsigned location;
+								//decide placement of nbr only in row of nodeId,
+								//another thread will place for candidateId
+								for (unsigned place = possibleEdgeBegin; place < possibleEdgeEnd; place++ ) {
+									if (maxNodeCount == globalNeighbors[place]) {
+										//maxNodeCount is the default value of the matrix
+										//then we have found location where we can place a node scine global neighbors default is maxNodeCount
+										location = place;
+										break;
 									}
-									//if (location < (maxNbrCount * maxNodeCount) ) {
-										globalNeighbors[location] = candidateId;
-										lengthZero[location ] = dist;
-
-										//only if a node is placed do we record it.
-										//place in matrix format upper diagonal
-										/*if (nodeId < candidateId) {
-											//on row node_id (mat notation)
-											finalEdgeIdPlaced = candidateId + maxNodeCount * nodeId;
-										}
-										else {
-											//on row cand_id (mat notation)
-											finalEdgeIdPlaced = nodeId + maxNodeCount * candidateId;
-										};*/
-										final_id_left = min(nodeId, candidateId);
-										final_id_right = max(nodeId, candidateId);
-
-										idTempVecLeft[save_index] = final_id_left;
-										idTempVecRight[save_index] = final_id_right;
-										(currentEdgeCountVec[nodeId])+=1;
-
-										save_index += 1;
-										numPlacedLinks += 1;
-									//}
-								//}
+								}
+								globalNeighbors[ location ] = candidateId;
+								lengthZero[ location ] = dist;
+								//only if a node is placed do we record it.
+	
+								final_id_left = min(nodeId, candidateId);
+								final_id_right = max(nodeId, candidateId);
+								idTempVecLeft[save_index] = final_id_left;
+								idTempVecRight[save_index] = final_id_right;
+								(currentEdgeCountVec[nodeId])+=1;
+								save_index += 1;
+								numPlacedLinks += 1;
+									
 							}
 						}
 					}
@@ -238,4 +222,4 @@ struct DeLinkCopiesFunctor {
 
 };
 
-#endif /*LINKNODESONDEVICE_H_*/
+#endif
