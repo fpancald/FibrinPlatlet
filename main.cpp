@@ -77,7 +77,7 @@ std::shared_ptr<NodeSystemDevice> createNodeSystem(const char* schemeFile, std::
 
 	if (auto p = props.child("use-linking"))
 		builder->linking = (p.text().as_bool());
-////////////////////////////////////////////////////		
+////////////////////////////////////////////////////
 //platelets parameters
 	if (auto p = props.child("plt_mass"))
 		builder->defaultPltMass = (p.text().as_double());
@@ -99,6 +99,12 @@ std::shared_ptr<NodeSystemDevice> createNodeSystem(const char* schemeFile, std::
 		builder->pltDensity = (p.text().as_double());
 		std::cout<<"setting density: "<< builder->pltDensity << std::endl;
 	}
+
+	if (auto p = props.child("use-pltforcefield"))
+		builder->pltfrcfld = (p.text().as_bool());
+
+	if (auto p = props.child("use-plttndrl"))
+		builder->plttndrl = (p.text().as_bool());
 
 	std::cout << "builder ptr address: " << builder << std::endl;
 	std::vector<unsigned> originNodes;
@@ -158,7 +164,7 @@ std::shared_ptr<NodeSystemDevice> createNodeSystem(const char* schemeFile, std::
 	//only use platelet input if density is zero
 	if ((builder->pltDensity) == 0.0) {
 		for (auto plt = plts.child("plt"); plt; plt = plt.next_sibling("plt")) {
-			
+
 			if (defaultPltMass < 0.0) {
 				std::cout << "parse error: plt mass is undefined\n";
 				return 0;
@@ -264,7 +270,7 @@ void run(int argc, char** argv) {
 
 		std::cout << "solving system in main" << std::endl;
 		system->solveSystemDevice();
-	
+
 
 	t1 = time(0);  //current time at the end of solving the system.
 	int total,hours,min,sec;

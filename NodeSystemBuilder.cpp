@@ -318,10 +318,10 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 		double pltminZ = (*(thrust::min_element(hostPosZ.begin(), hostPosZ.end())));
 		double pltmaxZ = (*(thrust::max_element(hostPosZ.begin(), hostPosZ.end())));
 		numPlts = 2;//static_cast<unsigned>(ceil((pltmaxX - pltminX) * (pltmaxY - pltminY) * (pltmaxZ - pltminZ) * pltDensity));
-		
+
 		std::cout<< "number of plts from density: "<< numPlts<<std::endl;
-		
-		
+
+
 		double padding = 1.0;
 
 		std::random_device rdX;  //Will be used to obtain a seed for the random number engine
@@ -343,9 +343,9 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 			hostPltPosZ.push_back(static_cast<double>(plt+0.1) );
 			std::cout<<" plt pos: "<< xPos << " "<< yPos << " "<< zPos << std::endl;
 		}
-    	  
 
-	} 
+
+	}
 
 	std::cout << "platelet count: " << numPlts << std::endl;
 	//now all the edges and variables are set.
@@ -391,8 +391,9 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 	host_ptr_devNodeSystem->domainParams.gridSpacing = std::max(pltRForce, 5*defaultLinkDiameter);
 	host_ptr_devNodeSystem->generalParams.fiberDiameter = defaultLinkDiameter ;
 	host_ptr_devNodeSystem->generalParams.pltDensity = pltDensity;
+	host_ptr_devNodeSystem->generalParams.pltfrcfld = pltfrcfld;
 
-	
+
 	host_ptr_devNodeSystem->initializeSystem(
 		hostIsNodeFixed,
 		hostPosX,

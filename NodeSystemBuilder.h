@@ -82,6 +82,8 @@ public:
 	unsigned pltMaxConn = 100;
 	double pltForce = 1.0;
 	double pltDensity = 0.0;
+	bool pltfrcfld = true;
+	bool plttndrl = false;
 
 	//std::shared_ptr<NodeSystemDevice> host_ptr_devNodeSystem;
 	std::vector<std::shared_ptr<BuildNode>> buildNodes;

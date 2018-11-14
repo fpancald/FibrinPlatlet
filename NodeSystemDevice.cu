@@ -45,17 +45,27 @@ void NodeSystemDevice::solveForcesOnDevice() {
 
 	//platetelet-node forces
 	//RESETS PLATELET FORCES
-	PltForceOnDevice(
-		nodeInfoVecs,
-		wlcInfoVecs,
-		generalParams,
-		pltInfoVecs,
-		auxVecs);
+	if (generalParams.pltfrcfld == true) {
+		PltForceOnDevice(
+			nodeInfoVecs,
+			wlcInfoVecs,
+			generalParams,
+			pltInfoVecs,
+			auxVecs);
 
-	PltInteractionOnDevice(
-  		generalParams,
-  		pltInfoVecs,
-  		auxVecs);
+		PltInteractionOnDevice(
+				generalParams,
+				pltInfoVecs,
+				auxVecs);
+	}
+	else if (generalParams.plttndrl == true) { //note for now force-field type has priority over tndrl-type
+		PltTndrlOnDevice(
+		  nodeInfoVecs,
+		  wlcInfoVecs,
+		  generalParams,
+		  pltInfoVecs,
+		  auxVecs);
+	}
 
 
 };
@@ -315,6 +325,10 @@ void NodeSystemDevice::setPltVecs(
 	auxVecs.idPlt_value.resize(generalParams.maxPltCount);
 	auxVecs.idPlt_bucket_expanded.resize(27 *( generalParams.maxPltCount ));
 	auxVecs.idPlt_value_expanded.resize(27 * (generalParams.maxPltCount));
+
+	if (generalParams.currentTime==0.0){
+    pltInfoVecs.tndrlNodeId.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
+  }
 
 };
 
