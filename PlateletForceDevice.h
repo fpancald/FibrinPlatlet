@@ -7,7 +7,7 @@
 
 
 //Force field-like mode
-void PltForceOnDevice(
+void PltForceFieldOnDevice(
   NodeInfoVecs& nodeInfoVecs,
 	WLCInfoVecs& wlcInfoVecs,
 	GeneralParams& generalParams,
@@ -15,10 +15,18 @@ void PltForceOnDevice(
   AuxVecs& auxVecs);
 
 
-void PltInteractionOnDevice(
+void PltInteractionPltOnDevice(
   	GeneralParams& generalParams,
   	PltInfoVecs& pltInfoVecs,
   	AuxVecs& auxVecs);
+
+    //Tndrl-like force
+void PltTndrlOnDevice(
+  NodeInfoVecs& nodeInfoVecs,
+	WLCInfoVecs& wlcInfoVecs,
+	GeneralParams& generalParams,
+  PltInfoVecs& pltInfoVecs,
+  AuxVecs& auxVecs);
 
 //go through and add appropriate entries for input
 struct PltonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3>  {
@@ -330,14 +338,6 @@ struct PltonPltForceFunctor : public thrust::unary_function<U2CVec6, CVec3>  {
       pltForceZAddr[pltId] += sumPltForceZ;
     }
 };
-
-//Tndrl-like force
-void PltTndrlOnDevice(
-  NodeInfoVecs& nodeInfoVecs,
-	WLCInfoVecs& wlcInfoVecs,
-	GeneralParams& generalParams,
-  PltInfoVecs& pltInfoVecs,
-  AuxVecs& auxVecs);
 
 
 //go through and add appropriate entries for input

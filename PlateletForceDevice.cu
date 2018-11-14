@@ -3,7 +3,6 @@
 
 
 //for a given platelet, search for network nodes, pull and push them
-=======
 //Force field-like mode
 
 void PltForceFieldOnDevice(
@@ -130,7 +129,7 @@ void PltForceFieldOnDevice(
 };
 
 //for a given platelet, apply force from other platelets
-void PltInteractionOnDevice(
+void PltInteractionPltOnDevice(
   	GeneralParams& generalParams,
   	PltInfoVecs& pltInfoVecs,
   	AuxVecs& auxVecs) {
@@ -178,6 +177,7 @@ void PltTndrlOnDevice(
 	PltInfoVecs& pltInfoVecs,
 	AuxVecs& auxVecs) {
 
+//why?
   if (generalParams.currentTime==0.0){
     thrust::fill(pltInfoVecs.tndrlNodeId.begin(),pltInfoVecs.tndrlNodeId.end(), generalParams.maxNodeCount + generalParams.maxPltCount);
     }
