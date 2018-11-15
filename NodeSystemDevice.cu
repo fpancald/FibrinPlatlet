@@ -71,12 +71,12 @@ void NodeSystemDevice::solveForcesOnDevice() {
 		  generalParams,
 		  pltInfoVecs,
 		  auxVecs);
-			if (generalParams.pltonplt == true) {
+			/*if (generalParams.pltonplt == true) {
 				PltonPltTndrlOnDevice(//platelet on platelet interaction through tndrl
 					generalParams,
 					pltInfoVecs,
 					auxVecs);
-			}
+			}*/
 
 	}
 

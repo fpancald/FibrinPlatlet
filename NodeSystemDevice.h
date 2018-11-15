@@ -243,6 +243,7 @@ struct GeneralParams{
 	double pltDensity;
 	bool pltfrcfld = true;
 	bool plttndrl = false;
+	bool pltonplt = true;
 
 	//parameters for advancing timestep and determining equilibrium
 	double df, dtMax, dtTemp, epsilon, maxForce;

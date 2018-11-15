@@ -10,7 +10,6 @@ LIBS := -lgsl -lgslcblas -lpugixml -L/afs/crc.nd.edu/user/s/sbritto2/networkgen/
 
 # Add inputs and outputs from these tool invocations to the build variables
 CPP_SRCS += \
-../PltForceDevice.cu \
 ../PltForceFieldDevice.cu \
 ../PltonPltForceFieldDevice.cu \
 ../PltTndrlDevice.cu \
@@ -28,7 +27,6 @@ CPP_SRCS += \
 
 # this is a variable
 OBJS += \
-./PltForceDevice.o \
 ./PltForceFieldDevice.o \
 ./PltonPltForceFieldDevice.o \
 ./PltTndrlDevice.o \
@@ -45,11 +43,10 @@ OBJS += \
 
 
 CPP_DEPS += \
-./PltForceDevice.d \
 ./PltForceFieldDevice.d \
 ./PltonPltForceFieldDevice.d \
 ./PltTndrlDevice.d \
-./PltVlmPushDevice.o \
+./PltVlmPushDevice.d \
 ./TorsionSolveOnDevice.d \
 ./WLCSolveOnDevice.d \
 ./AdvancePositionOnDevice.d \

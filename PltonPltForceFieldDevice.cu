@@ -1,5 +1,5 @@
 #include "PltonPltForceFieldDevice.h"
-#include "PlateletForceDevice.h"
+#include "PltForceDevice.h"
 #include "NodeSystemDevice.h"
 
 //for a given platelet, apply force from other platelets

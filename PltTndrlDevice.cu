@@ -1,5 +1,5 @@
 #include "PltTndrlDevice.h"
-#include "PlateletForceDevice.h"
+#include "PltForceDevice.h"
 #include "NodeSystemDevice.h"
 
 //tendril-like force

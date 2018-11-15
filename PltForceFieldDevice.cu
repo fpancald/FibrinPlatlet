@@ -1,5 +1,5 @@
 #include "PltForceFieldDevice.h"
-#include "PlateletForceDevice.h"
+#include "PltForceDevice.h"
 #include "NodeSystemDevice.h"
 
 //for a given platelet, search for network nodes, pull and push them
