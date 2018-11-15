@@ -4,13 +4,17 @@
 CXX := gcc
 NVCC := nvcc
 CFLAGS := -static -std=c++11 -Wall -Wextra
-NVCCFLAGS := 
+NVCCFLAGS :=
 IFLAGS = -isystem/afs/crc.nd.edu/x86_64_linux/c/cuda/8.0/include/
 LIBS := -lgsl -lgslcblas -lpugixml -L/afs/crc.nd.edu/user/s/sbritto2/networkgen/FibrinCode/UnderConstructionThrustExtension/pugixml/lib64
 
-# Add inputs and outputs from these tool invocations to the build variables 
+# Add inputs and outputs from these tool invocations to the build variables
 CPP_SRCS += \
-../PlateletForceDevice.cu \
+../PltForceDevice.cu \
+../PltForceFieldDevice.cu \
+../PltonPltForceFieldDevice.cu \
+../PltTndrlDevice.cu \
+../PltVlmPushDevice.cu \
 ../TorsionSolveOnDevice.cu \
 ../WLCSolveOnDevice.cu \
 ../AdvancePositionOnDevice.cu \
@@ -19,12 +23,16 @@ CPP_SRCS += \
 ../NodeSystemDevice.cu \
 ../NodeSystemBuilder.cpp \
 ../ForceDiagramStorage.cpp \
-../main.cpp 
+../main.cpp
 
 
 # this is a variable
 OBJS += \
-./PlateletForceDevice.o \
+./PltForceDevice.o \
+./PltForceFieldDevice.o \
+./PltonPltForceFieldDevice.o \
+./PltTndrlDevice.o \
+./PltVlmPushDevice.o \
 ./TorsionSolveOnDevice.o \
 ./WLCSolveOnDevice.o \
 ./AdvancePositionOnDevice.o \
@@ -33,11 +41,15 @@ OBJS += \
 ./NodeSystemDevice.o \
 ./NodeSystemBuilder.o \
 ./ForceDiagramStorage.o \
-./main.o 
+./main.o
 
- 
+
 CPP_DEPS += \
-./PlateletForceDevice.d \
+./PltForceDevice.d \
+./PltForceFieldDevice.d \
+./PltonPltForceFieldDevice.d \
+./PltTndrlDevice.d \
+./PltVlmPushDevice.o \
 ./TorsionSolveOnDevice.d \
 ./WLCSolveOnDevice.d \
 ./AdvancePositionOnDevice.d \
@@ -46,17 +58,17 @@ CPP_DEPS += \
 ./NodeSystemDevice.d \
 ./NodeSystemBuilder.d \
 ./ForceDiagramStorage.d \
-./main.d 
+./main.d
 
 
 #cpp files
-%.o : ./%.cpp 
+%.o : ./%.cpp
 	$(CXX) $(CFLAGS) $(IFLAGS) -o  $@ -c $^
 
-	
+
 #cuda files
-%.o : ./%.cu 
-	$(NVCC) $(NVCCFLAGS) -dc -o $@ $^ 
+%.o : ./%.cu
+	$(NVCC) $(NVCCFLAGS) -dc -o $@ $^
 
 
 

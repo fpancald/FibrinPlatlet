@@ -2,7 +2,11 @@
 #include "LinkNodesOnDevice.h"
 #include "WLCSolveOnDevice.h"
 #include "TorsionSolveOnDevice.h"
-#include "PlateletForceDevice.h"
+#include "PltForceDevice.h"
+#include "PltForceFieldDevice.h"
+#include "PltonPltForceFieldDevice.h"
+#include "PltTndrlDevice.h"
+#include "PltVlmPushDevice.h"
 #include "AdvancePositionOnDevice.h"
 #include "BucketSchemeOnDevice.h"
 #include "NodeSystemDevice.h"
@@ -46,12 +50,18 @@ void NodeSystemDevice::solveForcesOnDevice() {
 	//platetelet-node forces
 	//RESETS PLATELET FORCES
 	if (generalParams.pltfrcfld == true) {
-		PltForceFieldOnDevice(
+		PltForceFieldOnDevice(//platelet on node force field
 			nodeInfoVecs,
 			wlcInfoVecs,
 			generalParams,
 			pltInfoVecs,
 			auxVecs);
+		if (generalParams.pltonplt == true) {
+			PltInteractionPltOnDevice(//platelet on platelet interaction through force field
+				generalParams,
+				pltInfoVecs,
+				auxVecs);
+		}
 
 	}
 	else if (generalParams.plttndrl == true) { //note for now force-field type has priority over tndrl-type
@@ -61,12 +71,16 @@ void NodeSystemDevice::solveForcesOnDevice() {
 		  generalParams,
 		  pltInfoVecs,
 		  auxVecs);
+			if (generalParams.pltonplt == true) {
+				PltonPltTndrlOnDevice(//platelet on platelet interaction through tndrl
+					generalParams,
+					pltInfoVecs,
+					auxVecs);
+			}
+
 	}
 
-	PltInteractionPltOnDevice(
-		generalParams,
-		pltInfoVecs,
-		auxVecs);
+
 
 
 };
@@ -241,7 +255,7 @@ void NodeSystemDevice::setNodeVecs(
 	//copy fixed positions
 	nodeInfoVecs.isNodeFixed.resize(generalParams.maxNodeCount);
 	thrust::copy(hostIsNodeFixed.begin(), hostIsNodeFixed.end(), nodeInfoVecs.isNodeFixed.begin());
-	
+
 	nodeInfoVecs.linksThreadMade.resize(generalParams.maxNodeCount);
 	nodeInfoVecs.delinksThreadMade.resize(generalParams.maxNodeCount);
 	nodeInfoVecs.idMadeTempLeft.resize(generalParams.maxNodeCount * generalParams.maxLinksPerIteration);
