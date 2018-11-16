@@ -21,8 +21,6 @@ void PltForceFieldOnDevice(
 		thrust::fill(pltInfoVecs.nodeReducedForceY.begin(), pltInfoVecs.nodeReducedForceY.end(), 0.0);
 		thrust::fill(pltInfoVecs.nodeReducedForceZ.begin(), pltInfoVecs.nodeReducedForceZ.end(), 0.0);
 
-		//fill for image sort
-    	thrust::fill(pltInfoVecs.nodeUnreducedId.begin(),pltInfoVecs.nodeUnreducedId.end(), generalParams.maxNodeCount);
 
 
         //Call the plt force on nodes functor
@@ -32,29 +30,36 @@ void PltForceFieldOnDevice(
         	thrust::make_zip_iterator(
         		thrust::make_tuple(
 					counter,
-   					auxVecs.idPlt_value.begin(),
+   					auxVecs.idPlt_bucket.begin(),
         			pltInfoVecs.pltLocX.begin(),
         			pltInfoVecs.pltLocY.begin(),
-        			pltInfoVecs.pltLocZ.begin())),
+        			pltInfoVecs.pltLocZ.begin(),
+        		 	pltInfoVecs.pltForceX.begin(),
+        		 	pltInfoVecs.pltForceY.begin(),
+        		 	pltInfoVecs.pltForceZ.begin())),
         	thrust::make_zip_iterator(
         		thrust::make_tuple(
 					counter,
-    				auxVecs.idPlt_value.begin(),
+    				auxVecs.idPlt_bucket.begin(),
         		 	pltInfoVecs.pltLocX.begin(),
         		 	pltInfoVecs.pltLocY.begin(),
-        		 	pltInfoVecs.pltLocZ.begin())) + generalParams.maxPltCount,
+        		 	pltInfoVecs.pltLocZ.begin(), 
+        		 	pltInfoVecs.pltForceX.begin(),
+        		 	pltInfoVecs.pltForceY.begin(),
+        		 	pltInfoVecs.pltForceZ.begin())) + generalParams.maxPltCount,
          //save plt forces
          thrust::make_zip_iterator(
         	 thrust::make_tuple(
-				 //reset's forces
+				 //DOES NOT RESET FORCE
         		 pltInfoVecs.pltForceX.begin(),
         		 pltInfoVecs.pltForceY.begin(),
         		 pltInfoVecs.pltForceZ.begin())),
              PltonNodeForceFunctor(
-                 generalParams.pltMaxConn,
+                 generalParams.plt_other_intrct,
                  generalParams.pltRForce,
                  generalParams.pltForce,
                  generalParams.pltR,
+
                  generalParams.maxPltCount,
                  generalParams.fiberDiameter,
 				 generalParams.maxNodeCount,
@@ -67,7 +72,6 @@ void PltForceFieldOnDevice(
                  thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedForceZ.data()),
 
                  thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedId.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.pltImagingConnection.data()),
 
                  thrust::raw_pointer_cast(auxVecs.id_value_expanded.data()),//network neighbors
                  thrust::raw_pointer_cast(auxVecs.keyBegin.data()),
@@ -78,7 +82,6 @@ void PltForceFieldOnDevice(
         thrust::sort_by_key(pltInfoVecs.nodeUnreducedId.begin(), pltInfoVecs.nodeUnreducedId.end(),
         			thrust::make_zip_iterator(
         				thrust::make_tuple(
-							pltInfoVecs.pltImagingConnection.begin(),
         					pltInfoVecs.nodeUnreducedForceX.begin(),
         					pltInfoVecs.nodeUnreducedForceY.begin(),
         					pltInfoVecs.nodeUnreducedForceZ.begin())), thrust::less<unsigned>());

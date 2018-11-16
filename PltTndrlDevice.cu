@@ -3,6 +3,9 @@
 #include "NodeSystemDevice.h"
 
 //tendril-like force
+//The limit is plt_tndrl_intrct (small number)
+//Force is applied to nodes
+//We use the tndrl for imaging. 
 void PltTndrlOnDevice(
   NodeInfoVecs& nodeInfoVecs,
 	WLCInfoVecs& wlcInfoVecs,
@@ -21,61 +24,70 @@ void PltTndrlOnDevice(
 
 		//fill for image sort
     	thrust::fill(pltInfoVecs.nodeUnreducedId.begin(),pltInfoVecs.nodeUnreducedId.end(), generalParams.maxNodeCount);
+		thrust::counting_iterator<unsigned> counter(0);
 
         //Call the plt force on nodes functor
         thrust::transform(
         	thrust::make_zip_iterator(
         		thrust::make_tuple(
+					counter,
    					auxVecs.idPlt_bucket.begin(),
-   					auxVecs.idPlt_value.begin(),
         			pltInfoVecs.pltLocX.begin(),
         			pltInfoVecs.pltLocY.begin(),
-        			pltInfoVecs.pltLocZ.begin())),
+        			pltInfoVecs.pltLocZ.begin(),
+					pltInfoVecs.pltForceX.begin(),
+					pltInfoVecs.pltForceY.begin(),
+					pltInfoVecs.pltForceZ.begin())),
         	thrust::make_zip_iterator(
         		thrust::make_tuple(
+					counter,
         			auxVecs.idPlt_bucket.begin(),
-    				auxVecs.idPlt_value.begin(),
         		 	pltInfoVecs.pltLocX.begin(),
         		 	pltInfoVecs.pltLocY.begin(),
-        		 	pltInfoVecs.pltLocZ.begin())) + generalParams.maxPltCount,
-         //save plt forces
+        		 	pltInfoVecs.pltLocZ.begin(),
+					pltInfoVecs.pltForceX.begin(),
+					pltInfoVecs.pltForceY.begin(),
+					pltInfoVecs.pltForceZ.begin())) + generalParams.maxPltCount,
+         
          thrust::make_zip_iterator(
         	 thrust::make_tuple(
-				 //reset's forces
+				 //DOES NOT RESET FORCES
         		 pltInfoVecs.pltForceX.begin(),
         		 pltInfoVecs.pltForceY.begin(),
         		 pltInfoVecs.pltForceZ.begin())),
              PltTndrlonNodeForceFunctor(
-                 generalParams.pltMaxConn,
-                 generalParams.pltRForce,
-                 generalParams.pltForce,
-                 generalParams.pltR,
-                 generalParams.maxPltCount,
-                 generalParams.fiberDiameter,
-		             generalParams.maxNodeCount,
-                 generalParams.maxIdCount,
-                 generalParams.maxNeighborCount,
+                generalParams.plt_tndrl_intrct,
+                generalParams.pltRForce,
+                generalParams.pltForce,
+                generalParams.pltR,
 
-                 thrust::raw_pointer_cast(nodeInfoVecs.nodeLocX.data()),
-                 thrust::raw_pointer_cast(nodeInfoVecs.nodeLocY.data()),
-                 thrust::raw_pointer_cast(nodeInfoVecs.nodeLocZ.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedForceX.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedForceY.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedForceZ.data()),
+                generalParams.maxPltCount,
+                generalParams.fiberDiameter,
+		        generalParams.maxNodeCount,
+                generalParams.maxIdCountFlag,
+                generalParams.maxNeighborCount,
 
-                 thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedId.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.pltImagingConnection.data()),
+                thrust::raw_pointer_cast(nodeInfoVecs.nodeLocX.data()),
+                thrust::raw_pointer_cast(nodeInfoVecs.nodeLocY.data()),
+                thrust::raw_pointer_cast(nodeInfoVecs.nodeLocZ.data()),
+                thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedForceX.data()),
+                thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedForceY.data()),
+                thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedForceZ.data()),
 
-                 thrust::raw_pointer_cast(auxVecs.id_bucket_expanded.data()),
-                 thrust::raw_pointer_cast(auxVecs.keyBegin.data()),
-                 thrust::raw_pointer_cast(auxVecs.keyEnd.data()),
+                thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedId.data()),
+                thrust::raw_pointer_cast(pltInfoVecs.pltImagingConnection.data()),
 
-                 thrust::raw_pointer_cast(pltInfoVecs.tndrlNodeId.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.tndrlNodeType.data()),
-                 thrust::raw_pointer_cast(wlcInfoVecs.globalNeighbors.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.pltLocX.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.pltLocY.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.pltLocZ.data())) );
+                thrust::raw_pointer_cast(auxVecs.id_value_expanded.data()),//network neighbors
+                thrust::raw_pointer_cast(auxVecs.keyBegin.data()),
+                thrust::raw_pointer_cast(auxVecs.keyEnd.data()),
+
+                thrust::raw_pointer_cast(pltInfoVecs.tndrlNodeId.data()),
+                thrust::raw_pointer_cast(pltInfoVecs.tndrlNodeType.data()),
+                thrust::raw_pointer_cast(wlcInfoVecs.globalNeighbors.data()),
+
+                thrust::raw_pointer_cast(pltInfoVecs.pltLocX.data()),
+                thrust::raw_pointer_cast(pltInfoVecs.pltLocY.data()),
+                thrust::raw_pointer_cast(pltInfoVecs.pltLocZ.data())) );
 
         //now call a sort by key followed by a reduce by key to figure out which nodes are have force applied.
         //then make a functor that takes the id and force (4 tuple) and takes that force and adds it to the id'th entry in nodeInfoVecs.nodeForceX,Y,Z
