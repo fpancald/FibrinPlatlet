@@ -20,13 +20,13 @@ void PltInteractionPltOnDevice(
     	double* pltLocYAddr;
     	double* pltLocZAddr;
 
-      double* pltForceXAddr;
-    	double* pltForceYAddr;
-    	double* pltForceZAddr;
+    //  double* pltForceXAddr;
+    //	double* pltForceYAddr;
+    //	double* pltForceZAddr;
 
-    	unsigned* bucketNbrsExp;
-    	unsigned* keyBegin;
-    	unsigned* keyEnd;
+    	unsigned* idPlt_value_expanded;
+    	unsigned* keyPltBegin;
+    	unsigned* keyPltEnd;
 
 
        __host__ __device__
@@ -42,13 +42,13 @@ void PltInteractionPltOnDevice(
                 double* _pltLocYAddr,
                 double* _pltLocZAddr,
 
-                double* _pltForceXAddr,
-                double* _pltForceYAddr,
-                double* _pltForceZAddr,
+               // double* _pltForceXAddr,
+               // double* _pltForceYAddr,
+               // double* _pltForceZAddr,
 
-          			unsigned* _bucketNbrsExp,
-          			unsigned* _keyBegin,
-          			unsigned* _keyEnd) :
+          			unsigned* _idPlt_value_expanded,
+          			unsigned* _keyPltBegin,
+          			unsigned* _keyPltEnd) :
 
         pltmaxConn(_pltmaxConn),
         pltRForce(_pltRForce),
@@ -60,42 +60,49 @@ void PltInteractionPltOnDevice(
     		pltLocYAddr(_pltLocYAddr),
     		pltLocZAddr(_pltLocZAddr),
 
-        pltForceXAddr(_pltForceXAddr),
-        pltForceYAddr(_pltForceYAddr),
-        pltForceZAddr(_pltForceZAddr),
+      //  pltForceXAddr(_pltForceXAddr),
+      //  pltForceYAddr(_pltForceYAddr),
+      //  pltForceZAddr(_pltForceZAddr),
 
-    		bucketNbrsExp(_bucketNbrsExp),
-    		keyBegin(_keyBegin),
-    		keyEnd(_keyEnd) {}
+    		idPlt_value_expanded(_idPlt_value_expanded),
+    		keyPltBegin(_keyPltBegin),
+    		keyPltEnd(_keyPltEnd) {}
 
 
        __device__
-     		void operator()(const U2CVec3 &u2d3) {
+     		CVec3 operator()(const U2CVec6 &u2d6) {
 
-            unsigned bucketId = thrust::get<0>(u2d3);
-            unsigned pltId = thrust::get<1>(u2d3);
+          unsigned pltId = thrust::get<0>(u2d6);
+          unsigned bucketId = thrust::get<1>(u2d6);
 
-            //beginning and end of attempted interaction network nodes.
-    		    __attribute__ ((unused)) unsigned beginIndex = keyBegin[bucketId];
-    		    __attribute__ ((unused)) unsigned endIndex = keyEnd[bucketId];
-
-            double pltLocX = thrust::get<2>(u2d3);
-            double pltLocY = thrust::get<3>(u2d3);
-            double pltLocZ = thrust::get<4>(u2d3);
+          //beginning and end of attempted interaction network nodes.
+  		    __attribute__ ((unused)) unsigned beginIndex = keyPltBegin[bucketId];
+  		    __attribute__ ((unused)) unsigned endIndex = keyPltEnd[bucketId];
 
 
-            double sumPltForceX = 0.0;
-            double sumPltForceY = 0.0;
-            double sumPltForceZ = 0.0;
+          unsigned storageLocation = pltId * pltmaxConn;
+
+          double pltLocX = thrust::get<2>(u2d6);
+          double pltLocY = thrust::get<3>(u2d6);
+          double pltLocZ = thrust::get<4>(u2d6);
+
+          //use for return. 
+          double pltCurrentForceX = thrust::get<5>(u2d6);
+          double pltCurrentForceY = thrust::get<6>(u2d6);
+          double pltCurrentForceZ = thrust::get<7>(u2d6);
+
+          double sumPltForceX = pltCurrentForceX;
+          double sumPltForceY = pltCurrentForceY;
+          double sumPltForceZ = pltCurrentForceZ;
 
             //Loop through the number of available neighbors for each plt.
-            unsigned interactionCounter=0;
+            //unsigned interactionCounter = 0;
 
-    //for now no bucket scheme
+          //for now no bucket scheme
             for(unsigned i = 0; i < maxPltCount; i++) {
 
               //Choose a neighbor.
-              unsigned pullPlt_id = i;//bucketNbrsExp[i];
+              unsigned pullPlt_id = i;//idPlt_value_expanded[i];
               //
               if ( (pullPlt_id != pltId) && (pullPlt_id < maxPltCount) ) {
                 //Get position of plt
@@ -110,7 +117,7 @@ void PltInteractionPltOnDevice(
 
 
                 //only pull as many as are arms.
-                if (interactionCounter < pltmaxConn) {
+                //if (interactionCounter < plt_other_intrct) {
                     //attraction if platelet and fiber are within interaction distance but not overlapping
 
                       if ((dist < 2.0 * pltRForce) && (dist > 2.0 * pltR) ) {
@@ -127,7 +134,7 @@ void PltInteractionPltOnDevice(
 
                       }
                       //repulsion if fiber and platelet overlap
-                      else if (dist < 2 * pltR )  {
+                      else if (dist < (2.0 * pltR ) ) {
                           //plt only affects plt position if it is pulled.
                           //Determine direction of force based on positions and multiply magnitude force
                           double forcePltX = - (vecN_PX / dist) * (pltForce);
@@ -140,13 +147,15 @@ void PltInteractionPltOnDevice(
                           sumPltForceZ += 2.0 * (-1.0) * forcePltZ;
 
                       }
-                }
+                //}
             }
 
           }
-          pltForceXAddr[pltId] += sumPltForceX;
-          pltForceYAddr[pltId] += sumPltForceY;
-          pltForceZAddr[pltId] += sumPltForceZ;
+         // pltForceXAddr[pltId] += sumPltForceX;
+         // pltForceYAddr[pltId] += sumPltForceY;
+         // pltForceZAddr[pltId] += sumPltForceZ;
+          //after cyclign through plt's apply force to self. 
+          return thrust::make_tuple(sumPltForceX, sumPltForceY, sumPltForceZ);
         }
     };
 

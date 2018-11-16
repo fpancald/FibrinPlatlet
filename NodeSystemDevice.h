@@ -237,7 +237,8 @@ struct GeneralParams{
   //platelet parameters
   //look in builder for default parameter settings.
 	double pltForce;
-	unsigned pltMaxConn;
+	unsigned plt_other_intrct=100;//used for unreduced force size. Set large so able to push out many nodes
+	unsigned plt_tndrl_intrct=5;//used for tendril arm counts
 	double pltR;
 	double pltRForce;
 	double pltMass;
@@ -245,7 +246,7 @@ struct GeneralParams{
 	bool pltfrcfld = true;
 	bool plttndrl = false;
 	bool pltonplt = true;
-	unsigned maxIdCount=std::max(maxPltCount,maxNodeCount);
+	unsigned maxIdCountFlag=std::max(maxPltCount,maxNodeCount);//flag variable
 
 	//parameters for advancing timestep and determining equilibrium
 	double df, dtMax, dtTemp, epsilon, maxForce;

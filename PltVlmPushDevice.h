@@ -11,15 +11,15 @@ void PltVlmPushOnDevice(
   PltInfoVecs& pltInfoVecs,
   AuxVecs& auxVecs);
 
-  struct PltVlmPushForceFunctor : public thrust::unary_function<U2CVec3, CVec3>  {
-    unsigned pltmaxConn;
+  struct PltVlmPushForceFunctor : public thrust::unary_function<U2CVec6, CVec3>  {
+    unsigned plt_other_intrct;
     double pltRForce;
     double pltForce;
     double pltR;
+
     unsigned maxPltCount;
     double fiberDiameter;
     unsigned maxNodeCount;
-    unsigned maxIdCount;
     unsigned maxNeighborCount;
 
     double* nodeLocXAddr;
@@ -28,16 +28,13 @@ void PltVlmPushOnDevice(
   	double* nodeUForceXAddr;
   	double* nodeUForceYAddr;
   	double* nodeUForceZAddr;
-    unsigned* nodeUId;
-    unsigned* pltUId;
 
-  	unsigned* bucketNbrsExp;
+    unsigned* nodeUId;
+
+  	unsigned* id_value_expanded;
   	unsigned* keyBegin;
   	unsigned* keyEnd;
 
-    unsigned* tndrlNodeId;
-    unsigned* tndrlNodeType;
-    unsigned* glblNghbrsId;
     double* pltLocXAddr;
   	double* pltLocYAddr;
   	double* pltLocZAddr;
@@ -46,14 +43,14 @@ void PltVlmPushOnDevice(
      __host__ __device__
      //
          PltVlmPushForceFunctor(
-              unsigned& _pltmaxConn,
+              unsigned& _plt_other_intrct,
               double& _pltRForce,
               double& _pltForce,
               double& _pltR,
+
               unsigned& _maxPltCount,
               double& _fiberDiameter,
               unsigned& _maxNodeCount,
-              unsigned& _maxIdCount,
               unsigned& _maxNeighborCount,
 
               double* _nodeLocXAddr,
@@ -62,28 +59,25 @@ void PltVlmPushOnDevice(
               double* _nodeUForceXAddr,
               double* _nodeUForceYAddr,
               double* _nodeUForceZAddr,
+              
         			unsigned* _nodeUId,
-              unsigned* _pltUId,
 
-        			unsigned* _bucketNbrsExp,
+        			unsigned* _id_value_expanded,
         			unsigned* _keyBegin,
         			unsigned* _keyEnd,
 
-              unsigned* _tndrlNodeId,
-              unsigned* _tndrlNodeType,
-              unsigned* _glblNghbrsId,
               double* _pltLocXAddr,
               double* _pltLocYAddr,
               double* _pltLocZAddr) :
 
-      pltmaxConn(_pltmaxConn),
+      plt_other_intrct(_plt_other_intrct),
       pltRForce(_pltRForce),
       pltForce(_pltForce),
       pltR(_pltR),
+
       maxPltCount(_maxPltCount),
       fiberDiameter(_fiberDiameter),
       maxNodeCount(_maxNodeCount),
-      maxIdCount(_maxNodeCount),
       maxNeighborCount(_maxNeighborCount),
 
       nodeLocXAddr(_nodeLocXAddr),
@@ -92,42 +86,44 @@ void PltVlmPushOnDevice(
   		nodeUForceXAddr(_nodeUForceXAddr),
   		nodeUForceYAddr(_nodeUForceYAddr),
   		nodeUForceZAddr(_nodeUForceZAddr),
-      nodeUId(_nodeUId),
-      pltUId(_pltUId),
 
-  		bucketNbrsExp(_bucketNbrsExp),
+      nodeUId(_nodeUId),
+
+  		id_value_expanded(_id_value_expanded),
   		keyBegin(_keyBegin),
   		keyEnd(_keyEnd),
-      tndrlNodeId(_tndrlNodeId),
-      tndrlNodeType(_tndrlNodeType),
-      glblNghbrsId(_glblNghbrsId),
+      
       pltLocXAddr(_pltLocXAddr),
   		pltLocYAddr(_pltLocYAddr),
   		pltLocZAddr(_pltLocZAddr){}
 
 
      __device__
-   		CVec3 operator()(const U2CVec3 &u2d3) {
+   		CVec3 operator()(const U2CVec6 &u2d6) {
 
-          unsigned bucketId = thrust::get<0>(u2d3);
-          unsigned pltId = thrust::get<1>(u2d3);
+          unsigned pltId = thrust::get<0>(u2d6);
+          unsigned bucketId = thrust::get<1>(u2d6);
 
           //beginning and end of attempted interaction network nodes.
   		    __attribute__ ((unused)) unsigned beginIndex = keyBegin[bucketId];
   		    __attribute__ ((unused)) unsigned endIndex = keyEnd[bucketId];
 
 
-          unsigned storageLocation = pltId * pltmaxConn;
+          unsigned storageLocation = pltId * plt_other_intrct;
 
-          double pltLocX = thrust::get<2>(u2d3);
-          double pltLocY = thrust::get<3>(u2d3);
-          double pltLocZ = thrust::get<4>(u2d3);
+          double pltLocX = thrust::get<2>(u2d6);
+          double pltLocY = thrust::get<3>(u2d6);
+          double pltLocZ = thrust::get<4>(u2d6);
+          
+          //use for return. 
+          double pltCurrentForceX = thrust::get<5>(u2d6);
+          double pltCurrentForceY = thrust::get<6>(u2d6);
+          double pltCurrentForceZ = thrust::get<7>(u2d6);
 
-
-          double sumPltForceX = 0.0;
-          double sumPltForceY = 0.0;
-          double sumPltForceZ = 0.0;
-
+          double sumPltForceX = pltCurrentForceX;
+          double sumPltForceY = pltCurrentForceY;
+          double sumPltForceZ = pltCurrentForceZ;
+        
           //pushing
           unsigned pushCounter=0;
           //go through all nodes that might be pushed
@@ -146,9 +142,9 @@ void PltVlmPushOnDevice(
 
 
             //check pushcounter
-            if (pushCounter < maxNeighborCount) {//should this be some other counter?
+            if (pushCounter < plt_other_intrct) {//must be same as other counter. Check resize for correct size of unreduced vectors.
                 //repulsion if fiber and platelet overlap
-                 if (dist < pltR + fiberDiameter/2)  {
+                 if (dist < (pltR + fiberDiameter / 2.0) )  {
                     //node only affects plt position if it is pulled.
                     //Determine direction of force based on positions and multiply magnitude force
                     double forceNodeX = -(vecN_PX / dist) * (pltForce);
@@ -166,14 +162,15 @@ void PltVlmPushOnDevice(
                     nodeUForceYAddr[storageLocation + pushCounter] = forceNodeY;
                     nodeUForceZAddr[storageLocation + pushCounter] = forceNodeZ;
                     nodeUId[storageLocation + pushCounter] = pushNode_id;
-                    pltUId[storageLocation + pushCounter] = pltId;
-
                     pushCounter++;
                 }
             }
           }
 
+          //IN THIS FUNCTOR THERE IS NOT WRITING TO VECTORS. NO NEED FOR INCREMENT
+          //FORE IS ONLY APPLIED TO SELF. 
           //go through all plts that might be pushed
+          //only apply force to self. 
           for( unsigned i = 0; i < maxPltCount; i++){
             unsigned pushPlt_id=i;
             //
@@ -189,9 +186,9 @@ void PltVlmPushOnDevice(
 
 
             //check pushcounter
-            if (pushCounter < maxNeighborCount) {
+            //if (pushCounter < plt_other_intrct) {
                 //repulsion if fiber and platelet overlap
-                 if (dist < 2*pltR )  {
+                 if (dist < (2.0 * pltR ) )  {
                     //node only affects plt position if it is pulled.
                     //Determine direction of force based on positions and multiply magnitude force
                     double forcePltX = -(vecN_PX / dist) * (pltForce);
@@ -203,9 +200,9 @@ void PltVlmPushOnDevice(
                     sumPltForceY += (-1.0) * forcePltY;
                     sumPltForceZ += (-1.0) * forcePltZ;
 
-                    pushCounter++;
+                    //pushCounter++;
                 }
-            }
+            //}
           }
       //return platelet forces
       return thrust::make_tuple(sumPltForceX, sumPltForceY, sumPltForceZ);

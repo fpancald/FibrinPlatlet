@@ -2,6 +2,11 @@
 #include "PltForceDevice.h"
 #include "NodeSystemDevice.h"
 
+
+//Call the plt force on nodes functor
+//This functor applies force to nodes from platelets 
+//as well as the self platelet from other platelets to create volume exclusion
+//The interaction count is: plt_other_intrct. No imaging is done here. 
 void PltVlmPushOnDevice(
   NodeInfoVecs& nodeInfoVecs,
 	WLCInfoVecs& wlcInfoVecs,
@@ -17,42 +22,47 @@ void PltVlmPushOnDevice(
 		thrust::fill(pltInfoVecs.nodeReducedForceY.begin(), pltInfoVecs.nodeReducedForceY.end(), 0.0);
 		thrust::fill(pltInfoVecs.nodeReducedForceZ.begin(), pltInfoVecs.nodeReducedForceZ.end(), 0.0);
 
-		//fill for image sort
-    	thrust::fill(pltInfoVecs.nodeUnreducedId.begin(),pltInfoVecs.nodeUnreducedId.end(), generalParams.maxNodeCount);
 
-        //Call the plt force on nodes functor
+		thrust::counting_iterator<unsigned> counter(0);
+
         thrust::transform(
         	thrust::make_zip_iterator(
         		thrust::make_tuple(
-   					auxVecs.idPlt_bucket.begin(),
+					counter,
    					auxVecs.idPlt_value.begin(),
         			pltInfoVecs.pltLocX.begin(),
         			pltInfoVecs.pltLocY.begin(),
-        			pltInfoVecs.pltLocZ.begin())),
+        			pltInfoVecs.pltLocZ.begin(),
+					pltInfoVecs.pltForceX.begin(),
+					pltInfoVecs.pltForceY.begin(),
+					pltInfoVecs.pltForceZ.begin())),
         	thrust::make_zip_iterator(
         		thrust::make_tuple(
-        			auxVecs.idPlt_bucket.begin(),
+					counter,
     				auxVecs.idPlt_value.begin(),
         		 	pltInfoVecs.pltLocX.begin(),
         		 	pltInfoVecs.pltLocY.begin(),
-        		 	pltInfoVecs.pltLocZ.begin())) + generalParams.maxPltCount,
+        		 	pltInfoVecs.pltLocZ.begin(),
+					pltInfoVecs.pltForceX.begin(),
+					pltInfoVecs.pltForceY.begin(),
+					pltInfoVecs.pltForceZ.begin())) + generalParams.maxPltCount,
          //save plt forces
-         thrust::make_zip_iterator(
+         thrust::make_zip_iterator( 
         	 thrust::make_tuple(
-				 //reset's forces
+				 //DOES NOT RESET FORCE
         		 pltInfoVecs.pltForceX.begin(),
         		 pltInfoVecs.pltForceY.begin(),
         		 pltInfoVecs.pltForceZ.begin())),
              PltVlmPushForceFunctor(
-                 generalParams.pltMaxConn,
-                 generalParams.pltRForce,
-                 generalParams.pltForce,
-                 generalParams.pltR,
-                 generalParams.maxPltCount,
-                 generalParams.fiberDiameter,
-		             generalParams.maxNodeCount,
-                 generalParams.maxIdCount,
-                 generalParams.maxNeighborCount,
+                generalParams.plt_other_intrct,
+                generalParams.pltRForce,
+                generalParams.pltForce,
+                generalParams.pltR,
+
+                generalParams.maxPltCount,
+                generalParams.fiberDiameter,
+		        generalParams.maxNodeCount,
+                generalParams.maxNeighborCount,
 
                  thrust::raw_pointer_cast(nodeInfoVecs.nodeLocX.data()),
                  thrust::raw_pointer_cast(nodeInfoVecs.nodeLocY.data()),
@@ -62,15 +72,11 @@ void PltVlmPushOnDevice(
                  thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedForceZ.data()),
 
                  thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedId.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.pltImagingConnection.data()),
 
-                 thrust::raw_pointer_cast(auxVecs.id_bucket_expanded.data()),
+                 thrust::raw_pointer_cast(auxVecs.id_value_expanded.data()),
                  thrust::raw_pointer_cast(auxVecs.keyBegin.data()),
                  thrust::raw_pointer_cast(auxVecs.keyEnd.data()),
 
-                 thrust::raw_pointer_cast(pltInfoVecs.tndrlNodeId.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.tndrlNodeType.data()),
-                 thrust::raw_pointer_cast(wlcInfoVecs.globalNeighbors.data()),
                  thrust::raw_pointer_cast(pltInfoVecs.pltLocX.data()),
                  thrust::raw_pointer_cast(pltInfoVecs.pltLocY.data()),
                  thrust::raw_pointer_cast(pltInfoVecs.pltLocZ.data())) );
@@ -80,17 +86,9 @@ void PltVlmPushOnDevice(
         thrust::sort_by_key(pltInfoVecs.nodeUnreducedId.begin(), pltInfoVecs.nodeUnreducedId.end(),
         			thrust::make_zip_iterator(
         				thrust::make_tuple(
-							pltInfoVecs.pltImagingConnection.begin(),
         					pltInfoVecs.nodeUnreducedForceX.begin(),
         					pltInfoVecs.nodeUnreducedForceY.begin(),
         					pltInfoVecs.nodeUnreducedForceZ.begin())), thrust::less<unsigned>());
-
-    thrust::copy(pltInfoVecs.nodeUnreducedId.begin(),pltInfoVecs.nodeUnreducedId.end(), pltInfoVecs.nodeImagingConnection.begin());
-
-    pltInfoVecs.numConnections = thrust::count_if(
-        pltInfoVecs.nodeImagingConnection.begin(),
-        pltInfoVecs.nodeImagingConnection.end(), is_less_than(generalParams.maxNodeCount) );
-
 
 
 //reduce and apply force
@@ -111,7 +109,7 @@ void PltVlmPushOnDevice(
  					pltInfoVecs.nodeReducedForceZ.begin())),
  			thrust::equal_to<unsigned>(), CVec3Add())) - pltInfoVecs.nodeReducedId.begin();//binary_pred, binary_op
 
-
+		//apply force to network 
         thrust::for_each(
         	thrust::make_zip_iterator(//1st begin
         		thrust::make_tuple(

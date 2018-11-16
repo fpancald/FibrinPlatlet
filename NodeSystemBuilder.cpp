@@ -384,7 +384,7 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 
 	//platelet parameters
 	host_ptr_devNodeSystem->generalParams.pltForce = pltForce;
-	host_ptr_devNodeSystem->generalParams.pltMaxConn = pltMaxConn;
+	host_ptr_devNodeSystem->generalParams.plt_tndrl_intrct = pltMaxConn;
 	host_ptr_devNodeSystem->generalParams.pltR = pltR;
 	host_ptr_devNodeSystem->generalParams.pltRForce = pltRForce;
 	host_ptr_devNodeSystem->generalParams.pltMass = defaultPltMass;

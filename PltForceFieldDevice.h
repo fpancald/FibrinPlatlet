@@ -12,11 +12,12 @@ void PltForceFieldOnDevice(
   PltInfoVecs& pltInfoVecs,
   AuxVecs& auxVecs);
 
-  struct PltonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3>  {
-    unsigned pltmaxConn;
+  struct PltonNodeForceFunctor : public thrust::unary_function<U2CVec6, CVec3>  {
+    unsigned plt_other_intrct;
     double pltRForce;
     double pltForce;
     double pltR;
+
     unsigned maxPltCount;
     double fiberDiameter;
     unsigned maxNodeCount;
@@ -27,10 +28,10 @@ void PltForceFieldOnDevice(
   	double* nodeUForceXAddr;
   	double* nodeUForceYAddr;
   	double* nodeUForceZAddr;
-    unsigned* nodeUId;
-    unsigned* pltUId;
 
-  	unsigned* bucketNbrsExp;
+    unsigned* nodeUId;
+
+  	unsigned* id_value_expanded;
   	unsigned* keyBegin;
   	unsigned* keyEnd;
 
@@ -38,10 +39,11 @@ void PltForceFieldOnDevice(
      __host__ __device__
      //
          PltonNodeForceFunctor(
-              unsigned& _pltmaxConn,
+              unsigned& _plt_other_intrct,
               double& _pltRForce,
               double& _pltForce,
               double& _pltR,
+
               unsigned& _maxPltCount,
               double& _fiberDiameter,
               unsigned& _maxNodeCount,
@@ -52,17 +54,18 @@ void PltForceFieldOnDevice(
               double* _nodeUForceXAddr,
               double* _nodeUForceYAddr,
               double* _nodeUForceZAddr,
-        			unsigned* _nodeUId,
-              unsigned* _pltUId,
 
-        			unsigned* _bucketNbrsExp,
+        			unsigned* _nodeUId,
+
+        			unsigned* _id_value_expanded,
         			unsigned* _keyBegin,
         			unsigned* _keyEnd) :
 
-      pltmaxConn(_pltmaxConn),
+      plt_other_intrct(_plt_other_intrct),
       pltRForce(_pltRForce),
       pltForce(_pltForce),
       pltR(_pltR),
+
       maxPltCount(_maxPltCount),
       fiberDiameter(_fiberDiameter),
       maxNodeCount(_maxNodeCount),
@@ -73,43 +76,48 @@ void PltForceFieldOnDevice(
   		nodeUForceXAddr(_nodeUForceXAddr),
   		nodeUForceYAddr(_nodeUForceYAddr),
   		nodeUForceZAddr(_nodeUForceZAddr),
-      nodeUId(_nodeUId),
-      pltUId(_pltUId),
 
-  		bucketNbrsExp(_bucketNbrsExp),
+      nodeUId(_nodeUId),
+
+  		id_value_expanded(_id_value_expanded),
   		keyBegin(_keyBegin),
   		keyEnd(_keyEnd) {}
 
 
      __device__
-   		CVec3 operator()(const U2CVec3 &u2d3) {
+   		CVec3 operator()(const U2CVec6 &u2d6) {
 
-          unsigned bucketId = thrust::get<0>(u2d3);
-          unsigned pltId = thrust::get<1>(u2d3);
+          unsigned pltId = thrust::get<0>(u2d6);
+          unsigned bucketId = thrust::get<1>(u2d6);
 
           //beginning and end of attempted interaction network nodes.
   		    __attribute__ ((unused)) unsigned beginIndex = keyBegin[bucketId];
   		    __attribute__ ((unused)) unsigned endIndex = keyEnd[bucketId];
 
 
-          unsigned storageLocation = pltId * pltmaxConn;
+          unsigned storageLocation = pltId * plt_other_intrct;
 
-          double pltLocX = thrust::get<2>(u2d3);
-          double pltLocY = thrust::get<3>(u2d3);
-          double pltLocZ = thrust::get<4>(u2d3);
+          double pltLocX = thrust::get<2>(u2d6);
+          double pltLocY = thrust::get<3>(u2d6);
+          double pltLocZ = thrust::get<4>(u2d6);
 
+          //use for return. 
+          double pltCurrentForceX = thrust::get<5>(u2d6);
+          double pltCurrentForceY = thrust::get<6>(u2d6);
+          double pltCurrentForceZ = thrust::get<7>(u2d6);
 
-          double sumPltForceX = 0.0;
-          double sumPltForceY = 0.0;
-          double sumPltForceZ = 0.0;
+          double sumPltForceX = pltCurrentForceX;
+          double sumPltForceY = pltCurrentForceY;
+          double sumPltForceZ = pltCurrentForceZ;
 
           //Loop through the number of available neighbors for each plt.
           unsigned interactionCounter=0;
 
+          //change with bucket counter
           for(unsigned i = 0; i < maxNodeCount; i++) {
 
             //Choose a neighbor.
-            unsigned pullNode_id = i;//bucketNbrsExp[i];
+            unsigned pullNode_id = i;//id_value_expanded[i];
             //
             //Get position of node
             double vecN_PX = pltLocX - nodeLocXAddr[pullNode_id];
@@ -123,9 +131,9 @@ void PltForceFieldOnDevice(
 
 
             //only pull as many as are arms.
-            if (interactionCounter < pltmaxConn) {
+            if (interactionCounter < plt_other_intrct) {
                 //attraction if platelet and fiber are within interaction distance but not overlapping
-                if ((dist < pltRForce) && (dist > pltR + fiberDiameter/2) ) {
+                if ((dist < pltRForce) && (dist > (pltR + fiberDiameter / 2.0 ) ) ) {
                     //node only affects plt position if it is pulled.
                     //Determine direction of force based on positions and multiply magnitude force
                     double forceNodeX = (vecN_PX / dist) * (pltForce);
@@ -143,13 +151,12 @@ void PltForceFieldOnDevice(
                     nodeUForceYAddr[storageLocation + interactionCounter] = forceNodeY;
                     nodeUForceZAddr[storageLocation + interactionCounter] = forceNodeZ;
                     nodeUId[storageLocation + interactionCounter] = pullNode_id;
-                    pltUId[storageLocation + interactionCounter] = pltId;
-
+                    
                     interactionCounter++;
 
                 }
                 //repulsion if fiber and platelet overlap
-                else if (dist < pltR + fiberDiameter/2)  {
+                else if (dist < (pltR + fiberDiameter / 2 ) ) {
                     //node only affects plt position if it is pulled.
                     //Determine direction of force based on positions and multiply magnitude force
                     double forceNodeX = -(vecN_PX / dist) * (pltForce);
@@ -167,8 +174,7 @@ void PltForceFieldOnDevice(
                     nodeUForceYAddr[storageLocation + interactionCounter] = forceNodeY;
                     nodeUForceZAddr[storageLocation + interactionCounter] = forceNodeZ;
                     nodeUId[storageLocation + interactionCounter] = pullNode_id;
-                    pltUId[storageLocation + interactionCounter] = pltId;
-
+                    
                     interactionCounter++;
                 }
             }

@@ -35,6 +35,11 @@ void NodeSystemDevice::solveForcesOnDevice() {
 	thrust::fill(nodeInfoVecs.nodeForceX.begin(),nodeInfoVecs.nodeForceX.end(),0);
 	thrust::fill(nodeInfoVecs.nodeForceY.begin(),nodeInfoVecs.nodeForceY.end(),0);
 	thrust::fill(nodeInfoVecs.nodeForceZ.begin(),nodeInfoVecs.nodeForceZ.end(),0);
+	
+	thrust::fill(nodeInfoVecs.nodeForceX.begin(),nodeInfoVecs.nodeForceX.end(),0);
+	thrust::fill(nodeInfoVecs.nodeForceY.begin(),nodeInfoVecs.nodeForceY.end(),0);
+	thrust::fill(nodeInfoVecs.nodeForceZ.begin(),nodeInfoVecs.nodeForceZ.end(),0);
+
 
 	if (generalParams.linking == true) {
 			LinkNodesOnDevice(
@@ -67,10 +72,10 @@ void NodeSystemDevice::solveForcesOnDevice() {
 	}
 	else if (generalParams.plttndrl == true) { //note for now force-field type has priority over tndrl-type
 		//initialize Trnl-Node Id list
-	  if (generalParams.currentTime==0.0){
-	    thrust::fill(pltInfoVecs.tndrlNodeId.begin(),pltInfoVecs.tndrlNodeId.end(), generalParams.maxIdCount);
+	  	if (generalParams.currentTime == 0.0){
+	    	thrust::fill(pltInfoVecs.tndrlNodeId.begin(),pltInfoVecs.tndrlNodeId.end(), generalParams.maxIdCountFlag);
 			thrust::fill(pltInfoVecs.tndrlNodeType.begin(),pltInfoVecs.tndrlNodeType.end(), 0);
-	    }
+		}
 
 		// Tndrl-node pulling
 		PltTndrlOnDevice(
@@ -324,18 +329,18 @@ void NodeSystemDevice::setPltVecs(
 	pltInfoVecs.pltForceY.resize(generalParams.maxPltCount);
 	pltInfoVecs.pltForceZ.resize(generalParams.maxPltCount);
 
-	pltInfoVecs.pltImagingConnection.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
-	pltInfoVecs.nodeImagingConnection.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
+	pltInfoVecs.pltImagingConnection.resize(generalParams.maxPltCount * generalParams.plt_tndrl_intrct);
+	pltInfoVecs.nodeImagingConnection.resize(generalParams.maxPltCount * generalParams.plt_tndrl_intrct);
 
-	pltInfoVecs.nodeUnreducedId.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
-	pltInfoVecs.nodeUnreducedForceX.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
-	pltInfoVecs.nodeUnreducedForceY.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
-	pltInfoVecs.nodeUnreducedForceZ.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
+	pltInfoVecs.nodeUnreducedId.resize(generalParams.maxPltCount * generalParams.plt_other_intrct);
+	pltInfoVecs.nodeUnreducedForceX.resize(generalParams.maxPltCount * generalParams.plt_other_intrct);
+	pltInfoVecs.nodeUnreducedForceY.resize(generalParams.maxPltCount * generalParams.plt_other_intrct);
+	pltInfoVecs.nodeUnreducedForceZ.resize(generalParams.maxPltCount * generalParams.plt_other_intrct);
 
-	pltInfoVecs.nodeReducedId.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
-	pltInfoVecs.nodeReducedForceX.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
-	pltInfoVecs.nodeReducedForceY.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
-	pltInfoVecs.nodeReducedForceZ.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
+	pltInfoVecs.nodeReducedId.resize(generalParams.maxPltCount * generalParams.plt_other_intrct);
+	pltInfoVecs.nodeReducedForceX.resize(generalParams.maxPltCount * generalParams.plt_other_intrct);
+	pltInfoVecs.nodeReducedForceY.resize(generalParams.maxPltCount * generalParams.plt_other_intrct);
+	pltInfoVecs.nodeReducedForceZ.resize(generalParams.maxPltCount * generalParams.plt_other_intrct);
 
 	thrust::fill(pltInfoVecs.sumForcesOnPlt.begin(), pltInfoVecs.sumForcesOnPlt.end(), 0);
 
@@ -359,8 +364,8 @@ void NodeSystemDevice::setPltVecs(
 	auxVecs.idPlt_value_expanded.resize(27 * (generalParams.maxPltCount));
 
 	if (generalParams.currentTime==0.0){
-    pltInfoVecs.tndrlNodeId.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
-		pltInfoVecs.tndrlNodeType.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
+    pltInfoVecs.tndrlNodeId.resize(generalParams.maxPltCount * generalParams.plt_tndrl_intrct);
+		pltInfoVecs.tndrlNodeType.resize(generalParams.maxPltCount * generalParams.plt_tndrl_intrct);
   }
 
 };
