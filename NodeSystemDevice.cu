@@ -49,7 +49,7 @@ void NodeSystemDevice::solveForcesOnDevice() {
 
 	//platetelet-node forces
 	//RESETS PLATELET FORCES
-	if (generalParams.pltfrcfld == true) {
+	if (generalParams.pltfrcfld == true) {// note: this force-field includes both pulling and pushing
 		PltForceFieldOnDevice(//platelet on node force field
 			nodeInfoVecs,
 			wlcInfoVecs,
@@ -65,18 +65,34 @@ void NodeSystemDevice::solveForcesOnDevice() {
 
 	}
 	else if (generalParams.plttndrl == true) { //note for now force-field type has priority over tndrl-type
+		//initialize Trnl-Node Id list
+	  if (generalParams.currentTime==0.0){
+	    thrust::fill(pltInfoVecs.tndrlNodeId.begin(),pltInfoVecs.tndrlNodeId.end(), generalParams.maxIdCount);
+			thrust::fill(pltInfoVecs.tndrlNodeType.begin(),pltInfoVecs.tndrlNodeType.end(), 0);
+	    }
+
+		// Tndrl-node pulling
 		PltTndrlOnDevice(
 		  nodeInfoVecs,
 		  wlcInfoVecs,
 		  generalParams,
 		  pltInfoVecs,
 		  auxVecs);
-			/*if (generalParams.pltonplt == true) {
-				PltonPltTndrlOnDevice(//platelet on platelet interaction through tndrl
-					generalParams,
-					pltInfoVecs,
-					auxVecs);
-			}*/
+
+		//Tndrl-Plt pulling
+		if (generalParams.pltonplt == true) {
+			PltonPltTndrlOnDevice(//platelet on platelet interaction through tndrl
+				generalParams,
+				pltInfoVecs,
+				auxVecs);
+		}
+
+		PltVlmPushOnDevice(//push for volume exclusion
+			nodeInfoVecs,
+			wlcInfoVecs,
+			generalParams,
+			pltInfoVecs,
+			auxVecs);
 
 	}
 
@@ -343,6 +359,7 @@ void NodeSystemDevice::setPltVecs(
 
 	if (generalParams.currentTime==0.0){
     pltInfoVecs.tndrlNodeId.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
+		pltInfoVecs.tndrlNodeType.resize(generalParams.maxPltCount * generalParams.pltMaxConn);
   }
 
 };

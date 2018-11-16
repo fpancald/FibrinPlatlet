@@ -20,6 +20,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
   unsigned maxPltCount;
   double fiberDiameter;
   unsigned maxNodeCount;
+  unsigned maxIdCount;
   unsigned maxNeighborCount;
 
   double* nodeLocXAddr;
@@ -36,6 +37,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
 	unsigned* keyEnd;
 
   unsigned* tndrlNodeId;
+  unsigned* tndrlNodeType;
   unsigned* glblNghbrsId;
   double* pltLocXAddr;
 	double* pltLocYAddr;
@@ -52,6 +54,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
             unsigned& _maxPltCount,
             double& _fiberDiameter,
             unsigned& _maxNodeCount,
+            unsigned& _maxIdCount,
             unsigned& _maxNeighborCount,
 
             double* _nodeLocXAddr,
@@ -68,6 +71,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
       			unsigned* _keyEnd,
 
             unsigned* _tndrlNodeId,
+            unsigned* _tndrlNodeType,
             unsigned* _glblNghbrsId,
             double* _pltLocXAddr,
             double* _pltLocYAddr,
@@ -80,6 +84,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
     maxPltCount(_maxPltCount),
     fiberDiameter(_fiberDiameter),
     maxNodeCount(_maxNodeCount),
+    maxIdCount(_maxNodeCount),
     maxNeighborCount(_maxNeighborCount),
 
     nodeLocXAddr(_nodeLocXAddr),
@@ -95,6 +100,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
 		keyBegin(_keyBegin),
 		keyEnd(_keyEnd),
     tndrlNodeId(_tndrlNodeId),
+    tndrlNodeType(_tndrlNodeType),
     glblNghbrsId(_glblNghbrsId),
     pltLocXAddr(_pltLocXAddr),
 		pltLocYAddr(_pltLocYAddr),
@@ -123,17 +129,17 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
         double sumPltForceY = 0.0;
         double sumPltForceZ = 0.0;
 
-		double vecN_PX = 0.0;
-		double vecN_PY = 0.0;
-		double vecN_PZ = 0.0;
-		double dist = 0.0;
+    		double vecN_PX = 0.0;
+    		double vecN_PY = 0.0;
+    		double vecN_PZ = 0.0;
+    		double dist = 0.0;
 
         //pulling
         //Loop through the number of available tendrils
         for(unsigned interactionCounter = 0; interactionCounter < pltmaxConn; interactionCounter++) {
 
           //check if current tendril is still connected to a node (i.e. <maxNodecount)
-          if (tndrlNodeId[storageLocation + interactionCounter]<maxNodeCount){
+          if (tndrlNodeId[storageLocation + interactionCounter]!=maxIdCount && tndrlNodeType[storageLocation + interactionCounter]==0){
 
             //Calculate distance from plt to node.
             unsigned pullNode_id = tndrlNodeId[storageLocation + interactionCounter];//bucketNbrsExp[i];
@@ -149,10 +155,17 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
             //check if the node is not pulled  anymore
             if ((dist >= pltRForce) || (dist <= pltR + fiberDiameter/2) ){
               //empty tendril
-              tndrlNodeId[storageLocation + interactionCounter]=maxNodeCount+maxPltCount;
+              tndrlNodeId[storageLocation + interactionCounter]=maxIdCount;
               //try to find a new node to pull within connections of previous node
               for (unsigned j=0; j<maxNodeCount; j++){
                 unsigned newpullNode_id=glblNghbrsId[pullNode_id*maxNodeCount+j];
+                //check tentative node is not already connected
+                for (unsigned checkId=0; checkId<pltMaxConn; checkId++){
+                  if (newpullNode_id!=tndrlNodeId[storageLocation + checkId]){
+                    break;
+                  }
+                }
+                //check neighbor not empty
                 if (newpullNode_id!=maxNodeCount){
                    vecN_PX = pltLocX - nodeLocXAddr[newpullNode_id];
                    vecN_PY = pltLocY - nodeLocYAddr[newpullNode_id];
@@ -163,20 +176,19 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
                       (vecN_PY) * (vecN_PY) +
                       (vecN_PZ) * (vecN_PZ));
 
-                  //check if new node is in interaction range and fill tenril with new node than break neighbors loop
+                  //check if new node is in interaction range and fill tendril with new node than break neighbors loop
                   if ((dist < pltRForce) && (dist > pltR + fiberDiameter/2) ) {//pull this node
                       tndrlNodeId[storageLocation + interactionCounter]=newpullNode_id;//bucketNbrsExp[i];
+                      tndrlNodeType[storageLocation + interactionCounter]=0;//assign type
                       break;
                   }
                 }
               }
-
-
             }
           }
 
           //check if tendril instead still pulls a plt
-          else if (tndrlNodeId[storageLocation + interactionCounter]<maxPltCount){
+          else if (tndrlNodeId[storageLocation + interactionCounter]!=maxIdCount && tndrlTypeId[storageLocation + interactionCounter]==1){//note this happens only if plt-plt interaction is on
 
             //Calculate distance from plt to node.
             unsigned pullPlt_id = tndrlNodeId[storageLocation + interactionCounter];//bucketNbrsExp[i];
@@ -192,15 +204,21 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
             //check if the plt is not pulled  anymore
             if ((dist >= 2*pltRForce) || (dist <= 2*pltR) ){
               //empty tendril
-              tndrlNodeId[storageLocation + interactionCounter]=maxNodeCount+maxPltCount;
+              tndrlNodeId[storageLocation + interactionCounter]=maxIdCount;
             }
           }
 
           // check if tendril still has no node or platelet to pull
-          if (tndrlNodeId[storageLocation + interactionCounter]==maxNodeCount+maxPltCount){
+          if (tndrlNodeId[storageLocation + interactionCounter]==maxIdCount){
 
             //try to find a node to pull
             for (unsigned newpullNode_id=0; newpullNode_id<maxNodeCount; newpullNode_id++){
+              //check tentative node is not already connected
+              for (unsigned checkId=0; checkId<pltMaxConn; checkId++){
+                if (newpullNode_id!=tndrlNodeId[storageLocation + checkId]){
+                  break;
+                }
+              }
                  double vecN_PX = pltLocX - nodeLocXAddr[newpullNode_id];
                  double vecN_PY = pltLocY - nodeLocYAddr[newpullNode_id];
                  double vecN_PZ = pltLocZ - nodeLocZAddr[newpullNode_id];
@@ -213,11 +231,12 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
                 //check if new node is in interaction range and fill tenril with new node than break neighbors loop
                 if ((dist < pltRForce) && (dist > pltR + fiberDiameter/2) ) {//pull this node
                     tndrlNodeId[storageLocation + interactionCounter]=newpullNode_id;//bucketNbrsExp[i];
+                    tndrlNodeType[storageLocation + interactionCounter]=0;//assign type
                     break;
                 }
             }
 
-            // if still empty go to platelets
+            /*// if still empty go to platelets
             if (tndrlNodeId[storageLocation + interactionCounter]==maxNodeCount+maxPltCount){
               //try to find a platelet to pull
               for (unsigned j=0; j<maxPltCount; j++){
@@ -239,13 +258,13 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
                   }
 
               }
-            }
+            }*/
           }
 
-          //check if tendril has been filled and apply pulling forces. Note if filled direction and distence of forces are already calculated
-          if (tndrlNodeId[storageLocation + interactionCounter]!=maxNodeCount+maxPltCount){
+          //check if tendril has been filled with a node and apply pulling forces. Note if filled direction and distence of forces are already calculated
+          if (tndrlNodeId[storageLocation + interactionCounter]!=maxIdCount && tndrlNodeType[storageLocation + interactionCounter]==0){
             //node only affects plt position if it is pulled.
-			unsigned pullNode_id=tndrlNodeId[storageLocation + interactionCounter];
+			      unsigned pullNode_id=tndrlNodeId[storageLocation + interactionCounter];
             //Determine direction of force based on positions and multiply magnitude force
             double forceNodeX = (vecN_PX / dist) * (pltForce);
             double forceNodeY = (vecN_PY / dist) * (pltForce);
@@ -257,17 +276,16 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
             sumPltForceZ += (-1.0) * forceNodeZ;
 
             //store force in temporary vector if a node is pulled. Call reduction later.
-            if (tndrlNodeId[storageLocation + interactionCounter]<maxNodeCount){
-              nodeUForceXAddr[storageLocation + interactionCounter] = forceNodeX;
-              nodeUForceYAddr[storageLocation + interactionCounter] = forceNodeY;
-              nodeUForceZAddr[storageLocation + interactionCounter] = forceNodeZ;
-              nodeUId[storageLocation + interactionCounter] = pullNode_id;
-              pltUId[storageLocation + interactionCounter] = pltId;
-            }
+            nodeUForceXAddr[storageLocation + interactionCounter] = forceNodeX;
+            nodeUForceYAddr[storageLocation + interactionCounter] = forceNodeY;
+            nodeUForceZAddr[storageLocation + interactionCounter] = forceNodeZ;
+            nodeUId[storageLocation + interactionCounter] = pullNode_id;
+            pltUId[storageLocation + interactionCounter] = pltId;
+
           }
 
         }
-
+/*
         //pushing
         unsigned pushCounter=0;
         //go through all nodes that might be pushed
@@ -346,7 +364,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
                   pushCounter++;
               }
           }
-        }
+        }*/
     //return platelet forces
     return thrust::make_tuple(sumPltForceX, sumPltForceY, sumPltForceZ);
 

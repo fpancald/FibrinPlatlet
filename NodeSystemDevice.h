@@ -90,6 +90,7 @@ struct PltInfoVecs {
 	thrust::device_vector<double> nodeReducedForceZ;
 
 	thrust::device_vector<unsigned> tndrlNodeId;
+	thrust::device_vector<unsigned> tndrlNodeType;
 
 //
 
@@ -244,6 +245,7 @@ struct GeneralParams{
 	bool pltfrcfld = true;
 	bool plttndrl = false;
 	bool pltonplt = true;
+	unsigned maxIdCount=max(maxPltCount,maxNodeCount);
 
 	//parameters for advancing timestep and determining equilibrium
 	double df, dtMax, dtTemp, epsilon, maxForce;
@@ -253,6 +255,7 @@ struct GeneralParams{
 	unsigned iterationCounter = 0;
 	bool linking = true;
 	unsigned maxLinksPerIteration = 20;
+
 
 };
 

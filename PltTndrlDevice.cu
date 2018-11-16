@@ -10,10 +10,7 @@ void PltTndrlOnDevice(
 	PltInfoVecs& pltInfoVecs,
 	AuxVecs& auxVecs) {
 
-//why?
-  if (generalParams.currentTime==0.0){
-    thrust::fill(pltInfoVecs.tndrlNodeId.begin(),pltInfoVecs.tndrlNodeId.end(), generalParams.maxNodeCount + generalParams.maxPltCount);
-    }
+
 		thrust::fill(pltInfoVecs.nodeUnreducedForceX.begin(), pltInfoVecs.nodeUnreducedForceX.end(), 0.0);
 		thrust::fill(pltInfoVecs.nodeUnreducedForceY.begin(), pltInfoVecs.nodeUnreducedForceY.end(), 0.0);
 		thrust::fill(pltInfoVecs.nodeUnreducedForceZ.begin(), pltInfoVecs.nodeUnreducedForceZ.end(), 0.0);
@@ -55,7 +52,8 @@ void PltTndrlOnDevice(
                  generalParams.pltR,
                  generalParams.maxPltCount,
                  generalParams.fiberDiameter,
-		         generalParams.maxNodeCount,
+		             generalParams.maxNodeCount,
+                 generalParams.maxIdCount,
                  generalParams.maxNeighborCount,
 
                  thrust::raw_pointer_cast(nodeInfoVecs.nodeLocX.data()),
@@ -73,6 +71,7 @@ void PltTndrlOnDevice(
                  thrust::raw_pointer_cast(auxVecs.keyEnd.data()),
 
                  thrust::raw_pointer_cast(pltInfoVecs.tndrlNodeId.data()),
+                 thrust::raw_pointer_cast(pltInfoVecs.tndrlNodeType.data()),
                  thrust::raw_pointer_cast(wlcInfoVecs.globalNeighbors.data()),
                  thrust::raw_pointer_cast(pltInfoVecs.pltLocX.data()),
                  thrust::raw_pointer_cast(pltInfoVecs.pltLocY.data()),
