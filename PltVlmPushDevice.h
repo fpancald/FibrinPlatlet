@@ -45,7 +45,7 @@ void PltVlmPushOnDevice(
 
      __host__ __device__
      //
-         PltTndrlonNodeForceFunctor(
+         PltVlmPushForceFunctor(
               unsigned& _pltmaxConn,
               double& _pltRForce,
               double& _pltForce,
@@ -127,11 +127,6 @@ void PltVlmPushOnDevice(
           double sumPltForceX = 0.0;
           double sumPltForceY = 0.0;
           double sumPltForceZ = 0.0;
-
-      		double vecN_PX = 0.0;
-      		double vecN_PY = 0.0;
-      		double vecN_PZ = 0.0;
-      		double dist = 0.0;
 
           //pushing
           unsigned pushCounter=0;
@@ -217,4 +212,5 @@ void PltVlmPushOnDevice(
 
      }
 };
+
 #endif

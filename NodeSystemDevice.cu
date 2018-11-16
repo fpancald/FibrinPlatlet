@@ -6,6 +6,7 @@
 #include "PltForceFieldDevice.h"
 #include "PltonPltForceFieldDevice.h"
 #include "PltTndrlDevice.h"
+#include "PltonPltTndrlDevice.h"
 #include "PltVlmPushDevice.h"
 #include "AdvancePositionOnDevice.h"
 #include "BucketSchemeOnDevice.h"

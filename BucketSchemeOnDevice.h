@@ -353,7 +353,7 @@ OutputIterator expand(InputIterator1 first1,
   // return output + output_size
   thrust::advance(output, output_size);
   return output;
-}
+};
 
 
 

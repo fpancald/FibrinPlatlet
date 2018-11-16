@@ -25,6 +25,7 @@ void PltonPltTndrlOnDevice(
 	          		pltInfoVecs.pltLocX.begin(),
 	          		pltInfoVecs.pltLocY.begin(),
 	          		pltInfoVecs.pltLocZ.begin())) + generalParams.maxPltCount,
+					
 
 	         PltonPltTndrlForceFunctor(
 	             generalParams.pltMaxConn,
@@ -32,6 +33,7 @@ void PltonPltTndrlOnDevice(
 	             generalParams.pltForce,
 	             generalParams.pltR,
 	             generalParams.maxPltCount,
+				 generalParams.maxIdCount,
 	             thrust::raw_pointer_cast(pltInfoVecs.pltLocX.data()),
 	             thrust::raw_pointer_cast(pltInfoVecs.pltLocY.data()),
 	             thrust::raw_pointer_cast(pltInfoVecs.pltLocZ.data()),
@@ -40,6 +42,8 @@ void PltonPltTndrlOnDevice(
 	             thrust::raw_pointer_cast(pltInfoVecs.pltForceZ.data()),
 	             thrust::raw_pointer_cast(auxVecs.idPlt_value_expanded.data()),//plt neighbors
 	             thrust::raw_pointer_cast(auxVecs.keyPltBegin.data()),
-	             thrust::raw_pointer_cast(auxVecs.keyPltEnd.data()) ) );
+	             thrust::raw_pointer_cast(auxVecs.keyPltEnd.data()),
+				 thrust::raw_pointer_cast(pltInfoVecs.tndrlNodeId.data()),
+                 thrust::raw_pointer_cast(pltInfoVecs.tndrlNodeType.data()) ) );
 
 	};

@@ -84,7 +84,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
     maxPltCount(_maxPltCount),
     fiberDiameter(_fiberDiameter),
     maxNodeCount(_maxNodeCount),
-    maxIdCount(_maxNodeCount),
+    maxIdCount(_maxIdCount),
     maxNeighborCount(_maxNeighborCount),
 
     nodeLocXAddr(_nodeLocXAddr),
@@ -160,7 +160,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
               for (unsigned j=0; j<maxNodeCount; j++){
                 unsigned newpullNode_id=glblNghbrsId[pullNode_id*maxNodeCount+j];
                 //check tentative node is not already connected
-                for (unsigned checkId=0; checkId<pltMaxConn; checkId++){
+                for (unsigned checkId=0; checkId<pltmaxConn; checkId++){
                   if (newpullNode_id!=tndrlNodeId[storageLocation + checkId]){
                     break;
                   }
@@ -188,7 +188,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
           }
 
           //check if tendril instead still pulls a plt
-          else if (tndrlNodeId[storageLocation + interactionCounter]!=maxIdCount && tndrlTypeId[storageLocation + interactionCounter]==1){//note this happens only if plt-plt interaction is on
+          else if (tndrlNodeId[storageLocation + interactionCounter]!=maxIdCount && tndrlNodeType[storageLocation + interactionCounter]==1){//note this happens only if plt-plt interaction is on
 
             //Calculate distance from plt to node.
             unsigned pullPlt_id = tndrlNodeId[storageLocation + interactionCounter];//bucketNbrsExp[i];
@@ -214,7 +214,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
             //try to find a node to pull
             for (unsigned newpullNode_id=0; newpullNode_id<maxNodeCount; newpullNode_id++){
               //check tentative node is not already connected
-              for (unsigned checkId=0; checkId<pltMaxConn; checkId++){
+              for (unsigned checkId=0; checkId<pltmaxConn; checkId++){
                 if (newpullNode_id!=tndrlNodeId[storageLocation + checkId]){
                   break;
                 }

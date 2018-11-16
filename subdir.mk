@@ -13,6 +13,7 @@ CPP_SRCS += \
 ../PltForceFieldDevice.cu \
 ../PltonPltForceFieldDevice.cu \
 ../PltTndrlDevice.cu \
+../PltonPltTndrlDevice.cu \
 ../PltVlmPushDevice.cu \
 ../TorsionSolveOnDevice.cu \
 ../WLCSolveOnDevice.cu \
@@ -29,6 +30,7 @@ CPP_SRCS += \
 OBJS += \
 ./PltForceFieldDevice.o \
 ./PltonPltForceFieldDevice.o \
+./PltonPltTndrlDevice.o \
 ./PltTndrlDevice.o \
 ./PltVlmPushDevice.o \
 ./TorsionSolveOnDevice.o \
@@ -46,6 +48,7 @@ CPP_DEPS += \
 ./PltForceFieldDevice.d \
 ./PltonPltForceFieldDevice.d \
 ./PltTndrlDevice.d \
+./PltonPltTndrlDevice.d \
 ./PltVlmPushDevice.d \
 ./TorsionSolveOnDevice.d \
 ./WLCSolveOnDevice.d \
