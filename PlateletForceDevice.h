@@ -452,10 +452,10 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function<U2CVec3, CVec3
         double sumPltForceY = 0.0;
         double sumPltForceZ = 0.0;
 		
-		double vecN_PX = 0.0;
-		double vecN_PY = 0.0;
-		double vecN_PZ = 0.0;
-		double dist = 0.0;
+		    double vecN_PX = 0.0;
+		    double vecN_PY = 0.0;
+		    double vecN_PZ = 0.0;
+		    double dist = 0.0;
 
         //pulling
         //Loop through the number of available tendrils
