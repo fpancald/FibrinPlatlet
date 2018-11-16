@@ -80,7 +80,7 @@ void PltInteractionPltOnDevice(
   		    __attribute__ ((unused)) unsigned endIndex = keyPltEnd[bucketId];
 
 
-          unsigned storageLocation = pltId * pltmaxConn;
+          __attribute__ ((unused)) unsigned storageLocation = pltId * pltmaxConn;
 
           double pltLocX = thrust::get<2>(u2d6);
           double pltLocY = thrust::get<3>(u2d6);
