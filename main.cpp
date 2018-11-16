@@ -105,6 +105,9 @@ std::shared_ptr<NodeSystemDevice> createNodeSystem(const char* schemeFile, std::
 
 	if (auto p = props.child("use-plttndrl"))
 		builder->plttndrl = (p.text().as_bool());
+	
+	if (auto p = props.child("use-pltonplt"))
+		builder->pltonplt = (p.text().as_bool());
 
 	std::cout << "builder ptr address: " << builder << std::endl;
 	std::vector<unsigned> originNodes;

@@ -132,7 +132,7 @@ void extendBucketScheme(
 		auxVecs.id_bucket_expanded.end(), is_greater_than(domainParams.totalBucketCount) );
 	unsigned numberInsideRange = endIndexExpanded - numberOfOutOfRange;
 
-	unsigned endIndexSearch = endIndexExpanded - numberOfOutOfRange;
+	__attribute__ ((unused)) unsigned endIndexSearch = endIndexExpanded - numberOfOutOfRange;
 
 	thrust::stable_sort_by_key(auxVecs.id_bucket_expanded.begin(),
 		auxVecs.id_bucket_expanded.begin() + endIndexExpanded,

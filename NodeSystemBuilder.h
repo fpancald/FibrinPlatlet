@@ -84,6 +84,7 @@ public:
 	double pltDensity = 0.0;
 	bool pltfrcfld = true;
 	bool plttndrl = false;
+	bool pltonplt = true;
 
 	//std::shared_ptr<NodeSystemDevice> host_ptr_devNodeSystem;
 	std::vector<std::shared_ptr<BuildNode>> buildNodes;
