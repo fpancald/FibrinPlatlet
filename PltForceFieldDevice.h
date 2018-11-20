@@ -91,8 +91,8 @@ void PltForceFieldOnDevice(
           unsigned bucketId = thrust::get<1>(u2d6);
 
           //beginning and end of attempted interaction network nodes.
-  		    __attribute__ ((unused)) unsigned beginIndex = keyBegin[bucketId];
-  		    __attribute__ ((unused)) unsigned endIndex = keyEnd[bucketId];
+  		    unsigned beginIndex = keyBegin[bucketId];
+  		    unsigned endIndex = keyEnd[bucketId];
 
 
           unsigned storageLocation = pltId * plt_other_intrct;
@@ -111,13 +111,13 @@ void PltForceFieldOnDevice(
           double sumPltForceZ = pltCurrentForceZ;
 
           //Loop through the number of available neighbors for each plt.
-          unsigned interactionCounter=0;
+          unsigned interactionCounter = 0;
 
           //change with bucket counter
-          for(unsigned i = 0; i < maxNodeCount; i++) {
+          for(unsigned i = beginIndex; i < endIndex; i++) {
 
             //Choose a neighbor.
-            unsigned pullNode_id = i;//id_value_expanded[i];
+            unsigned pullNode_id = id_value_expanded[i];
             //
             //Get position of node
             double vecN_PX = pltLocX - nodeLocXAddr[pullNode_id];

@@ -79,7 +79,8 @@ public:
 	double defaultPltMass = 100;
 	double pltRForce = 1.4;
 	double pltR = 0.1;
-	unsigned pltMaxConn = 100;
+	unsigned plt_other_intrct = 100;
+	unsigned plt_tndrl_intrct = 5;
 	double pltForce = 1.0;
 	double pltDensity = 0.0;
 	bool pltfrcfld = true;

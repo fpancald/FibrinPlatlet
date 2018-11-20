@@ -105,6 +105,7 @@ void PltTndrlOnDevice(
         pltInfoVecs.nodeImagingConnection.begin(),
         pltInfoVecs.nodeImagingConnection.end(), is_less_than(generalParams.maxNodeCount) );
 
+	std::cout<<"num connections tndrl: "<< pltInfoVecs.numConnections << std::endl;
 
 
 //reduce and apply force

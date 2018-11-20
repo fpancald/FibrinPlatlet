@@ -338,9 +338,9 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 			double xPos = distX(genX);
 			double yPos = distY(genY);
 			double zPos = distZ(genZ);
-			hostPltPosX.push_back(static_cast<double>(plt+0.1) );
-			hostPltPosY.push_back(static_cast<double>(plt+0.1) );
-			hostPltPosZ.push_back(static_cast<double>(plt+0.1) );
+			hostPltPosX.push_back(static_cast<double>(plt+3.0) );
+			hostPltPosY.push_back(static_cast<double>(plt+3.0) );
+			hostPltPosZ.push_back(static_cast<double>(plt+3.0) );
 			std::cout<<" plt pos: "<< xPos << " "<< yPos << " "<< zPos << std::endl;
 		}
 
@@ -384,11 +384,12 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 
 	//platelet parameters
 	host_ptr_devNodeSystem->generalParams.pltForce = pltForce;
-	host_ptr_devNodeSystem->generalParams.plt_tndrl_intrct = pltMaxConn;
+	host_ptr_devNodeSystem->generalParams.plt_other_intrct = plt_other_intrct;
+	host_ptr_devNodeSystem->generalParams.plt_tndrl_intrct = plt_tndrl_intrct;
 	host_ptr_devNodeSystem->generalParams.pltR = pltR;
 	host_ptr_devNodeSystem->generalParams.pltRForce = pltRForce;
 	host_ptr_devNodeSystem->generalParams.pltMass = defaultPltMass;
-	host_ptr_devNodeSystem->domainParams.gridSpacing = std::max(pltRForce, 5*defaultLinkDiameter);
+	host_ptr_devNodeSystem->domainParams.gridSpacing = 2.0*std::max(pltRForce, 5*defaultLinkDiameter);
 	host_ptr_devNodeSystem->generalParams.fiberDiameter = defaultLinkDiameter ;
 	host_ptr_devNodeSystem->generalParams.pltDensity = pltDensity;
 	host_ptr_devNodeSystem->generalParams.pltfrcfld = pltfrcfld;

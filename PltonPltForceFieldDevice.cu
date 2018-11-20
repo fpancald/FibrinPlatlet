@@ -13,7 +13,7 @@ void PltInteractionPltOnDevice(
 	thrust::counting_iterator<unsigned> counter(0);
 
     thrust::transform(
-      	thrust::make_zip_iterator(
+      	thrust::make_zip_iterator( 
         	thrust::make_tuple(
 				counter,
         		auxVecs.idPlt_bucket.begin(),

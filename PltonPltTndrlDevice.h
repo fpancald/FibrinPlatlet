@@ -22,10 +22,6 @@ struct PltonPltTndrlForceFunctor : public thrust::unary_function<U2CVec6, CVec3>
 	double* pltLocYAddr;
 	double* pltLocZAddr;
 
-  //	double* pltForceXAddr;
-//	double* pltForceYAddr;
-//	double* pltForceZAddr;
-
 	unsigned* idPlt_value_expanded;
 	unsigned* keyPltBegin;
 	unsigned* keyPltEnd;
@@ -49,10 +45,6 @@ struct PltonPltTndrlForceFunctor : public thrust::unary_function<U2CVec6, CVec3>
 		double* _pltLocYAddr,
 		double* _pltLocZAddr,
 
-	//	double* _pltForceXAddr,
-	//	double* _pltForceYAddr,
-	//	double* _pltForceZAddr,
-
 		unsigned* _idPlt_value_expanded,
 		unsigned* _keyPltBegin,
 		unsigned* _keyPltEnd,
@@ -72,10 +64,6 @@ struct PltonPltTndrlForceFunctor : public thrust::unary_function<U2CVec6, CVec3>
 	pltLocYAddr(_pltLocYAddr),
 	pltLocZAddr(_pltLocZAddr),
 
-//	pltForceXAddr(_pltForceXAddr),
-//	pltForceYAddr(_pltForceYAddr),
-//	pltForceZAddr(_pltForceZAddr),
-
 	idPlt_value_expanded(_idPlt_value_expanded),
 	keyPltBegin(_keyPltBegin),
 	keyPltEnd(_keyPltEnd),
@@ -91,8 +79,8 @@ struct PltonPltTndrlForceFunctor : public thrust::unary_function<U2CVec6, CVec3>
 		unsigned bucketId = thrust::get<1>(u2d6);
 
 		//beginning and end of attempted interaction network nodes.
-			__attribute__ ((unused)) unsigned beginIndex = keyPltBegin[bucketId];
-			__attribute__ ((unused)) unsigned endIndex = keyPltEnd[bucketId];
+			unsigned beginIndex = keyPltBegin[bucketId];
+			unsigned endIndex = keyPltEnd[bucketId];
 			
 		unsigned storageLocation = pltId * plt_tndrl_intrct;
 
@@ -116,7 +104,7 @@ struct PltonPltTndrlForceFunctor : public thrust::unary_function<U2CVec6, CVec3>
 
 		//pulling
 		//Loop through the number of available tendrils
-		for(unsigned interactionCounter = 0; interactionCounter < plt_tndrl_intrct; interactionCounter++) {
+		for( unsigned interactionCounter = 0; interactionCounter < plt_tndrl_intrct; interactionCounter++ ) {
 
 			//check if tendril pulls a plt
 			if ( ((tndrlNodeId[storageLocation + interactionCounter]) != maxIdCountFlag) && 
@@ -142,10 +130,10 @@ struct PltonPltTndrlForceFunctor : public thrust::unary_function<U2CVec6, CVec3>
 
 			  // check if tendril still has no node or platelet to pull
 			if (tndrlNodeId[storageLocation + interactionCounter] == maxIdCountFlag){
-			  	//try to find a platelet to pull
-				  //replace with bucket id soon.
-			  	for (unsigned j = 0; j < maxPltCount; j++){
-					unsigned newpullPlt_id = j; //idPlt_value_expanded[iter];
+			  	//then there was nothing to pull 
+				//so try to find a platelet to pu
+			  	for (unsigned iter = beginIndex; iter < endIndex; iter++){
+					unsigned newpullPlt_id = idPlt_value_expanded[iter];
 
 				   	double vecN_PX = pltLocX - pltLocXAddr[newpullPlt_id];
 				   	double vecN_PY = pltLocY - pltLocYAddr[newpullPlt_id];
