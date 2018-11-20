@@ -64,22 +64,26 @@ void PltVlmPushOnDevice(
 		        generalParams.maxNodeCount,
                 generalParams.maxNeighborCount,
 
-                 thrust::raw_pointer_cast(nodeInfoVecs.nodeLocX.data()),
-                 thrust::raw_pointer_cast(nodeInfoVecs.nodeLocY.data()),
-                 thrust::raw_pointer_cast(nodeInfoVecs.nodeLocZ.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedForceX.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedForceY.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedForceZ.data()),
+                thrust::raw_pointer_cast(nodeInfoVecs.nodeLocX.data()),
+                thrust::raw_pointer_cast(nodeInfoVecs.nodeLocY.data()),
+                thrust::raw_pointer_cast(nodeInfoVecs.nodeLocZ.data()),
+                thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedForceX.data()),
+                thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedForceY.data()),
+                thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedForceZ.data()),
 
-                 thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedId.data()),
+                thrust::raw_pointer_cast(pltInfoVecs.nodeUnreducedId.data()),
 
-                 thrust::raw_pointer_cast(auxVecs.id_value_expanded.data()),
-                 thrust::raw_pointer_cast(auxVecs.keyBegin.data()),
-                 thrust::raw_pointer_cast(auxVecs.keyEnd.data()),
+                thrust::raw_pointer_cast(auxVecs.id_value_expanded.data()),
+                thrust::raw_pointer_cast(auxVecs.keyBegin.data()),
+                thrust::raw_pointer_cast(auxVecs.keyEnd.data()),
+				 
+                thrust::raw_pointer_cast(auxVecs.idPlt_value_expanded.data()),
+                thrust::raw_pointer_cast(auxVecs.keyPltBegin.data()),
+                thrust::raw_pointer_cast(auxVecs.keyPltEnd.data()),
 
-                 thrust::raw_pointer_cast(pltInfoVecs.pltLocX.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.pltLocY.data()),
-                 thrust::raw_pointer_cast(pltInfoVecs.pltLocZ.data())) );
+                thrust::raw_pointer_cast(pltInfoVecs.pltLocX.data()),
+                thrust::raw_pointer_cast(pltInfoVecs.pltLocY.data()),
+                thrust::raw_pointer_cast(pltInfoVecs.pltLocZ.data())) );
 
         //now call a sort by key followed by a reduce by key to figure out which nodes are have force applied.
         //then make a functor that takes the id and force (4 tuple) and takes that force and adds it to the id'th entry in nodeInfoVecs.nodeForceX,Y,Z

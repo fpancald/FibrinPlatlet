@@ -80,7 +80,7 @@ void PltInteractionPltOnDevice(
   		    __attribute__ ((unused)) unsigned endIndex = keyPltEnd[bucketId];
 
 
-          unsigned storageLocation = pltId * pltmaxConn;
+          //unsigned storageLocation = pltId * pltmaxConn;
 
           double pltLocX = thrust::get<2>(u2d6);
           double pltLocY = thrust::get<3>(u2d6);
@@ -99,10 +99,10 @@ void PltInteractionPltOnDevice(
             //unsigned interactionCounter = 0;
 
           //for now no bucket scheme
-            for(unsigned i = 0; i < maxPltCount; i++) {
+            for(unsigned i = beginIndex; i < endIndex; i++) {
 
               //Choose a neighbor.
-              unsigned pullPlt_id = i;//idPlt_value_expanded[i];
+              unsigned pullPlt_id = idPlt_value_expanded[i];
               //
               if ( (pullPlt_id != pltId) && (pullPlt_id < maxPltCount) ) {
                 //Get position of plt

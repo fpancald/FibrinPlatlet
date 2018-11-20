@@ -34,6 +34,10 @@ void PltVlmPushOnDevice(
   	unsigned* id_value_expanded;
   	unsigned* keyBegin;
   	unsigned* keyEnd;
+    
+  	unsigned* idPlt_value_expanded;
+  	unsigned* keyPltBegin;
+  	unsigned* keyPltEnd;
 
     double* pltLocXAddr;
   	double* pltLocYAddr;
@@ -65,6 +69,10 @@ void PltVlmPushOnDevice(
         			unsigned* _id_value_expanded,
         			unsigned* _keyBegin,
         			unsigned* _keyEnd,
+              
+        			unsigned* _idPlt_value_expanded,
+        			unsigned* _keyPltBegin,
+        			unsigned* _keyPltEnd,
 
               double* _pltLocXAddr,
               double* _pltLocYAddr,
@@ -89,9 +97,13 @@ void PltVlmPushOnDevice(
 
       nodeUId(_nodeUId),
 
-  		id_value_expanded(_id_value_expanded),
+  		id_value_expanded(_id_value_expanded),//these are for network
   		keyBegin(_keyBegin),
   		keyEnd(_keyEnd),
+
+      idPlt_value_expanded(_idPlt_value_expanded),//these are for plt
+  		keyPltBegin(_keyPltBegin),
+  		keyPltEnd(_keyPltEnd),
       
       pltLocXAddr(_pltLocXAddr),
   		pltLocYAddr(_pltLocYAddr),
@@ -105,8 +117,11 @@ void PltVlmPushOnDevice(
           unsigned bucketId = thrust::get<1>(u2d6);
 
           //beginning and end of attempted interaction network nodes.
-  		    __attribute__ ((unused)) unsigned beginIndex = keyBegin[bucketId];
-  		    __attribute__ ((unused)) unsigned endIndex = keyEnd[bucketId];
+  		    unsigned beginIndexNode = keyBegin[bucketId];
+  		    unsigned endIndexNode = keyEnd[bucketId];
+
+          unsigned beginIndexPlt = keyPltBegin[bucketId];
+  		    unsigned endIndexPlt = keyPltEnd[bucketId];
 
 
           unsigned storageLocation = pltId * plt_other_intrct;
@@ -126,53 +141,50 @@ void PltVlmPushOnDevice(
         
           //pushing
           unsigned pushCounter=0;
+
           //go through all nodes that might be pushed
-          for( unsigned i = 0; i < maxNodeCount; i++){
-            unsigned pushNode_id=i;
-            //
-            //Get position of node
-            double vecN_PX = pltLocX - nodeLocXAddr[pushNode_id];
-            double vecN_PY = pltLocY - nodeLocYAddr[pushNode_id];
-            double vecN_PZ = pltLocZ - nodeLocZAddr[pushNode_id];
-            //Calculate distance from plt to node.
-            double dist = sqrt(
-                (vecN_PX) * (vecN_PX) +
-                (vecN_PY) * (vecN_PY) +
-                (vecN_PZ) * (vecN_PZ));
+          for( unsigned i = beginIndexNode; i < endIndexNode; i++){
+              unsigned pushNode_id = id_value_expanded[i];
+              //
+              //Get position of node
+              double vecN_PX = pltLocX - nodeLocXAddr[pushNode_id];
+              double vecN_PY = pltLocY - nodeLocYAddr[pushNode_id];
+              double vecN_PZ = pltLocZ - nodeLocZAddr[pushNode_id];
+              //Calculate distance from plt to node.
+              double dist = sqrt(
+                  (vecN_PX) * (vecN_PX) +
+                  (vecN_PY) * (vecN_PY) +
+                  (vecN_PZ) * (vecN_PZ));   
 
-
-            //check pushcounter
-            if (pushCounter < plt_other_intrct) {//must be same as other counter. Check resize for correct size of unreduced vectors.
-                //repulsion if fiber and platelet overlap
-                 if (dist < (pltR + fiberDiameter / 2.0) )  {
-                    //node only affects plt position if it is pulled.
-                    //Determine direction of force based on positions and multiply magnitude force
-                    double forceNodeX = -(vecN_PX / dist) * (pltForce);
-                    double forceNodeY = -(vecN_PY / dist) * (pltForce);
-                    double forceNodeZ = -(vecN_PZ / dist) * (pltForce);
-
-                    //count force for plt.
-                    sumPltForceX += (-1.0) * forceNodeX;
-                    sumPltForceY += (-1.0) * forceNodeY;
-                    sumPltForceZ += (-1.0) * forceNodeZ;
-
-                    //store force in temporary vector. Call reduction later.
-
-                    nodeUForceXAddr[storageLocation + pushCounter] = forceNodeX;
-                    nodeUForceYAddr[storageLocation + pushCounter] = forceNodeY;
-                    nodeUForceZAddr[storageLocation + pushCounter] = forceNodeZ;
-                    nodeUId[storageLocation + pushCounter] = pushNode_id;
-                    pushCounter++;
-                }
-            }
+              //check pushcounter
+              if (pushCounter < plt_other_intrct) {//must be same as other counter. Check resize for correct size of unreduced vectors.
+                  //repulsion if fiber and platelet overlap
+                   if (dist < (pltR + fiberDiameter / 2.0) )  {
+                      //node only affects plt position if it is pulled.
+                      //Determine direction of force based on positions and multiply magnitude force
+                      double forceNodeX = -(vecN_PX / dist) * (pltForce);
+                      double forceNodeY = -(vecN_PY / dist) * (pltForce);
+                      double forceNodeZ = -(vecN_PZ / dist) * (pltForce);   
+                      //count force for plt.
+                      sumPltForceX += (-1.0) * forceNodeX;
+                      sumPltForceY += (-1.0) * forceNodeY;
+                      sumPltForceZ += (-1.0) * forceNodeZ;    
+                      //store force in temporary vector. Call reduction later.    
+                      nodeUForceXAddr[storageLocation + pushCounter] = forceNodeX;
+                      nodeUForceYAddr[storageLocation + pushCounter] = forceNodeY;
+                      nodeUForceZAddr[storageLocation + pushCounter] = forceNodeZ;
+                      nodeUId[storageLocation + pushCounter] = pushNode_id;
+                      pushCounter++;
+                  }
+              }
           }
 
-          //IN THIS FUNCTOR THERE IS NOT WRITING TO VECTORS. NO NEED FOR INCREMENT
-          //FORE IS ONLY APPLIED TO SELF. 
+          //IN THIS SECTION THERE IS NOT WRITING TO VECTORS. NO NEED FOR INCREMENT
+          //FORCE IS ONLY APPLIED TO SELF. 
           //go through all plts that might be pushed
           //only apply force to self. 
-          for( unsigned i = 0; i < maxPltCount; i++){
-            unsigned pushPlt_id=i;
+          for( unsigned i = beginIndexPlt; i < endIndexPlt; i++){
+            unsigned pushPlt_id = idPlt_value_expanded[i];
             //
             //Get position of node
             double vecN_PX = pltLocX - pltLocXAddr[pushPlt_id];

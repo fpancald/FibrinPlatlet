@@ -290,7 +290,7 @@ struct BucketIndexer {
 	Tuu operator()(const Tdddu& v) {
 
 			unsigned id = thrust::get<3>(v);
-			if (id == 479){
+			if (id == 0){
 				//comment
 			}
 			unsigned x = static_cast<unsigned>((thrust::get<0>(v) - minX) / unitLen);

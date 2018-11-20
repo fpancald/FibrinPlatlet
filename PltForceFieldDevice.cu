@@ -86,11 +86,11 @@ void PltForceFieldOnDevice(
         					pltInfoVecs.nodeUnreducedForceY.begin(),
         					pltInfoVecs.nodeUnreducedForceZ.begin())), thrust::less<unsigned>());
 
-    thrust::copy(pltInfoVecs.nodeUnreducedId.begin(),pltInfoVecs.nodeUnreducedId.end(), pltInfoVecs.nodeImagingConnection.begin());
+ //   thrust::copy(pltInfoVecs.nodeUnreducedId.begin(),pltInfoVecs.nodeUnreducedId.end(), pltInfoVecs.nodeImagingConnection.begin());
 
-    pltInfoVecs.numConnections = thrust::count_if(
-        pltInfoVecs.nodeImagingConnection.begin(),
-        pltInfoVecs.nodeImagingConnection.end(), is_less_than(generalParams.maxNodeCount) );
+ //   pltInfoVecs.numConnections = thrust::count_if(
+  //      pltInfoVecs.nodeImagingConnection.begin(),
+  //      pltInfoVecs.nodeImagingConnection.end(), is_less_than(generalParams.maxNodeCount) );
 
 
 		//reduce network force

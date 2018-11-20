@@ -85,8 +85,11 @@ std::shared_ptr<NodeSystemDevice> createNodeSystem(const char* schemeFile, std::
 	if (auto p = props.child("plt_force"))
 		builder->pltForce = (p.text().as_double());
 
-	if (auto p = props.child("plt_max_conn"))
-		builder->pltMaxConn = (p.text().as_uint());
+	if (auto p = props.child("plt_other_intrct"))
+		builder->plt_other_intrct = (p.text().as_uint());
+
+	if (auto p = props.child("plt_tndrl_intrct"))
+		builder->plt_tndrl_intrct = (p.text().as_uint());
 
 	if (auto p = props.child("plt_r"))
 		builder->pltR = (p.text().as_double());
@@ -100,14 +103,19 @@ std::shared_ptr<NodeSystemDevice> createNodeSystem(const char* schemeFile, std::
 		std::cout<<"setting density: "<< builder->pltDensity << std::endl;
 	}
 
-	if (auto p = props.child("use-pltforcefield"))
+	if (auto p = props.child("use-pltforcefield")){
 		builder->pltfrcfld = (p.text().as_bool());
-
-	if (auto p = props.child("use-plttndrl"))
-		builder->plttndrl = (p.text().as_bool());
+		std::cout<<"frcFld: "<< builder->pltfrcfld<<std::endl;
+	}
+	if (auto p = props.child("use-plttndrl")){
+		builder->plttndrl = (p.text().as_bool());	
+		std::cout<<"plttndrl: "<< builder->plttndrl<<std::endl;
+	}
 	
-	if (auto p = props.child("use-pltonplt"))
+	if (auto p = props.child("use-pltonplt")){
 		builder->pltonplt = (p.text().as_bool());
+		std::cout<<"plt_interact: "<< builder->pltonplt<<std::endl;
+	}
 
 	std::cout << "builder ptr address: " << builder << std::endl;
 	std::vector<unsigned> originNodes;
