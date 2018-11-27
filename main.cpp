@@ -169,7 +169,7 @@ std::shared_ptr<NodeSystemDevice> createNodeSystem(const char* schemeFile, std::
 
 	__attribute__ ((unused)) double pltmass;
 	double pltx, plty, pltz; //variables to be used reading in data.
-	double defaultPltMass = nodes.attribute("plt-mass").as_double(-1.0);
+	double defaultPltMass = plts.attribute("plt-mass").as_double(-1.0);
 	builder->defaultPltMass = defaultPltMass;
 
 	//only use platelet input if density is zero
