@@ -76,8 +76,8 @@ void PltInteractionPltOnDevice(
           unsigned bucketId = thrust::get<1>(u2d6);
 
           //beginning and end of attempted interaction network nodes.
-  		    __attribute__ ((unused)) unsigned beginIndex = keyPltBegin[bucketId];
-  		    __attribute__ ((unused)) unsigned endIndex = keyPltEnd[bucketId];
+  		    unsigned beginIndex = keyPltBegin[bucketId];
+  		    unsigned endIndex = keyPltEnd[bucketId];
 
 
           //unsigned storageLocation = pltId * pltmaxConn;
