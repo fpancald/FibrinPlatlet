@@ -170,15 +170,16 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
                     (vecN_PX) * (vecN_PX) +
                     (vecN_PY) * (vecN_PY) +
                     (vecN_PZ) * (vecN_PZ));
-
+				
+				//WARNING: CHANGE BACK TO RESET AND CHOOSE NEW PLT OR NODE
                 //check if the node is in pulling range.
-                if ((dist >= pltRForce) || (dist <= (pltR + fiberDiameter / 2.0 ) ) ){
+                /* if ((dist >= pltRForce) || (dist <= (pltR + fiberDiameter / 2.0 ) ) ){
 					
                   	//then node is out of range, so we empty tendril
 					//and search for a new node.
 					
-					//WARNING: CHANGE BACK TO RESET AND CHOOSE NEW PLT OR NODE
-                  	//tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;//reset
+					
+                  	tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;//reset
                   	//try to find a new node to pull within connections of previous node
                   	unsigned startIndex = maxNeighborCount * pullNode_id;
                   	unsigned endIndex = startIndex + maxNeighborCount;
@@ -211,7 +212,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
                   	  	  	}
                   	  	}
                   	}
-                }
+                } */
             }
 
         	//check if tendril instead still pulls a plt
@@ -232,12 +233,13 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
         	        (vecN_PZ) * (vecN_PZ));
 	
         	    //check if the plt is not pulled  anymore
-        	    if ((dist >= 2.0 * pltRForce) || (dist <= 2.0 * pltR) ){
+				//WARNING: CHANGE BACK TO RESET AND CHOOSE NEW PLT OR NODE
+/*         	    if ((dist >= 2.0 * pltRForce) || (dist <= 2.0 * pltR) ){
         	        //then plt is out of range so we disconnect
         	    
-					//WARNING: CHANGE BACK TO RESET AND CHOOSE NEW PLT OR NODE
-					//tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;
-        	    }
+					
+					tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;
+        	    } */
         	}
 
 			//after check, re generate choice of node and type.
@@ -297,7 +299,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
             pullNode_type = tndrlNodeType[storageLocation + interactionCounter];
 
 			if ( (pullNode_id != maxIdCountFlag)
-        	   && ( pullNode_type == 0)) {
+        	   && ( pullNode_type == 0) ) {
         	    //then we have a post-search node we can pull.
 				//Add force to it and the current platelet.
 
@@ -310,23 +312,24 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
         	       (vecN_PX) * (vecN_PX) +
         	       (vecN_PY) * (vecN_PY) +
         	       (vecN_PZ) * (vecN_PZ));
+				if ((dist < pltRForce) && (dist > (pltR + fiberDiameter / 2.0))){
+					//Determine direction of force based on positions and multiply magnitude force
+					double forceNodeX = (vecN_PX / dist) * (pltForce);
+					double forceNodeY = (vecN_PY / dist) * (pltForce);
+					double forceNodeZ = (vecN_PZ / dist) * (pltForce);
 
-        	    //Determine direction of force based on positions and multiply magnitude force
-        	    double forceNodeX = (vecN_PX / dist) * (pltForce);
-        	    double forceNodeY = (vecN_PY / dist) * (pltForce);
-        	    double forceNodeZ = (vecN_PZ / dist) * (pltForce);
+					//count force for self plt.
+					sumPltForceX += (-1.0) * forceNodeX;
+					sumPltForceY += (-1.0) * forceNodeY;
+					sumPltForceZ += (-1.0) * forceNodeZ;
 
-        	    //count force for self plt.
-        	    sumPltForceX += (-1.0) * forceNodeX;
-        	    sumPltForceY += (-1.0) * forceNodeY;
-        	    sumPltForceZ += (-1.0) * forceNodeZ;
-
-        	    //store force in temporary vector if a node is pulled. Call reduction later.
-        	    nodeUForceXAddr[storageLocation + interactionCounter] = forceNodeX;
-        	    nodeUForceYAddr[storageLocation + interactionCounter] = forceNodeY;
-        	    nodeUForceZAddr[storageLocation + interactionCounter] = forceNodeZ;
-        	    nodeUId[storageLocation + interactionCounter] = pullNode_id;
-        	    pltUId[storageLocation + interactionCounter] = pltId;
+					//store force in temporary vector if a node is pulled. Call reduction later.
+					nodeUForceXAddr[storageLocation + interactionCounter] = forceNodeX;
+					nodeUForceYAddr[storageLocation + interactionCounter] = forceNodeY;
+					nodeUForceZAddr[storageLocation + interactionCounter] = forceNodeZ;
+					nodeUId[storageLocation + interactionCounter] = pullNode_id;
+					pltUId[storageLocation + interactionCounter] = pltId;
+				}
 
         	}
 

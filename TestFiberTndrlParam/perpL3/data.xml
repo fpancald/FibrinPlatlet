@@ -31,10 +31,10 @@
 </settings>
     <nodes default-mass="1.0">
         <node>0.0 0.0 0.0</node>
-        <node>9.0 0.0 0.0</node>
+        <node>3.0 0.0 0.0</node>
     </nodes>
 	<plts plt-mass="0.486"><!-- these are use only if plt_density is set to 0.0-->
-		<plt> 4.5 2.17 0.0 </plt>
+		<plt> 1.5 2.0 0.0 </plt>
 	</plts>
     <links>
         <link>0 1</link>

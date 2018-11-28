@@ -122,10 +122,11 @@ struct PltonPltTndrlForceFunctor : public thrust::unary_function<U2CVec6, CVec3>
 					(vecN_PY) * (vecN_PY) +
 					(vecN_PZ) * (vecN_PZ));	
 				//check if the plt is not pulled  anymore
-				if ( (dist >= 2.0 * pltRForce) || (dist <= 2.0 * pltR) ){
+				//WARNING: CHANGE BACK TO RESET AND CHOOSE NEW PLT OR NODE
+				/* if ( (dist >= 2.0 * pltRForce) || (dist <= 2.0 * pltR) ){
 				  	//empty tendril
 				  	tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;
-				}
+				} */
 			}
 
 			  // check if tendril still has no node or platelet to pull
@@ -155,7 +156,7 @@ struct PltonPltTndrlForceFunctor : public thrust::unary_function<U2CVec6, CVec3>
 
 			//check if tendril has been filled with plt and apply pulling forces. Note if filled direction and distence of forces are already calculated
 			if ( ((tndrlNodeId[storageLocation + interactionCounter]) != maxIdCountFlag) && 
-			  	( (tndrlNodeType[storageLocation + interactionCounter]) == 1)){
+			  	( (tndrlNodeType[storageLocation + interactionCounter]) == 1) && (dist < 2.0 * pltRForce) && (dist > 2.0 * pltR)){
 				//Determine direction of force based on positions and multiply magnitude force
 				double forceNodeX = (vecN_PX / dist) * (pltForce);
 				double forceNodeY = (vecN_PY / dist) * (pltForce);
