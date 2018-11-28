@@ -22,7 +22,8 @@ void extendBucketScheme(
 	NodeInfoVecs& nodeInfoVecs,
 	PltInfoVecs& pltInfoVecs,
 	DomainParams& domainParams,
-	AuxVecs& auxVecs);
+	AuxVecs& auxVecs,
+	GeneralParams& generalParams);
 
 
 

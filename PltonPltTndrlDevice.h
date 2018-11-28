@@ -79,8 +79,8 @@ struct PltonPltTndrlForceFunctor : public thrust::unary_function<U2CVec6, CVec3>
 		unsigned bucketId = thrust::get<1>(u2d6);
 
 		//beginning and end of attempted interaction network nodes.
-			unsigned beginIndex = keyPltBegin[bucketId];
-			unsigned endIndex = keyPltEnd[bucketId];
+		unsigned beginIndex = keyPltBegin[bucketId];
+		unsigned endIndex = keyPltEnd[bucketId];
 			
 		unsigned storageLocation = pltId * plt_tndrl_intrct;
 

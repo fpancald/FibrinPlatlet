@@ -245,7 +245,7 @@ struct GeneralParams{
 	double pltDensity;
 	bool pltfrcfld = false;
 	bool plttndrl = true; 
-	bool pltonplt = false;
+	bool pltonplt = true;
 	unsigned maxIdCountFlag=std::max(maxPltCount,maxNodeCount);//flag variable
 
 	//parameters for advancing timestep and determining equilibrium

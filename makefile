@@ -40,7 +40,7 @@ all: bend-model
 
 #Flags
 CXXFLAGS=-O2 -std=c++0x -pg -g -c -Wall
-NVCCFLAGS=-O2
+NVCCFLAGS=-O0 -g -G
 # Tool invocations
 bend-model: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'

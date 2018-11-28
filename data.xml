@@ -14,19 +14,19 @@
     <constant-extra-nodes>false</constant-extra-nodes>
     <mass>1.0</mass><!--used?-->
     <link-diameter>0.1</link-diameter>
-	<use-linking>true</use-linking>
+	<use-linking>false</use-linking>
     <worm-like>true</worm-like>
 	
 	<use-pltforcefield>false</use-pltforcefield>
 	<use-plttndrl>true</use-plttndrl>
 	<use-pltonplt>true</use-pltonplt>
 	
-	<plt_mass>2.0</plt_mass><!-- platelet mass-->
-	<plt_force>5.0</plt_force><!-- platelet force-->
+	<plt_mass>0.486</plt_mass><!-- platelet mass-->
+	<plt_force>2.1</plt_force><!-- platelet force-->
 	<plt_other_intrct>300</plt_other_intrct><!-- platelet maximum number of force field exclusion, or volume exclusion-->
-	<plt_tndrl_intrct>6</plt_tndrl_intrct><!-- platelet maximum number of connections-->
-	<plt_r>1.0</plt_r>   <!-- radius of platelet from center (volume exclusion)-->
-	<plt_r_force>1.5</plt_r_force><!-- force radius from platelet center-->
+	<plt_tndrl_intrct>3</plt_tndrl_intrct><!-- platelet maximum number of connections-->
+	<plt_r>1.13</plt_r>   <!-- radius of platelet from center (volume exclusion)-->
+	<plt_r_force>2.18</plt_r_force><!-- force radius from platelet center-->
 	<plt_density>0.1</plt_density>
 </settings>
     <nodes default-mass="1.0">
