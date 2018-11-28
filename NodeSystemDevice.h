@@ -246,7 +246,7 @@ struct GeneralParams{
 	bool pltfrcfld = false;
 	bool plttndrl = true; 
 	bool pltonplt = true;
-	unsigned maxIdCountFlag=std::max(maxPltCount,maxNodeCount);//flag variable
+	unsigned maxIdCountFlag;//flag variable
 
 	//parameters for advancing timestep and determining equilibrium
 	double df, dtMax, dtTemp, epsilon, maxForce;
