@@ -97,6 +97,16 @@ std::shared_ptr<NodeSystemDevice> createNodeSystem(const char* schemeFile, std::
 	if (auto p = props.child("plt_r_force")) {
 		builder->pltRForce = (p.text().as_double());
 	}
+	if (auto p = props.child("plt_r_adhesion")) {
+		double RAdhesion=(p.text().as_double());
+		if (RAdhesion>0.0 && RAdhesion<1.0){
+			builder->pltRAdhesion = RAdhesion;
+		}
+		else{
+			std::cout << "parse error: platelet adhesion radius fraction is not valid\n";
+			return 0;
+		}
+	}
 
 	if (auto p = props.child("plt_density")) {
 		builder->pltDensity = (p.text().as_double());
@@ -110,6 +120,14 @@ std::shared_ptr<NodeSystemDevice> createNodeSystem(const char* schemeFile, std::
 	if (auto p = props.child("use-plttndrl")){
 		builder->plttndrl = (p.text().as_bool());	
 		std::cout<<"plttndrl: "<< builder->plttndrl<<std::endl;
+	}
+	if (auto p = props.child("use-pltrelease")){
+		builder->pltrelease = (p.text().as_bool());	
+		std::cout<<"pltrelease: "<< builder->pltrelease<<std::endl;
+	}
+	if (auto p = props.child("use-plthandhand")){
+		builder->plthandhand = (p.text().as_bool());	
+		std::cout<<"plthandhand: "<< builder->plthandhand<<std::endl;
 	}
 	
 	if (auto p = props.child("use-pltonplt")){

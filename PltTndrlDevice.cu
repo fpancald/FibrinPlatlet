@@ -70,6 +70,9 @@ void PltTndrlOnDevice(
 		        generalParams.maxNodeCount,
                 generalParams.maxIdCountFlag,
                 generalParams.maxNeighborCount,
+				generalParams.pltrelease,
+				generalParams.plthandhand,
+				
 
                 thrust::raw_pointer_cast(nodeInfoVecs.nodeLocX.data()),
                 thrust::raw_pointer_cast(nodeInfoVecs.nodeLocY.data()),

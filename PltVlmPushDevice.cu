@@ -56,6 +56,7 @@ void PltVlmPushOnDevice(
              PltVlmPushForceFunctor(
                 generalParams.plt_other_intrct,
                 generalParams.pltRForce,
+				generalParams.pltRAdhesion,
                 generalParams.pltForce,
                 generalParams.pltR,
 

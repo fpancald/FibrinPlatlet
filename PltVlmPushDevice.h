@@ -14,6 +14,7 @@ void PltVlmPushOnDevice(
   struct PltVlmPushForceFunctor : public thrust::unary_function< U2CVec6, CVec3 >  {
     unsigned plt_other_intrct;
     double pltRForce;
+	double pltRAdhesion;
     double pltForce;
     double pltR;
 
@@ -49,6 +50,7 @@ void PltVlmPushOnDevice(
          PltVlmPushForceFunctor(
               unsigned& _plt_other_intrct,
               double& _pltRForce,
+			  double& _pltRAdhesion,
               double& _pltForce,
               double& _pltR,
 
@@ -80,6 +82,7 @@ void PltVlmPushOnDevice(
 
       plt_other_intrct(_plt_other_intrct),
       pltRForce(_pltRForce),
+	  pltRAdhesion(_pltRAdhesion),
       pltForce(_pltForce),
       pltR(_pltR),
 
@@ -155,13 +158,31 @@ void PltVlmPushOnDevice(
                       (vecN_PZ) * (vecN_PZ));   
 
                   //check pushcounter
-                      //repulsion if fiber and platelet overlap
-                  if (dist < (pltR + fiberDiameter / 2.0) )  {
+                      //repulsion if fiber and platelet overlap more than adhesion fractional radius
+                  if (dist < (pltRAdhesion*pltR + fiberDiameter / 2.0) )  {
                       //node only affects plt position if it is pulled.
                       //Determine direction of force based on positions and multiply magnitude force
                       double forceNodeX = -(vecN_PX / dist) * (pltForce);
                       double forceNodeY = -(vecN_PY / dist) * (pltForce);
                       double forceNodeZ = -(vecN_PZ / dist) * (pltForce);   
+                      //count force for plt.
+                      sumPltForceX += (-1.0) * forceNodeX;
+                      sumPltForceY += (-1.0) * forceNodeY;
+                      sumPltForceZ += (-1.0) * forceNodeZ;    
+                      //store force in temporary vector. Call reduction later.    
+                      nodeUForceXAddr[storageLocation + pushCounter] = forceNodeX;
+                      nodeUForceYAddr[storageLocation + pushCounter] = forceNodeY;
+                      nodeUForceZAddr[storageLocation + pushCounter] = forceNodeZ;
+                      nodeUId[storageLocation + pushCounter] = pushNode_id;
+                      pushCounter++;
+                  }
+				  //adhesion if between fractional adhesion radius and radius
+				  else if ((dist > (pltRAdhesion*pltR + fiberDiameter / 2.0)) && (dist < (pltR + fiberDiameter / 2.0)) )  {
+                      //node only affects plt position if it is pulled.
+                      //Determine direction of force based on positions and multiply magnitude force
+                      double forceNodeX = (vecN_PX / dist) * (pltForce);
+                      double forceNodeY = (vecN_PY / dist) * (pltForce);
+                      double forceNodeZ = (vecN_PZ / dist) * (pltForce);   
                       //count force for plt.
                       sumPltForceX += (-1.0) * forceNodeX;
                       sumPltForceY += (-1.0) * forceNodeY;

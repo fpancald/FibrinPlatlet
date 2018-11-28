@@ -23,6 +23,8 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
   	unsigned maxNodeCount;
   	unsigned maxIdCountFlag;
   	unsigned maxNeighborCount;
+	bool pltrelease;
+	bool plthandhand;
 
   	double* nodeLocXAddr;
 	double* nodeLocYAddr;
@@ -60,6 +62,8 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
             unsigned& _maxNodeCount,
             unsigned& _maxIdCountFlag,
             unsigned& _maxNeighborCount,
+			bool& _pltrelease,
+			bool& _plthandhand,
 
             double* _nodeLocXAddr,
             double* _nodeLocYAddr,
@@ -93,6 +97,8 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
     maxNodeCount(_maxNodeCount),
     maxIdCountFlag(_maxIdCountFlag),
     maxNeighborCount(_maxNeighborCount),
+	pltrelease(_pltrelease),
+	plthandhand(_plthandhand),
 
     nodeLocXAddr(_nodeLocXAddr),
 	nodeLocYAddr(_nodeLocYAddr),
@@ -171,48 +177,49 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
                     (vecN_PY) * (vecN_PY) +
                     (vecN_PZ) * (vecN_PZ));
 				
-				//WARNING: CHANGE BACK TO RESET AND CHOOSE NEW PLT OR NODE
-                //check if the node is in pulling range.
-                /* if ((dist >= pltRForce) || (dist <= (pltR + fiberDiameter / 2.0 ) ) ){
+                //check if the node is not in pulling range anymore.
+                if ((dist >= pltRForce) || (dist <= (pltR + fiberDiameter / 2.0 ) ) ){
 					
-                  	//then node is out of range, so we empty tendril
-					//and search for a new node.
+                  	//then node is out of range, so we empty tendril if pltrelease is true
 					
-					
-                  	tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;//reset
-                  	//try to find a new node to pull within connections of previous node
-                  	unsigned startIndex = maxNeighborCount * pullNode_id;
-                  	unsigned endIndex = startIndex + maxNeighborCount;
-	
-                  	for (unsigned nbr_loc = startIndex; nbr_loc < endIndex; nbr_loc++){
-					  
-                  	  	  	unsigned newpullNode_id = glblNghbrsId[ nbr_loc ];
-                  	  	  	//check tentative node is not already connected
-                  	  	  	for (unsigned checkId = 0; checkId < plt_tndrl_intrct; checkId++) {
-                  	  	  	    if (newpullNode_id != tndrlNodeId[storageLocation + checkId]) {
-                  	  	  	      break;
-                  	  	  	    }
-                  	  	  	}
-                  	  	//check neighbor not empty
-                  	  	if (newpullNode_id < maxNodeCount){//maxNodeCount is default neighbor value.
-                  	  	  	 vecN_PX = pltLocX - nodeLocXAddr[newpullNode_id];
-                  	  	  	 vecN_PY = pltLocY - nodeLocYAddr[newpullNode_id];
-                  	  	  	 vecN_PZ = pltLocZ - nodeLocZAddr[newpullNode_id];
-                  	  	  	//Calculate distance from plt to node.
-                  	  	  	 dist = sqrt(
-                  	  	  	    (vecN_PX) * (vecN_PX) +
-                  	  	  	    (vecN_PY) * (vecN_PY) +
-                  	  	  	    (vecN_PZ) * (vecN_PZ));
+					if (pltrelease==true){
+						tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;//reset
+					}
+                  	//try to find a new node to pull within connections of previous node if plthandhand is true
+					if (plthandhand==true){
+						unsigned startIndex = maxNeighborCount * pullNode_id;
+						unsigned endIndex = startIndex + maxNeighborCount;
+		
+						for (unsigned nbr_loc = startIndex; nbr_loc < endIndex; nbr_loc++){
+						  
+								unsigned newpullNode_id = glblNghbrsId[ nbr_loc ];
+								//check tentative node is not already connected
+								for (unsigned checkId = 0; checkId < plt_tndrl_intrct; checkId++) {
+									if (newpullNode_id != tndrlNodeId[storageLocation + checkId]) {
+									  break;
+									}
+								}
+							//check neighbor not empty
+							if (newpullNode_id < maxNodeCount){//maxNodeCount is default neighbor value.
+								 vecN_PX = pltLocX - nodeLocXAddr[newpullNode_id];
+								 vecN_PY = pltLocY - nodeLocYAddr[newpullNode_id];
+								 vecN_PZ = pltLocZ - nodeLocZAddr[newpullNode_id];
+								//Calculate distance from plt to node.
+								 dist = sqrt(
+									(vecN_PX) * (vecN_PX) +
+									(vecN_PY) * (vecN_PY) +
+									(vecN_PZ) * (vecN_PZ));
 
-                  	  	  	//check if new node is in interaction range and fill tendril with new node than break neighbors loop
-                  	  	  	if ((dist < pltRForce) && (dist > (pltR + fiberDiameter / 2.0) ) ) {//pull this node
-                  	  	  	    tndrlNodeId[storageLocation + interactionCounter] = newpullNode_id;//bucketNbrsExp[i];
-                  	  	  	    tndrlNodeType[storageLocation + interactionCounter] = 0;//assign type
-                  	  	  	    break;
-                  	  	  	}
-                  	  	}
-                  	}
-                } */
+								//check if new node is in interaction range and fill tendril with new node than break neighbors loop
+								if ((dist < pltRForce) && (dist > (pltR + fiberDiameter / 2.0) ) ) {//pull this node
+									tndrlNodeId[storageLocation + interactionCounter] = newpullNode_id;//bucketNbrsExp[i];
+									tndrlNodeType[storageLocation + interactionCounter] = 0;//assign type
+									break;
+								}
+							}
+						}
+					}
+                }
             }
 
         	//check if tendril instead still pulls a plt
@@ -232,14 +239,13 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
         	        (vecN_PY) * (vecN_PY) +
         	        (vecN_PZ) * (vecN_PZ));
 	
-        	    //check if the plt is not pulled  anymore
-				//WARNING: CHANGE BACK TO RESET AND CHOOSE NEW PLT OR NODE
-/*         	    if ((dist >= 2.0 * pltRForce) || (dist <= 2.0 * pltR) ){
+        	    //check if the plt is not pulled  anymore and pltrelease is true
+        	    if (((dist >= 2.0 * pltRForce) || (dist <= 2.0 * pltR)) && pltrelease==true ){
         	        //then plt is out of range so we disconnect
         	    
 					
 					tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;
-        	    } */
+        	    }
         	}
 
 			//after check, re generate choice of node and type.
