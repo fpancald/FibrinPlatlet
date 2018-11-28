@@ -28,10 +28,6 @@ void PltTndrlOnDevice(
 		thrust::counting_iterator<unsigned> counter(0);
 
 
-		for (unsigned i = 0; i < auxVecs.idPlt_bucket.size(); i++)
-			std::cout<<"plt buckettndrl: "<<auxVecs.idPlt_bucket[i] << std::endl;
-		for (unsigned i = 0; i < pltInfoVecs.tndrlNodeType.size(); i++)
-			std::cout<<"plt tndrlNodeType: "<<pltInfoVecs.tndrlNodeType[i] << std::endl;
         //Call the plt force on nodes functor
 		//WARNING:
 		//writes to unreduced vector entries from 0 to maxPltCount*plt_tndrl_intrct
@@ -97,18 +93,12 @@ void PltTndrlOnDevice(
                 thrust::raw_pointer_cast(pltInfoVecs.pltLocY.data()),
                 thrust::raw_pointer_cast(pltInfoVecs.pltLocZ.data())) );
 
-
-		for (unsigned i = 0; i < pltInfoVecs.tndrlNodeType.size(); i++)
-			std::cout<<"plt tndrlNodeType: "<<pltInfoVecs.tndrlNodeType[i] << std::endl;
-
 		
         //now call a sort by key followed by a reduce by key to figure out which nodes are have force applied.
         //then make a functor that takes the id and force (4 tuple) and takes that force and adds it to the id'th entry in nodeInfoVecs.nodeForceX,Y,Z
         
 		unsigned total_num_arms = pltInfoVecs.nodeImagingConnection.size();
-		for (unsigned i = 0; i < total_num_arms; i++){
-			std::cout<<"pre sort plt nodeUnreducedId_1_2: "<<pltInfoVecs.nodeUnreducedId[i] << std::endl;
-		}
+		
 		thrust::sort_by_key(pltInfoVecs.nodeUnreducedId.begin(), pltInfoVecs.nodeUnreducedId.end(),
         			thrust::make_zip_iterator(
         				thrust::make_tuple(
@@ -117,18 +107,6 @@ void PltTndrlOnDevice(
         					pltInfoVecs.nodeUnreducedForceY.begin(),
         					pltInfoVecs.nodeUnreducedForceZ.begin())), thrust::less<unsigned>());
 
-
-
-		for (unsigned i = 0; i < auxVecs.idPlt_bucket.size(); i++){
-			std::cout<<"plt buckettndrl_1_2: "<<auxVecs.idPlt_bucket[i] << std::endl;
-		}
-		for (unsigned i = 0; i < pltInfoVecs.nodeImagingConnection.size(); i++){
-			std::cout<<"plt nodeimaging_1_2: "<<pltInfoVecs.nodeImagingConnection[i] << std::endl;
-		}
-		for (unsigned i = 0; i < total_num_arms; i++){
-			std::cout<<"plt nodeUnreducedId_1_2: "<<pltInfoVecs.nodeUnreducedId[i] << std::endl;
-		}
-
     	thrust::copy(pltInfoVecs.nodeUnreducedId.begin(),pltInfoVecs.nodeUnreducedId.begin() + total_num_arms, pltInfoVecs.nodeImagingConnection.begin());
 
     	pltInfoVecs.numConnections = thrust::count_if(
@@ -136,6 +114,16 @@ void PltTndrlOnDevice(
     	    pltInfoVecs.nodeImagingConnection.end(), is_less_than(generalParams.maxNodeCount) );
 
 
+
+		/*for (unsigned i = 0; i < auxVecs.idPlt_bucket.size(); i++){
+			std::cout<<"plt buckettndrl_1_2: "<<auxVecs.idPlt_bucket[i] << std::endl;
+		}
+		for (unsigned i = 0; i < pltInfoVecs.nodeImagingConnection.size(); i++){
+			std::cout<<"plt nodeimaging_1_2: "<<pltInfoVecs.nodeImagingConnection[i] << std::endl;
+		}
+		for (unsigned i = 0; i < total_num_arms; i++){
+			std::cout<<"plt nodeUnreducedId_1_2: "<<pltInfoVecs.nodeUnreducedId[i] << std::endl;
+		}*/
 //reduce and apply force
  		unsigned endKey = thrust::get<0>(
  			thrust::reduce_by_key(
@@ -154,7 +142,7 @@ void PltTndrlOnDevice(
  					pltInfoVecs.nodeReducedForceZ.begin())),
  			thrust::equal_to<unsigned>(), CVec3Add())) - pltInfoVecs.nodeReducedId.begin();//binary_pred, binary_op
 
-		std::cout<<"endkey: "<< endKey<<std::endl;
+		//std::cout<<"endkey: "<< endKey<<std::endl;
         thrust::for_each(
         	thrust::make_zip_iterator(//1st begin
         		thrust::make_tuple(
