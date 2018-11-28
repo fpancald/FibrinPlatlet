@@ -26,7 +26,7 @@ void NodeSystemDevice::setBucketScheme() {
 	buildBucketScheme(nodeInfoVecs, pltInfoVecs, domainParams,
 		auxVecs, generalParams);
 
-	extendBucketScheme(nodeInfoVecs, pltInfoVecs, domainParams, auxVecs);
+	extendBucketScheme(nodeInfoVecs, pltInfoVecs, domainParams, auxVecs, generalParams);
 };
 
 void NodeSystemDevice::solveForcesOnDevice() {
@@ -36,9 +36,9 @@ void NodeSystemDevice::solveForcesOnDevice() {
 	thrust::fill(nodeInfoVecs.nodeForceY.begin(),nodeInfoVecs.nodeForceY.end(),0);
 	thrust::fill(nodeInfoVecs.nodeForceZ.begin(),nodeInfoVecs.nodeForceZ.end(),0);
 	
-	thrust::fill(nodeInfoVecs.nodeForceX.begin(),nodeInfoVecs.nodeForceX.end(),0);
-	thrust::fill(nodeInfoVecs.nodeForceY.begin(),nodeInfoVecs.nodeForceY.end(),0);
-	thrust::fill(nodeInfoVecs.nodeForceZ.begin(),nodeInfoVecs.nodeForceZ.end(),0);
+	thrust::fill(pltInfoVecs.pltForceX.begin(),pltInfoVecs.pltForceX.end(),0);
+	thrust::fill(pltInfoVecs.pltForceY.begin(),pltInfoVecs.pltForceY.end(),0);
+	thrust::fill(pltInfoVecs.pltForceZ.begin(),pltInfoVecs.pltForceZ.end(),0);
 
 
 	if (generalParams.linking == true) {
@@ -71,11 +71,6 @@ void NodeSystemDevice::solveForcesOnDevice() {
 
 	}
 	else if (generalParams.plttndrl == true) { //note for now force-field type has priority over tndrl-type
-		//initialize Trnl-Node Id list
-	  	if (generalParams.currentTime == 0.0){
-	    	thrust::fill(pltInfoVecs.tndrlNodeId.begin(),pltInfoVecs.tndrlNodeId.end(), generalParams.maxIdCountFlag);
-			thrust::fill(pltInfoVecs.tndrlNodeType.begin(),pltInfoVecs.tndrlNodeType.end(), 0);
-		}
 
 		// Tndrl-node pulling
 		PltTndrlOnDevice(
@@ -87,10 +82,10 @@ void NodeSystemDevice::solveForcesOnDevice() {
 
 		//Tndrl-Plt pulling
 		if (generalParams.pltonplt == true) {
-			PltonPltTndrlOnDevice(//platelet on platelet interaction through tndrl
+			/*PltonPltTndrlOnDevice(//platelet on platelet interaction through tndrl
 				generalParams,
 				pltInfoVecs,
-				auxVecs);
+				auxVecs);*/
 		}
 
 		PltVlmPushOnDevice(//push for volume exclusion
@@ -119,7 +114,7 @@ void NodeSystemDevice::solveSystemDevice() {
 		generalParams.iterationCounter++;
 		generalParams.currentTime += generalParams.dtTemp;
 
-		std::cout<<"iterationCount: "<< generalParams.iterationCounter <<std::endl;
+		//std::cout<<"iterationCount: "<< generalParams.iterationCounter <<std::endl;
 
 
 		AdvancePositionOnDevice(
@@ -132,12 +127,12 @@ void NodeSystemDevice::solveSystemDevice() {
 		solveForcesOnDevice(); //resets and solves forces for next time step
 
 
-		if (generalParams.iterationCounter % 1000 == 0) {
+		if (generalParams.iterationCounter % 500 == 0) {
 
 			storage->print_VTK_File();
 			//store sum of all forces on each node. Used in stress calculations
 			//store before upadting storage class.
-			thrust::transform(
+		/*	thrust::transform(
 				thrust::make_zip_iterator(
 					thrust::make_tuple(
 						nodeInfoVecs.nodeForceX.begin(),
@@ -163,7 +158,7 @@ void NodeSystemDevice::solveSystemDevice() {
 							pltInfoVecs.pltForceY.begin(),
 							pltInfoVecs.pltForceZ.begin())) + generalParams.maxPltCount,
 					pltInfoVecs.sumForcesOnPlt.begin(),//save vector
-					NormFunctor());
+					NormFunctor());*/
 
 
 			generalParams.epsilon = (1.0) *
@@ -234,6 +229,7 @@ void NodeSystemDevice::initializeSystem(
 		hostWLCEdgeLeft,
 		hostWLCEdgeRight,
 		hostWLCLenZero );
+		
 
 };
 
@@ -365,10 +361,15 @@ void NodeSystemDevice::setPltVecs(
 	auxVecs.idPlt_bucket_expanded.resize(27 *( generalParams.maxPltCount ));
 	auxVecs.idPlt_value_expanded.resize(27 * (generalParams.maxPltCount));
 
-	if (generalParams.currentTime==0.0){
     pltInfoVecs.tndrlNodeId.resize(generalParams.maxPltCount * generalParams.plt_tndrl_intrct);
-		pltInfoVecs.tndrlNodeType.resize(generalParams.maxPltCount * generalParams.plt_tndrl_intrct);
-  }
+	pltInfoVecs.tndrlNodeType.resize(generalParams.maxPltCount * generalParams.plt_tndrl_intrct);
+
+	//fill with flag vales.	
+	std::cout<<"maxIdFlag: "<< generalParams.maxIdCountFlag<<std::endl;
+	
+	thrust::fill(pltInfoVecs.tndrlNodeId.begin(),pltInfoVecs.tndrlNodeId.end(), generalParams.maxIdCountFlag);
+	thrust::fill(pltInfoVecs.tndrlNodeType.begin(),pltInfoVecs.tndrlNodeType.end(), 0);
+  
 
 };
 

@@ -14,6 +14,9 @@ void PltonPltTndrlOnDevice(
 	AuxVecs& auxVecs) {
 
 
+	for (unsigned i = 0; i < auxVecs.idPlt_bucket.size(); i++)
+		std::cout<<"plt bucket pltonplt: "<<auxVecs.idPlt_bucket[i] << std::endl;
+        
 	thrust::counting_iterator<unsigned> counter(0);
 
     thrust::transform(

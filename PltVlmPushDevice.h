@@ -11,7 +11,7 @@ void PltVlmPushOnDevice(
   PltInfoVecs& pltInfoVecs,
   AuxVecs& auxVecs);
 
-  struct PltVlmPushForceFunctor : public thrust::unary_function<U2CVec6, CVec3>  {
+  struct PltVlmPushForceFunctor : public thrust::unary_function< U2CVec6, CVec3 >  {
     unsigned plt_other_intrct;
     double pltRForce;
     double pltForce;
@@ -107,7 +107,7 @@ void PltVlmPushOnDevice(
       
       pltLocXAddr(_pltLocXAddr),
   		pltLocYAddr(_pltLocYAddr),
-  		pltLocZAddr(_pltLocZAddr){}
+  		pltLocZAddr(_pltLocZAddr) {}
 
 
      __device__
@@ -131,35 +131,32 @@ void PltVlmPushOnDevice(
           double pltLocZ = thrust::get<4>(u2d6);
           
           //use for return. 
-          double pltCurrentForceX = thrust::get<5>(u2d6);
-          double pltCurrentForceY = thrust::get<6>(u2d6);
-          double pltCurrentForceZ = thrust::get<7>(u2d6);
-
-          double sumPltForceX = pltCurrentForceX;
-          double sumPltForceY = pltCurrentForceY;
-          double sumPltForceZ = pltCurrentForceZ;
+          double sumPltForceX = thrust::get<5>(u2d6);;
+          double sumPltForceY = thrust::get<6>(u2d6);;
+          double sumPltForceZ = thrust::get<7>(u2d6);;
         
           //pushing
-          unsigned pushCounter=0;
+          unsigned pushCounter = 0;
 
           //go through all nodes that might be pushed
-          for( unsigned i = beginIndexNode; i < endIndexNode; i++){
-              unsigned pushNode_id = id_value_expanded[i];
-              //
-              //Get position of node
-              double vecN_PX = pltLocX - nodeLocXAddr[pushNode_id];
-              double vecN_PY = pltLocY - nodeLocYAddr[pushNode_id];
-              double vecN_PZ = pltLocZ - nodeLocZAddr[pushNode_id];
-              //Calculate distance from plt to node.
-              double dist = sqrt(
-                  (vecN_PX) * (vecN_PX) +
-                  (vecN_PY) * (vecN_PY) +
-                  (vecN_PZ) * (vecN_PZ));   
+          for( unsigned id_count = beginIndexNode; id_count < endIndexNode; id_count++){
+              unsigned pushNode_id = id_value_expanded[id_count];
+              
+              if (pushCounter < plt_other_intrct) {//must be same as other counter.
+                  
+                  //Get position of node
+                  double vecN_PX = pltLocX - nodeLocXAddr[pushNode_id];
+                  double vecN_PY = pltLocY - nodeLocYAddr[pushNode_id];
+                  double vecN_PZ = pltLocZ - nodeLocZAddr[pushNode_id];
+                  //Calculate distance from plt to node.
+                  double dist = sqrt(
+                      (vecN_PX) * (vecN_PX) +
+                      (vecN_PY) * (vecN_PY) +
+                      (vecN_PZ) * (vecN_PZ));   
 
-              //check pushcounter
-              if (pushCounter < plt_other_intrct) {//must be same as other counter. Check resize for correct size of unreduced vectors.
-                  //repulsion if fiber and platelet overlap
-                   if (dist < (pltR + fiberDiameter / 2.0) )  {
+                  //check pushcounter
+                      //repulsion if fiber and platelet overlap
+                  if (dist < (pltR + fiberDiameter / 2.0) )  {
                       //node only affects plt position if it is pulled.
                       //Determine direction of force based on positions and multiply magnitude force
                       double forceNodeX = -(vecN_PX / dist) * (pltForce);
@@ -184,37 +181,32 @@ void PltVlmPushOnDevice(
           //go through all plts that might be pushed
           //only apply force to self. 
           for( unsigned i = beginIndexPlt; i < endIndexPlt; i++){
-            unsigned pushPlt_id = idPlt_value_expanded[i];
-            //
-            //Get position of node
-            double vecN_PX = pltLocX - pltLocXAddr[pushPlt_id];
-            double vecN_PY = pltLocY - pltLocYAddr[pushPlt_id];
-            double vecN_PZ = pltLocZ - pltLocZAddr[pushPlt_id];
-            //Calculate distance from plt to node.
-            double dist = sqrt(
-                (vecN_PX) * (vecN_PX) +
-                (vecN_PY) * (vecN_PY) +
-                (vecN_PZ) * (vecN_PZ));
-
-
-            //check pushcounter
-            //if (pushCounter < plt_other_intrct) {
-                //repulsion if fiber and platelet overlap
-                 if (dist < (2.0 * pltR ) )  {
-                    //node only affects plt position if it is pulled.
-                    //Determine direction of force based on positions and multiply magnitude force
-                    double forcePltX = -(vecN_PX / dist) * (pltForce);
-                    double forcePltY = -(vecN_PY / dist) * (pltForce);
-                    double forcePltZ = -(vecN_PZ / dist) * (pltForce);
-
-                    //count force for plt.
-                    sumPltForceX += (-1.0) * forcePltX;
-                    sumPltForceY += (-1.0) * forcePltY;
-                    sumPltForceZ += (-1.0) * forcePltZ;
-
-                    //pushCounter++;
-                }
-            //}
+              unsigned pushPlt_id = idPlt_value_expanded[i];
+              //
+              //Get position of node
+              double vecN_PX = pltLocX - pltLocXAddr[pushPlt_id];
+              double vecN_PY = pltLocY - pltLocYAddr[pushPlt_id];
+              double vecN_PZ = pltLocZ - pltLocZAddr[pushPlt_id];
+              //Calculate distance from plt to node.
+              double dist = sqrt(
+                  (vecN_PX) * (vecN_PX) +
+                  (vecN_PY) * (vecN_PY) +
+                  (vecN_PZ) * (vecN_PZ));
+  
+  
+              //check pushcounter
+              //repulsion if fiber and platelet overlap
+              if (dist < (2.0 * pltR ) )  {
+                  //node only affects plt position if it is pulled.
+                  //Determine direction of force based on positions and multiply magnitude force
+                  double forcePltX = -(vecN_PX / dist) * (pltForce);
+                  double forcePltY = -(vecN_PY / dist) * (pltForce);
+                  double forcePltZ = -(vecN_PZ / dist) * (pltForce);
+                  //count force for plt.
+                  sumPltForceX += (-1.0) * forcePltX;
+                  sumPltForceY += (-1.0) * forcePltY;
+                  sumPltForceZ += (-1.0) * forcePltZ;
+              }
           }
       //return platelet forces
       return thrust::make_tuple(sumPltForceX, sumPltForceY, sumPltForceZ);

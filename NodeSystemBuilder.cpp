@@ -317,7 +317,7 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 		double pltmaxY = (*(thrust::max_element(hostPosY.begin(), hostPosY.end())));
 		double pltminZ = (*(thrust::min_element(hostPosZ.begin(), hostPosZ.end())));
 		double pltmaxZ = (*(thrust::max_element(hostPosZ.begin(), hostPosZ.end())));
-		numPlts = static_cast<unsigned>(ceil((pltmaxX - pltminX) * (pltmaxY - pltminY) * (pltmaxZ - pltminZ) * pltDensity));//2;
+		numPlts = 2;//static_cast<unsigned>(ceil((pltmaxX - pltminX) * (pltmaxY - pltminY) * (pltmaxZ - pltminZ) * pltDensity));
 
 		std::cout<< "number of plts from density: "<< numPlts<<std::endl;
 
@@ -338,9 +338,9 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 			double xPos = distX(genX);
 			double yPos = distY(genY);
 			double zPos = distZ(genZ);
-			hostPltPosX.push_back(static_cast<double>(xPos) );
-			hostPltPosY.push_back(static_cast<double>(yPos) );
-			hostPltPosZ.push_back(static_cast<double>(zPos) );
+			hostPltPosX.push_back(static_cast<double>(plt+3) );
+			hostPltPosY.push_back(static_cast<double>(plt+3) );
+			hostPltPosZ.push_back(static_cast<double>(plt+3) );
 			std::cout<<" plt pos: "<< xPos << " "<< yPos << " "<< zPos << std::endl;
 		}
 
@@ -389,10 +389,13 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 	host_ptr_devNodeSystem->generalParams.pltR = pltR;
 	host_ptr_devNodeSystem->generalParams.pltRForce = pltRForce;
 	host_ptr_devNodeSystem->generalParams.pltMass = defaultPltMass;
-	host_ptr_devNodeSystem->domainParams.gridSpacing = 2.0*std::max(pltRForce, 5*defaultLinkDiameter);
+	host_ptr_devNodeSystem->domainParams.gridSpacing = std::max(pltRForce, 5*defaultLinkDiameter);
 	host_ptr_devNodeSystem->generalParams.fiberDiameter = defaultLinkDiameter ;
 	host_ptr_devNodeSystem->generalParams.pltDensity = pltDensity;
+	
 	host_ptr_devNodeSystem->generalParams.pltfrcfld = pltfrcfld;
+	host_ptr_devNodeSystem->generalParams.plttndrl = plttndrl;
+	host_ptr_devNodeSystem->generalParams.pltonplt = pltonplt;
 
 
 	host_ptr_devNodeSystem->initializeSystem(

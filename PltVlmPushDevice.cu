@@ -14,7 +14,7 @@ void PltVlmPushOnDevice(
 	PltInfoVecs& pltInfoVecs,
 	AuxVecs& auxVecs) {
 
-    thrust::fill(pltInfoVecs.nodeUnreducedForceX.begin(), pltInfoVecs.nodeUnreducedForceX.end(), 0.0);
+    	thrust::fill(pltInfoVecs.nodeUnreducedForceX.begin(), pltInfoVecs.nodeUnreducedForceX.end(), 0.0);
 		thrust::fill(pltInfoVecs.nodeUnreducedForceY.begin(), pltInfoVecs.nodeUnreducedForceY.end(), 0.0);
 		thrust::fill(pltInfoVecs.nodeUnreducedForceZ.begin(), pltInfoVecs.nodeUnreducedForceZ.end(), 0.0);
 
@@ -25,21 +25,24 @@ void PltVlmPushOnDevice(
 
 		thrust::counting_iterator<unsigned> counter(0);
 
+		for (unsigned i = 0; i < auxVecs.idPlt_bucket.size(); i++)
+			std::cout<<"plt bucketvol: "<<auxVecs.idPlt_bucket[i] << std::endl;
+
         thrust::transform(
         	thrust::make_zip_iterator(
         		thrust::make_tuple(
 					counter,
-   					auxVecs.idPlt_value.begin(),
+   					auxVecs.idPlt_bucket.begin(),
         			pltInfoVecs.pltLocX.begin(),
         			pltInfoVecs.pltLocY.begin(),
         			pltInfoVecs.pltLocZ.begin(),
 					pltInfoVecs.pltForceX.begin(),
 					pltInfoVecs.pltForceY.begin(),
 					pltInfoVecs.pltForceZ.begin())),
-        	thrust::make_zip_iterator(
+        	thrust::make_zip_iterator( 
         		thrust::make_tuple(
 					counter,
-    				auxVecs.idPlt_value.begin(),
+    				auxVecs.idPlt_bucket.begin(),
         		 	pltInfoVecs.pltLocX.begin(),
         		 	pltInfoVecs.pltLocY.begin(),
         		 	pltInfoVecs.pltLocZ.begin(),
@@ -95,7 +98,7 @@ void PltVlmPushOnDevice(
         					pltInfoVecs.nodeUnreducedForceZ.begin())), thrust::less<unsigned>());
 
 
-//reduce and apply force
+		//reduce and apply force
  		unsigned endKey = thrust::get<0>(
  			thrust::reduce_by_key(
  				pltInfoVecs.nodeUnreducedId.begin(),
