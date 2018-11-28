@@ -25,9 +25,6 @@ void PltVlmPushOnDevice(
 
 		thrust::counting_iterator<unsigned> counter(0);
 
-		for (unsigned i = 0; i < auxVecs.idPlt_bucket.size(); i++)
-			std::cout<<"plt bucketvol: "<<auxVecs.idPlt_bucket[i] << std::endl;
-
         thrust::transform(
         	thrust::make_zip_iterator(
         		thrust::make_tuple(

@@ -34,9 +34,9 @@ void initDimensionBucketScheme(
 	domainParams.maxZ = max(maxZTemp, domainParams.pltmaxZ) + space;
 
 	//always set bucket count. Update total if different. 
-	domainParams.XBucketCount = ceil((domainParams.maxX - domainParams.minX) / domainParams.gridSpacing + 1);
-	domainParams.YBucketCount = ceil((domainParams.maxY - domainParams.minY) / domainParams.gridSpacing + 1);
-	domainParams.ZBucketCount = ceil((domainParams.maxZ - domainParams.minZ) / domainParams.gridSpacing + 1);
+	domainParams.XBucketCount = ceil((domainParams.maxX - domainParams.minX) / domainParams.gridSpacing) + 1;
+	domainParams.YBucketCount = ceil((domainParams.maxY - domainParams.minY) / domainParams.gridSpacing) + 1;
+	domainParams.ZBucketCount = ceil((domainParams.maxZ - domainParams.minZ) / domainParams.gridSpacing) + 1;
 
 	if ( (domainParams.XBucketCount * domainParams.YBucketCount * domainParams.ZBucketCount) != domainParams.totalBucketCount	) {
 		std::cout<<"x-bucket: "<< domainParams.XBucketCount<<std::endl;
@@ -210,11 +210,13 @@ void extendBucketScheme(
 		pltsearch_begin + domainParams.totalBucketCount,
 		auxVecs.keyPltEnd.begin());
 
-	
+	/*
 	unsigned choice = 0;
 
 	unsigned bucket = auxVecs.idPlt_bucket[choice];
 	std::cout<<"bucketplt 0: "<< bucket<<std::endl;
+	std::cout<<"plt pos: "<<pltInfoVecs.pltLocX[0]<<" "<<pltInfoVecs.pltLocY[0]<<" "<<pltInfoVecs.pltLocZ[0]<<std::endl;
+	std::cout<<"key len: "<< auxVecs.keyBegin.size() << std::endl;
 	unsigned begin = auxVecs.keyBegin[bucket];
 	unsigned end = auxVecs.keyEnd[bucket];
 	
@@ -231,7 +233,7 @@ void extendBucketScheme(
 			std::cout<<"dist: "<< dist<< " between: "<< choice << " and nbr: "<< nbr<<std::endl; 
 			std::cout<<"nbr: "<< nbr<< " is in bucket: "<< buck <<std::endl;
 		}
-	}
+	}*/
 
 	/*
 	std::cout<<"from all plt:"<<std::endl;
@@ -294,6 +296,8 @@ thrust::sort_by_key(auxVecs.id_value.begin(),
 		auxVecs.id_value.begin() + generalParams.maxNodeCount,
 		auxVecs.id_bucket.begin());
 
+auxVecs.endIndexBucketKeys = generalParams.maxNodeCount;
+
 	//platelets
 	//std::cout<<"bucket platelet"<<std::endl;
 	thrust::counting_iterator<unsigned> indexBucketBegin1(0);
@@ -327,5 +331,6 @@ thrust::sort_by_key(auxVecs.idPlt_value.begin(),
 		auxVecs.idPlt_value.end(),
 		auxVecs.idPlt_bucket.begin());
 
-
+auxVecs.endIndexBucketPltKeys = generalParams.maxPltCount;
+ 
 };

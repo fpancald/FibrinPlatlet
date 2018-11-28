@@ -21,12 +21,14 @@ void NodeSystemDevice::setBucketScheme() {
 		pltInfoVecs,
 		domainParams,
 		auxVecs,
-		generalParams);
+		generalParams);		
 
 	buildBucketScheme(nodeInfoVecs, pltInfoVecs, domainParams,
 		auxVecs, generalParams);
 
 	extendBucketScheme(nodeInfoVecs, pltInfoVecs, domainParams, auxVecs, generalParams);
+
+		
 };
 
 void NodeSystemDevice::solveForcesOnDevice() {
@@ -116,15 +118,20 @@ void NodeSystemDevice::solveSystemDevice() {
 
 		//std::cout<<"iterationCount: "<< generalParams.iterationCounter <<std::endl;
 
-
 		AdvancePositionOnDevice(
 			nodeInfoVecs,
 			pltInfoVecs,
 		 	generalParams);
-
+//std::cout<<"post adv plt pos: "<<pltInfoVecs.pltLocX[0]<<" "<<pltInfoVecs.pltLocY[0]<<" "<<pltInfoVecs.pltLocZ[0]<<std::endl;
+//std::cout<<"post adv plt force: "<<pltInfoVecs.pltForceX[0]<<" "<<pltInfoVecs.pltForceY[0]<<" "<<pltInfoVecs.pltForceZ[0]<<std::endl;
+	
+		
 		setBucketScheme();
 
+		
 		solveForcesOnDevice(); //resets and solves forces for next time step
+//std::cout<<"post force plt pos: "<<pltInfoVecs.pltLocX[0]<<" "<<pltInfoVecs.pltLocY[0]<<" "<<pltInfoVecs.pltLocZ[0]<<std::endl;
+//std::cout<<"post force plt force: "<<pltInfoVecs.pltForceX[0]<<" "<<pltInfoVecs.pltForceY[0]<<" "<<pltInfoVecs.pltForceZ[0]<<std::endl;
 
 
 		if (generalParams.iterationCounter % 500 == 0) {
@@ -218,7 +225,6 @@ void NodeSystemDevice::initializeSystem(
 		hostPosY,
 		hostPosZ);
 
-
 	setTorsionVecs(
 		hostTorsionIndexLeft,
 		hostTorsionIndexCenter,
@@ -229,8 +235,8 @@ void NodeSystemDevice::initializeSystem(
 		hostWLCEdgeLeft,
 		hostWLCEdgeRight,
 		hostWLCLenZero );
-		
 
+		
 };
 
 void NodeSystemDevice::setNodeVecs(
@@ -371,7 +377,6 @@ void NodeSystemDevice::setPltVecs(
 	
 	thrust::fill(pltInfoVecs.tndrlNodeType.begin(),pltInfoVecs.tndrlNodeType.end(), 0);
   
-
 };
 
 void NodeSystemDevice::setTorsionVecs(

@@ -182,30 +182,33 @@ void PltVlmPushOnDevice(
           //only apply force to self. 
           for( unsigned i = beginIndexPlt; i < endIndexPlt; i++){
               unsigned pushPlt_id = idPlt_value_expanded[i];
-              //
-              //Get position of node
-              double vecN_PX = pltLocX - pltLocXAddr[pushPlt_id];
-              double vecN_PY = pltLocY - pltLocYAddr[pushPlt_id];
-              double vecN_PZ = pltLocZ - pltLocZAddr[pushPlt_id];
-              //Calculate distance from plt to node.
-              double dist = sqrt(
-                  (vecN_PX) * (vecN_PX) +
-                  (vecN_PY) * (vecN_PY) +
-                  (vecN_PZ) * (vecN_PZ));
-  
-  
-              //check pushcounter
-              //repulsion if fiber and platelet overlap
-              if (dist < (2.0 * pltR ) )  {
-                  //node only affects plt position if it is pulled.
-                  //Determine direction of force based on positions and multiply magnitude force
-                  double forcePltX = -(vecN_PX / dist) * (pltForce);
-                  double forcePltY = -(vecN_PY / dist) * (pltForce);
-                  double forcePltZ = -(vecN_PZ / dist) * (pltForce);
-                  //count force for plt.
-                  sumPltForceX += (-1.0) * forcePltX;
-                  sumPltForceY += (-1.0) * forcePltY;
-                  sumPltForceZ += (-1.0) * forcePltZ;
+              
+              
+              if (pushPlt_id != pltId) {
+                  //then pushPlt id can be pushed since it is not the self
+                  double vecN_PX = pltLocX - pltLocXAddr[pushPlt_id];
+                  double vecN_PY = pltLocY - pltLocYAddr[pushPlt_id];
+                  double vecN_PZ = pltLocZ - pltLocZAddr[pushPlt_id];
+                  //Calculate distance from plt to node.
+                  double dist = sqrt(
+                      (vecN_PX) * (vecN_PX) +
+                      (vecN_PY) * (vecN_PY) +
+                      (vecN_PZ) * (vecN_PZ));
+      
+      
+                  //check pushcounter
+                  //repulsion if fiber and platelet overlap
+                  if (dist < (2.0 * pltR ) )  {
+                      //node only affects plt position if it is pulled.
+                      //Determine direction of force based on positions and multiply magnitude force
+                      double forcePltX = -(vecN_PX / dist) * (pltForce);
+                      double forcePltY = -(vecN_PY / dist) * (pltForce);
+                      double forcePltZ = -(vecN_PZ / dist) * (pltForce);
+                      //count force for plt.
+                      sumPltForceX += (-1.0) * forcePltX;
+                      sumPltForceY += (-1.0) * forcePltY;
+                      sumPltForceZ += (-1.0) * forcePltZ;
+                  }
               }
           }
       //return platelet forces
