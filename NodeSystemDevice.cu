@@ -366,8 +366,9 @@ void NodeSystemDevice::setPltVecs(
 
 	//fill with flag vales.	
 	std::cout<<"maxIdFlag: "<< generalParams.maxIdCountFlag<<std::endl;
-	
+
 	thrust::fill(pltInfoVecs.tndrlNodeId.begin(),pltInfoVecs.tndrlNodeId.end(), generalParams.maxIdCountFlag);
+	
 	thrust::fill(pltInfoVecs.tndrlNodeType.begin(),pltInfoVecs.tndrlNodeType.end(), 0);
   
 

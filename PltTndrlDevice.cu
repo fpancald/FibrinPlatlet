@@ -30,6 +30,8 @@ void PltTndrlOnDevice(
 
 		for (unsigned i = 0; i < auxVecs.idPlt_bucket.size(); i++)
 			std::cout<<"plt buckettndrl: "<<auxVecs.idPlt_bucket[i] << std::endl;
+		for (unsigned i = 0; i < pltInfoVecs.tndrlNodeType.size(); i++)
+			std::cout<<"plt tndrlNodeType: "<<pltInfoVecs.tndrlNodeType[i] << std::endl;
         //Call the plt force on nodes functor
 		//WARNING:
 		//writes to unreduced vector entries from 0 to maxPltCount*plt_tndrl_intrct
@@ -96,14 +98,17 @@ void PltTndrlOnDevice(
                 thrust::raw_pointer_cast(pltInfoVecs.pltLocZ.data())) );
 
 
+		for (unsigned i = 0; i < pltInfoVecs.tndrlNodeType.size(); i++)
+			std::cout<<"plt tndrlNodeType: "<<pltInfoVecs.tndrlNodeType[i] << std::endl;
+
 		
         //now call a sort by key followed by a reduce by key to figure out which nodes are have force applied.
         //then make a functor that takes the id and force (4 tuple) and takes that force and adds it to the id'th entry in nodeInfoVecs.nodeForceX,Y,Z
         
 		unsigned total_num_arms = pltInfoVecs.nodeImagingConnection.size();
-	/*	for (unsigned i = 0; i < total_num_arms; i++){
+		for (unsigned i = 0; i < total_num_arms; i++){
 			std::cout<<"pre sort plt nodeUnreducedId_1_2: "<<pltInfoVecs.nodeUnreducedId[i] << std::endl;
-		}*/
+		}
 		thrust::sort_by_key(pltInfoVecs.nodeUnreducedId.begin(), pltInfoVecs.nodeUnreducedId.end(),
         			thrust::make_zip_iterator(
         				thrust::make_tuple(
@@ -114,7 +119,7 @@ void PltTndrlOnDevice(
 
 
 
-	/*	for (unsigned i = 0; i < auxVecs.idPlt_bucket.size(); i++){
+		for (unsigned i = 0; i < auxVecs.idPlt_bucket.size(); i++){
 			std::cout<<"plt buckettndrl_1_2: "<<auxVecs.idPlt_bucket[i] << std::endl;
 		}
 		for (unsigned i = 0; i < pltInfoVecs.nodeImagingConnection.size(); i++){
@@ -122,7 +127,7 @@ void PltTndrlOnDevice(
 		}
 		for (unsigned i = 0; i < total_num_arms; i++){
 			std::cout<<"plt nodeUnreducedId_1_2: "<<pltInfoVecs.nodeUnreducedId[i] << std::endl;
-		}*/
+		}
 
     	thrust::copy(pltInfoVecs.nodeUnreducedId.begin(),pltInfoVecs.nodeUnreducedId.begin() + total_num_arms, pltInfoVecs.nodeImagingConnection.begin());
 

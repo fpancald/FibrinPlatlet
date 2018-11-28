@@ -341,7 +341,8 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 			hostPltPosX.push_back(static_cast<double>(plt+3) );
 			hostPltPosY.push_back(static_cast<double>(plt+3) );
 			hostPltPosZ.push_back(static_cast<double>(plt+3) );
-			std::cout<<" plt pos: "<< xPos << " "<< yPos << " "<< zPos << std::endl;
+
+			std::cout<<" plt pos: "<< hostPltPosX[plt] << " "<< hostPltPosY[plt] << " "<< hostPltPosZ[plt] << std::endl;
 		}
 
 
@@ -354,6 +355,9 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 
 	host_ptr_devNodeSystem->generalParams.maxNodeCount = hostPosX.size();
 	host_ptr_devNodeSystem->generalParams.maxPltCount = numPlts;//Plt
+	
+	host_ptr_devNodeSystem->generalParams.maxIdCountFlag = std::max(numPlts, host_ptr_devNodeSystem->generalParams.maxNodeCount);
+
 	host_ptr_devNodeSystem->generalParams.totalTorsionCount = hostTorsionAngleZero.size();
 
 	host_ptr_devNodeSystem->generalParams.originNodeCount = originNodeCount;
@@ -396,7 +400,7 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 	host_ptr_devNodeSystem->generalParams.pltfrcfld = pltfrcfld;
 	host_ptr_devNodeSystem->generalParams.plttndrl = plttndrl;
 	host_ptr_devNodeSystem->generalParams.pltonplt = pltonplt;
-
+	
 
 	host_ptr_devNodeSystem->initializeSystem(
 		hostIsNodeFixed,
