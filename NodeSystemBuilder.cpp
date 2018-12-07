@@ -335,9 +335,9 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
     	std::uniform_real_distribution<> distZ(pltminZ + padding, pltmaxZ - padding);
 
 		for (unsigned plt = 0; plt < numPlts; plt++ ){
-			double xPos = distX(genX);
-			double yPos = distY(genY);
-			double zPos = distZ(genZ);
+			__attribute__ ((unused)) double xPos = distX(genX);
+			__attribute__ ((unused)) double yPos = distY(genY);
+			__attribute__ ((unused)) double zPos = distZ(genZ);
 			hostPltPosX.push_back(static_cast<double>(plt+3) );
 			hostPltPosY.push_back(static_cast<double>(plt+3) );
 			hostPltPosZ.push_back(static_cast<double>(plt+3) );

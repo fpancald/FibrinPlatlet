@@ -19,6 +19,8 @@
 	
 	<use-pltforcefield>false</use-pltforcefield>
 	<use-plttndrl>true</use-plttndrl>
+	<use-pltrelease>true</use-pltrelease>
+	<use-plthandhand>false</use-plthandhand>
 	<use-pltonplt>true</use-pltonplt>
 	
 	<plt_mass>0.486</plt_mass><!-- platelet mass-->
@@ -27,7 +29,8 @@
 	<plt_tndrl_intrct>3</plt_tndrl_intrct><!-- platelet maximum number of connections-->
 	<plt_r>1.13</plt_r>   <!-- radius of platelet from center (volume exclusion)-->
 	<plt_r_force>2.18</plt_r_force><!-- force radius from platelet center-->
-	<plt_density>0.1</plt_density>
+	<plt_r_adhesion>0.9</plt_r_adhesion><!-- fractional radius of adhesion of platelt. This should be between 0 and 1. Nodes adhere to platelet between this fraction and the whole platelet radius-->
+	<plt_density>0.0</plt_density>
 </settings>
     <nodes default-mass="1.0">
         <node>4.6404 7.4482 2.7229</node>
@@ -435,6 +438,10 @@
         <node>4.8267 4.7908 6.9654</node>
         <node>1.7899 8.8457 9.457</node>
     </nodes>
+	<plts plt-mass="0.486"><!-- these are use only if plt_density is set to 0.0-->
+		<plt> 6.0 6.0 6.0 </plt>
+		<plt> 3.0 3.0 3.0 </plt>
+	</plts>
     <links>
         <link>25 366</link>
         <link>155 263</link>

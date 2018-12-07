@@ -9,4 +9,4 @@ bend-model
 *.o*.*
 *.sta
 *.mat
-
+*.zip
