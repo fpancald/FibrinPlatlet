@@ -134,7 +134,6 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
 		unsigned endIndex = keyEnd[bucketId];
 
 
-
         unsigned storageLocation = pltId * plt_tndrl_intrct;
 
         double pltLocX = thrust::get<2>(u2d6);
@@ -191,21 +190,9 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
 						unsigned startIndex = maxNeighborCount * pullNode_id;
 						unsigned endIndex = startIndex + maxNeighborCount;
 
-            unsigned numberNghbrs=endIndex-startIndex+1;
-            thrust::device_vector<unsigned> nodes_ID(numberNghbrs);
-            thrust::device_vector<double> nodes_rand(numberNghbrs);
-            thrust::minstd_rand rndeng;
-            thrust::copy(thrust::device, glblNghbrsId[startIndex], glblNghbrsId[endIndex], nodes_ID.begin());
-            thrust::uniform_real_distribution<double> randudist(0.0,1.0);
-            for (unsigned idx = 1; idx < numberNghbrs; idx++){
-              nodes_rand[idx]=randudist(rndeng);
-            }
-            thrust::stable_sort_by_key(nodes_rand.begin(),nodes_rand.end(),nodes_ID.begin(), thrust::greater<double>() );
-
-
 						for (unsigned nbr_loc = startIndex; nbr_loc < endIndex; nbr_loc++){
 
-								unsigned newpullNode_id = nodes_ID[ nbr_loc-startIndex ];
+								unsigned newpullNode_id = glblNghbrsId[ nbr_loc ];
 								//check tentative node is not already connected
 								for (unsigned checkId = 0; checkId < plt_tndrl_intrct; checkId++) {
 									if (newpullNode_id != tndrlNodeId[storageLocation + checkId]) {
