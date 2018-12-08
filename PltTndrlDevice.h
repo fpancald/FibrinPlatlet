@@ -43,7 +43,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
   	unsigned* tndrlNodeId;
   	unsigned* tndrlNodeType;
   	unsigned* glblNghbrsId;
-	
+
   	double* pltLocXAddr;
 	double* pltLocYAddr;
 	double* pltLocZAddr;
@@ -82,7 +82,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
             unsigned* _tndrlNodeId,
             unsigned* _tndrlNodeType,
             unsigned* _glblNghbrsId,
-			
+
             double* _pltLocXAddr,
             double* _pltLocYAddr,
             double* _pltLocZAddr) :
@@ -134,13 +134,14 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
 		unsigned endIndex = keyEnd[bucketId];
 
 
+
         unsigned storageLocation = pltId * plt_tndrl_intrct;
 
         double pltLocX = thrust::get<2>(u2d6);
         double pltLocY = thrust::get<3>(u2d6);
         double pltLocZ = thrust::get<4>(u2d6);
 
-        //use for return. 
+        //use for return.
         double pltCurrentForceX = thrust::get<5>(u2d6);
         double pltCurrentForceY = thrust::get<6>(u2d6);
         double pltCurrentForceZ = thrust::get<7>(u2d6);
@@ -176,12 +177,12 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
                     (vecN_PX) * (vecN_PX) +
                     (vecN_PY) * (vecN_PY) +
                     (vecN_PZ) * (vecN_PZ));
-				
+
                 //check if the node is not in pulling range anymore.
                 if ((dist >= pltRForce) || (dist <= (pltR + fiberDiameter / 2.0 ) ) ){
-					
+
                   	//then node is out of range, so we empty tendril if pltrelease is true
-					
+
 					if (pltrelease==true){
 						tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;//reset
 					}
@@ -189,10 +190,22 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
 					if (plthandhand==true){
 						unsigned startIndex = maxNeighborCount * pullNode_id;
 						unsigned endIndex = startIndex + maxNeighborCount;
-		
+
+            unsigned numberNghbrs=endIndex-startIndex+1;
+            thrust::device_vector<unsigned> nodes_ID(numberNghbrs);
+            thrust::device_vector<double> nodes_rand(numberNghbrs);
+            thrust::minstd_rand rndeng;
+            thrust::copy(thrust::device, glblNghbrsId[startIndex], glblNghbrsId[endIndex], nodes_ID.begin());
+            thrust::uniform_real_distribution<double> randudist(0.0,1.0);
+            for (unsigned idx = 1; idx < numberNghbrs; idx++){
+              nodes_rand[idx]=randudist(rndeng);
+            }
+            thrust::stable_sort_by_key(nodes_rand.begin(),nodes_rand.end(),nodes_ID.begin(), thrust::greater<double>() );
+
+
 						for (unsigned nbr_loc = startIndex; nbr_loc < endIndex; nbr_loc++){
-						  
-								unsigned newpullNode_id = glblNghbrsId[ nbr_loc ];
+
+								unsigned newpullNode_id = nodes_ID[ nbr_loc-startIndex ];
 								//check tentative node is not already connected
 								for (unsigned checkId = 0; checkId < plt_tndrl_intrct; checkId++) {
 									if (newpullNode_id != tndrlNodeId[storageLocation + checkId]) {
@@ -223,11 +236,11 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
             }
 
         	//check if tendril instead still pulls a plt
-        	else if ( (pullNode_id != maxIdCountFlag) && 
+        	else if ( (pullNode_id != maxIdCountFlag) &&
         	    ( pullNode_type == 1) ) {//note this happens only if plt-plt interaction is on
         	  	//then we have a plt connected to the plt.
 				//TYPE 1 is plt
-	
+
         	    //Calc range
         	    unsigned pullPlt_id = tndrlNodeId[storageLocation + interactionCounter];//bucketNbrsExp[i];
         	    //Get position of plt
@@ -238,12 +251,12 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
         	        (vecN_PX) * (vecN_PX) +
         	        (vecN_PY) * (vecN_PY) +
         	        (vecN_PZ) * (vecN_PZ));
-	
+
         	    //check if the plt is not pulled  anymore and pltrelease is true
         	    if (((dist >= 2.0 * pltRForce) || (dist <= 2.0 * pltR)) && pltrelease==true ){
         	        //then plt is out of range so we disconnect
-        	    
-					
+
+
 					tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;
         	    }
         	}
@@ -254,14 +267,14 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
 
         	// check if tendril still has no node or platelet to pull
         	if (pullNode_id == maxIdCountFlag){
-				//then we have nothing to pull. 
-        	    //try to find a node to pull by searching. 
+				//then we have nothing to pull.
+        	    //try to find a node to pull by searching.
 
-				//ISSUE HERE: we need a random permutation of nodes. 
+				//ISSUE HERE: we need a random permutation of nodes.
         	    for (unsigned newpull_index = beginIndex; newpull_index < endIndex; newpull_index++){
         	        unsigned newpullNode_id = id_value_expanded[ newpull_index ];
 					bool node_is_new = true;
-	
+
 					//check tentative node is not already connected
 				    for (unsigned checkId = 0; checkId < plt_tndrl_intrct; checkId++){
         	        	if (newpullNode_id == tndrlNodeId[storageLocation + checkId]){
@@ -282,7 +295,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
 
 						//check if new node is in interaction range and fill tenril with new unique node
 						//then break searching loop
-						if ((dist < pltRForce) && 
+						if ((dist < pltRForce) &&
 							(dist > (pltR + fiberDiameter / 2.0) ) ) {
 							//pull this node
 
@@ -299,7 +312,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
         	//WARNING: ONLY PULLING NODES
 			//UP TO HERE WE HAVE CHECKED FOR NODES
         	//check if tendril has been filled with a node and apply pulling forces. Note if filled direction and distence of forces are already calculated
-        	
+
 			//after last check, re generate choice of node and type.
             pullNode_id = tndrlNodeId[storageLocation + interactionCounter];
             pullNode_type = tndrlNodeType[storageLocation + interactionCounter];
@@ -309,7 +322,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
         	    //then we have a post-search node we can pull.
 				//Add force to it and the current platelet.
 
-				unsigned pullNode_id = tndrlNodeId[storageLocation + interactionCounter];        	        
+				unsigned pullNode_id = tndrlNodeId[storageLocation + interactionCounter];
 				double vecN_PX = pltLocX - nodeLocXAddr[pullNode_id];
         	    double vecN_PY = pltLocY - nodeLocYAddr[pullNode_id];
         	    double vecN_PZ = pltLocZ - nodeLocZAddr[pullNode_id];
