@@ -55,6 +55,7 @@ void PltonPltTndrlOnDevice(
 
             generalParams.maxPltCount,
 			generalParams.maxIdCountFlag,
+			generalParams.pltrelease,
 
             thrust::raw_pointer_cast(pltInfoVecs.pltLocX.data()),
             thrust::raw_pointer_cast(pltInfoVecs.pltLocY.data()),

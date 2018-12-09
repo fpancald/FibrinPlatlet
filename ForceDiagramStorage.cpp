@@ -222,12 +222,80 @@ void ForceDiagramStorage::print_VTK_File() {
 
 	}
 
-	//now print platelets with attatchments
+	//now print platelets 
 	if ((sys)) {
 		unsigned digits = ceil(log10(iteration + 1));
 		std::string format = ".vtk";
 		std::string Number;
 		std::string initial = "AnimationTest/Platelet";
+		std::ofstream ofs;
+		if (digits == 1 || digits == 0) {
+			Number = "0000" + std::to_string(iteration);
+		}
+		else if (digits == 2) {
+			Number = "000" + std::to_string(iteration);
+		}
+		else if (digits == 3) {
+			Number = "00" + std::to_string(iteration);
+		}
+		else if (digits == 4) {
+			Number = "0" + std::to_string(iteration);
+		}
+
+		std::string Filename = initial + Number + format;
+
+		ofs.open(Filename.c_str());
+		
+	
+		unsigned maxPltCount = sys->generalParams.maxPltCount;
+		
+		double xPos;
+		double yPos;
+		double zPos;
+		
+		ofs << "# vtk DataFile Version 3.0" << std::endl;
+		ofs << "Point representing Sub_cellular elem model" << std::endl;
+		ofs << "ASCII" << std::endl << std::endl;
+		ofs << "DATASET UNSTRUCTURED_GRID" << std::endl;
+		
+		 
+		ofs << "POINTS " << maxPltCount  << " float" << std::endl;
+		for (unsigned i = 0; i< maxPltCount; i++) {
+			xPos = sys->pltInfoVecs.pltLocX[i];
+			yPos = sys->pltInfoVecs.pltLocY[i];
+			zPos = sys->pltInfoVecs.pltLocZ[i];
+
+			ofs << std::setprecision(5) <<std::fixed<< xPos << " " << yPos << " " << zPos << " " << '\n'<< std::fixed;
+		}
+
+		//std::cout<<'here1'<<std::flush;
+		
+		unsigned numCells = 1;
+
+		unsigned numNumsInCells = 1 + maxPltCount;
+
+		ofs << "CELLS " << numCells << " " << numNumsInCells << std::endl;
+		
+		//place edges as cells of type 2. 
+		ofs<< maxPltCount;
+		for (unsigned point = 0; point < maxPltCount; point++ ){
+			ofs<< " " << point;
+		}
+		ofs<<" "<< std::endl;
+
+		ofs << "CELL_TYPES " << numCells << std::endl;  
+		//set edges and last set scattered points
+				
+		ofs << 2 << std::endl;//scatter points for capsid
+		
+	}
+	
+	//now print platelets with attatchments
+	if ((sys)) {
+		unsigned digits = ceil(log10(iteration + 1));
+		std::string format = ".vtk";
+		std::string Number;
+		std::string initial = "AnimationTest/PlateletConn";
 		std::ofstream ofs;
 		if (digits == 1 || digits == 0) {
 			Number = "0000" + std::to_string(iteration);

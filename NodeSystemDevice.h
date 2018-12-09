@@ -241,10 +241,13 @@ struct GeneralParams{
 	unsigned plt_tndrl_intrct;//used for tendril arm counts
 	double pltR;
 	double pltRForce;
+	double pltRAdhesion;
 	double pltMass;
 	double pltDensity;
 	bool pltfrcfld = false;
 	bool plttndrl = true; 
+	bool pltrelease = true;
+	bool plthandhand = true;
 	bool pltonplt = true;
 	unsigned maxIdCountFlag;//flag variable
 

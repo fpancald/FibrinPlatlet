@@ -335,9 +335,9 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
     	std::uniform_real_distribution<> distZ(pltminZ + padding, pltmaxZ - padding);
 
 		for (unsigned plt = 0; plt < numPlts; plt++ ){
-			double xPos = distX(genX);
-			double yPos = distY(genY);
-			double zPos = distZ(genZ);
+			__attribute__ ((unused)) double xPos = distX(genX);
+			__attribute__ ((unused)) double yPos = distY(genY);
+			__attribute__ ((unused)) double zPos = distZ(genZ);
 			hostPltPosX.push_back(static_cast<double>(plt+3) );
 			hostPltPosY.push_back(static_cast<double>(plt+3) );
 			hostPltPosZ.push_back(static_cast<double>(plt+3) );
@@ -392,6 +392,7 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 	host_ptr_devNodeSystem->generalParams.plt_tndrl_intrct = plt_tndrl_intrct;
 	host_ptr_devNodeSystem->generalParams.pltR = pltR;
 	host_ptr_devNodeSystem->generalParams.pltRForce = pltRForce;
+	host_ptr_devNodeSystem->generalParams.pltRAdhesion = pltRAdhesion;
 	host_ptr_devNodeSystem->generalParams.pltMass = defaultPltMass;
 	host_ptr_devNodeSystem->domainParams.gridSpacing = std::max(pltRForce, 5*defaultLinkDiameter);
 	host_ptr_devNodeSystem->generalParams.fiberDiameter = defaultLinkDiameter ;
@@ -399,6 +400,8 @@ std::shared_ptr<NodeSystemDevice> NodeSystemBuilder::create() {
 	
 	host_ptr_devNodeSystem->generalParams.pltfrcfld = pltfrcfld;
 	host_ptr_devNodeSystem->generalParams.plttndrl = plttndrl;
+	host_ptr_devNodeSystem->generalParams.pltrelease = pltrelease;
+	host_ptr_devNodeSystem->generalParams.plthandhand = plthandhand;
 	host_ptr_devNodeSystem->generalParams.pltonplt = pltonplt;
 	
 

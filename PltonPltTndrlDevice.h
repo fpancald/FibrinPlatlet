@@ -17,6 +17,7 @@ struct PltonPltTndrlForceFunctor : public thrust::unary_function<U2CVec6, CVec3>
 
   	unsigned maxPltCount;
   	unsigned maxIdCountFlag;
+	bool pltrelease;
 
 	double* pltLocXAddr;
 	double* pltLocYAddr;
@@ -40,6 +41,7 @@ struct PltonPltTndrlForceFunctor : public thrust::unary_function<U2CVec6, CVec3>
 
 		unsigned& _maxPltCount,
 		unsigned& _maxIdCountFlag,
+		bool& _pltrelease,
 
 		double* _pltLocXAddr,
 		double* _pltLocYAddr,
@@ -59,6 +61,7 @@ struct PltonPltTndrlForceFunctor : public thrust::unary_function<U2CVec6, CVec3>
 
 	maxPltCount(_maxPltCount),
 	maxIdCountFlag(_maxIdCountFlag),
+	pltrelease(_pltrelease),
 
 	pltLocXAddr(_pltLocXAddr),
 	pltLocYAddr(_pltLocYAddr),
@@ -121,8 +124,8 @@ struct PltonPltTndrlForceFunctor : public thrust::unary_function<U2CVec6, CVec3>
 					(vecN_PX) * (vecN_PX) +
 					(vecN_PY) * (vecN_PY) +
 					(vecN_PZ) * (vecN_PZ));	
-				//check if the plt is not pulled  anymore
-				if ( (dist >= 2.0 * pltRForce) || (dist <= 2.0 * pltR) ){
+				//check if the plt is not pulled  anymore and pltrelease is true
+				if ( ((dist >= 2.0 * pltRForce) || (dist <= 2.0 * pltR)) && pltrelease==true ){
 				  	//empty tendril
 				  	tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;
 				}
@@ -155,7 +158,7 @@ struct PltonPltTndrlForceFunctor : public thrust::unary_function<U2CVec6, CVec3>
 
 			//check if tendril has been filled with plt and apply pulling forces. Note if filled direction and distence of forces are already calculated
 			if ( ((tndrlNodeId[storageLocation + interactionCounter]) != maxIdCountFlag) && 
-			  	( (tndrlNodeType[storageLocation + interactionCounter]) == 1)){
+			  	( (tndrlNodeType[storageLocation + interactionCounter]) == 1) && (dist < 2.0 * pltRForce) && (dist > 2.0 * pltR)){
 				//Determine direction of force based on positions and multiply magnitude force
 				double forceNodeX = (vecN_PX / dist) * (pltForce);
 				double forceNodeY = (vecN_PY / dist) * (pltForce);

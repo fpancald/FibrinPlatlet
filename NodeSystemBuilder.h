@@ -78,6 +78,7 @@ public:
 	unsigned numPlts;
 	double defaultPltMass = 100;
 	double pltRForce = 1.4;
+	double pltRAdhesion=1.0;
 	double pltR = 0.1;
 	unsigned plt_other_intrct = 100;
 	unsigned plt_tndrl_intrct = 5;
@@ -85,6 +86,8 @@ public:
 	double pltDensity = 0.0;
 	bool pltfrcfld = false;
 	bool plttndrl = true;
+	bool pltrelease = true;
+	bool plthandhand = true;
 	bool pltonplt = false;
 
 	//std::shared_ptr<NodeSystemDevice> host_ptr_devNodeSystem;
