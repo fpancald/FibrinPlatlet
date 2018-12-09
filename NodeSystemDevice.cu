@@ -134,7 +134,7 @@ void NodeSystemDevice::solveSystemDevice() {
 //std::cout<<"post force plt force: "<<pltInfoVecs.pltForceX[0]<<" "<<pltInfoVecs.pltForceY[0]<<" "<<pltInfoVecs.pltForceZ[0]<<std::endl;
 
 
-		if (generalParams.iterationCounter % 500 == 0) {
+		if (generalParams.iterationCounter % 5000 == 0) {
 
 			storage->print_VTK_File();
 			//store sum of all forces on each node. Used in stress calculations

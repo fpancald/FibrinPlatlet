@@ -78,7 +78,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
             unsigned* _tndrlNodeId,
             unsigned* _tndrlNodeType,
             unsigned* _glblNghbrsId,
-			
+
             double* _pltLocXAddr,
             double* _pltLocYAddr,
             double* _pltLocZAddr) :
@@ -178,7 +178,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
 					//and search for a new node.
 					
 					//WARNING: CHANGE BACK TO RESET AND CHOOSE NEW PLT OR NODE
-                  	//tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;//reset
+                  	tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;//reset
                   	//try to find a new node to pull within connections of previous node
                   	unsigned startIndex = maxNeighborCount * pullNode_id;
                   	unsigned endIndex = startIndex + maxNeighborCount;
@@ -236,7 +236,7 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
         	        //then plt is out of range so we disconnect
         	    
 					//WARNING: CHANGE BACK TO RESET AND CHOOSE NEW PLT OR NODE
-					//tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;
+					tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;
         	    }
         	}
 
@@ -251,6 +251,8 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
 
 				//ISSUE HERE: we need a random permutation of nodes. 
         	    for (unsigned newpull_index = beginIndex; newpull_index < endIndex; newpull_index++){
+
+					//we really want to choose a random number between begin_index and end_index. 
         	        unsigned newpullNode_id = id_value_expanded[ newpull_index ];
 					bool node_is_new = true;
 	
