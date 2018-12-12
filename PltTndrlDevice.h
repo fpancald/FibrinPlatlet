@@ -188,9 +188,9 @@ struct PltTndrlonNodeForceFunctor : public thrust::unary_function< U2CVec6, CVec
                   	//try to find a new node to pull within connections of previous node if plthandhand is true
 					if (plthandhand==true){
 						unsigned startIndex = maxNeighborCount * pullNode_id;
-						unsigned endIndex = startIndex + maxNeighborCount;
+						unsigned finalIndex = startIndex + maxNeighborCount;
 
-						for (unsigned nbr_loc = startIndex; nbr_loc < endIndex; nbr_loc++){
+						for (unsigned nbr_loc = startIndex; nbr_loc < finalIndex; nbr_loc++){
 
 								unsigned newpullNode_id = glblNghbrsId[ nbr_loc ];
 								//check tentative node is not already connected
