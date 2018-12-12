@@ -46,7 +46,14 @@
     <links>
         <link>0 1</link>
 		<link>2 3</link>
+		<link>4 5</link>
     </links>
     <fixed>
+		<node>0</node>
+		<node>1</node>
+		<node>2</node>
+		<node>3</node>
+		<node>4</node>
+		<node>5</node>
     </fixed>
 </data>

@@ -44,5 +44,7 @@
         <link>0 1</link>
     </links>
     <fixed>
+		<node>0</node>
+		<node>1</node>
     </fixed>
 </data>
