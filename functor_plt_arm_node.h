@@ -178,17 +178,10 @@ struct functor_plt_arm_node : public thrust::unary_function< U2CVec6, CVec3>  {
 					}
                   	//try to find a new node to pull within connections of previous node if plthandhand is true
 					if (plthandhand==true){
-<<<<<<< HEAD:PltTndrlDevice.h
-						unsigned startIndex = maxNeighborCount * pullNode_id;
-						unsigned finalIndex = startIndex + maxNeighborCount;
-
-						for (unsigned nbr_loc = startIndex; nbr_loc < finalIndex; nbr_loc++){
-=======
 						unsigned startIndex_1 = maxNeighborCount * pullNode_id;
 						unsigned endIndex_1 = startIndex_1 + maxNeighborCount;
 
 						for (unsigned nbr_loc = startIndex_1; nbr_loc < endIndex_1; nbr_loc++){
->>>>>>> 62d766c4c854ea6b91440315e95f632da547ff37:functor_plt_arm_node.h
 
 								unsigned newpullNode_id = glblNghbrsId[ nbr_loc ];
 								//check tentative node is not already connected
