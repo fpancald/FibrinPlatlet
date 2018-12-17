@@ -54,7 +54,7 @@ void init_net_inct_bucket(
 	domainParams.ZBucketCount_net_intc = ceil((domainParams.maxZ - domainParams.minZ) / domainParams.gridSpacing_net_intc) + 1;
 
 	if ( (domainParams.XBucketCount_net_intc * domainParams.YBucketCount_net_intc * domainParams.ZBucketCount_net_intc) != domainParams.totalBucketCount_net_intc	) {
-		
+		std::cout<<"resetting grid for network interact" << std::endl;
 		std::cout<<"x-bucket: "<< domainParams.XBucketCount_net_intc<<std::endl;
 		std::cout<<"y-bucket: "<< domainParams.YBucketCount_net_intc<<std::endl;
 		std::cout<<"z-bucket: "<< domainParams.ZBucketCount_net_intc<<std::endl;

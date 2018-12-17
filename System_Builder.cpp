@@ -395,8 +395,8 @@ std::shared_ptr<System> SystemBuilder::create() {
 	host_ptr_devNodeSystem->generalParams.pltRAdhesion = pltRAdhesion;
 	host_ptr_devNodeSystem->generalParams.pltMass = defaultPltMass;
 
-	host_ptr_devNodeSystem->domainParams.gridSpacing_plt_intc = pltRForce;
-	host_ptr_devNodeSystem->domainParams.gridSpacing_net_intc = 5*defaultLinkDiameter;
+	host_ptr_devNodeSystem->domainParams.gridSpacing_plt_intc = 1.2 * pltRForce;
+	host_ptr_devNodeSystem->domainParams.gridSpacing_net_intc = 5 * defaultLinkDiameter;
 
 	host_ptr_devNodeSystem->generalParams.fiberDiameter = defaultLinkDiameter ;
 	host_ptr_devNodeSystem->generalParams.pltDensity = pltDensity;

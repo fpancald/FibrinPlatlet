@@ -144,15 +144,17 @@ void System::solveForces() {
 
 void System::solveSystem() {
 
+	//set initial bucket scheme
+	setBucketScheme();
 
 	//set initial epsilon
 	generalParams.epsilon = (1.0) *
 		sqrt(6.0*generalParams.kB * generalParams.temperature * generalParams.dtTemp / generalParams.viscousDamp);
 
 	while (generalParams.runSim == true) {
+
 		generalParams.iterationCounter++;
 		generalParams.currentTime += generalParams.dtTemp;
-
 		//std::cout<<"iterationCount: "<< generalParams.iterationCounter <<std::endl;
 
 		Advance_Positions(
@@ -160,7 +162,9 @@ void System::solveSystem() {
 			pltInfoVecs,
 		 	generalParams);	
 		
-		setBucketScheme();
+		if (generalParams.iterationCounter % 10 == 0) {
+			setBucketScheme();
+		}
 
 		
 		solveForces(); //resets and solves forces for next time step
@@ -168,7 +172,7 @@ void System::solveSystem() {
 //std::cout<<"post force plt force: "<<pltInfoVecs.pltForceX[0]<<" "<<pltInfoVecs.pltForceY[0]<<" "<<pltInfoVecs.pltForceZ[0]<<std::endl;
 
 
-		if (generalParams.iterationCounter % 5000 == 0) {
+		if (generalParams.iterationCounter % 500 == 0) {
 
 			storage->print_VTK_File();
 			//store sum of all forces on each node. Used in stress calculations
@@ -204,6 +208,7 @@ void System::solveSystem() {
 
 			generalParams.epsilon = (1.0) *
 				sqrt(6.0 * generalParams.kB * generalParams.temperature * generalParams.dtTemp / generalParams.viscousDamp);
+
 		}
 
 	}
@@ -350,6 +355,12 @@ void System::setNodeVecs(
 	auxVecs.id_value_plt_intc.resize(generalParams.maxNodeCount);
 	auxVecs.id_bucket_expanded_plt_intc.resize(27 * (generalParams.maxNodeCount));
 	auxVecs.id_value_expanded_plt_intc.resize(27 *( generalParams.maxNodeCount ));
+
+	
+	auxVecs.idPlt_bucket.resize(generalParams.maxPltCount);
+	auxVecs.idPlt_value.resize(generalParams.maxPltCount);
+	auxVecs.idPlt_bucket_expanded.resize(27 * (generalParams.maxPltCount));
+	auxVecs.idPlt_value_expanded.resize(27 *( generalParams.maxPltCount ));
 
 };
 
