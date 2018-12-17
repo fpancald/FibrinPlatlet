@@ -11,14 +11,14 @@
 
 #include "pugixml/include/pugixml.hpp"
 
-#include "NodeSystemDevice.h"
+#include "System.h"
 
-#include "NodeSystemBuilder.h"
-#include "ForceDiagramStorage.h"
+#include "System_Builder.h"
+#include "Storage.h"
 
 
 
-std::shared_ptr<NodeSystemDevice> createNodeSystem(const char* schemeFile, std::shared_ptr<NodeSystemBuilder> builder)	{
+std::shared_ptr<System> createSystem(const char* schemeFile, std::shared_ptr<SystemBuilder> builder)	{
 	pugi::xml_document doc;
 	pugi::xml_parse_result parseResult = doc.load_file(schemeFile);
 
@@ -282,23 +282,23 @@ void run(int argc, char** argv) {
 	}
 
 
-		auto builder = std::make_shared<NodeSystemBuilder>(epsilon, timeStep);
+		auto builder = std::make_shared<SystemBuilder>(epsilon, timeStep);
 
-		auto system = createNodeSystem(argv[argc-1], builder);
+		auto system = createSystem(argv[argc-1], builder);
 
 		auto outputFileName = generateOutputFileName(argv[argc-1]);
 
 		//once the system is set, we'll store the initial values via the ptr system.
-		//ForceDiagramStocrrage storage( system, outputFileName);
-		auto storage = std::make_shared<ForceDiagramStorage>(system, builder, outputFileName);
+		//Storage storage( system, outputFileName);
+		auto storage = std::make_shared<Storage>(system, builder, outputFileName);
 
 
 		std::cout << "assigning fdiagram in main" << std::endl;
-		system->assignForceDiagramStorage(storage);
+		system->assignStorage(storage);
 		std::cout << "post fdiagram in main" << std::endl;
 
 		std::cout << "solving system in main" << std::endl;
-		system->solveSystemDevice();
+		system->solveSystem();
 
 
 	t1 = time(0);  //current time at the end of solving the system.
