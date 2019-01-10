@@ -317,7 +317,7 @@ std::shared_ptr<System> SystemBuilder::create() {
 		double pltmaxY = (*(thrust::max_element(hostPosY.begin(), hostPosY.end())));
 		double pltminZ = (*(thrust::min_element(hostPosZ.begin(), hostPosZ.end())));
 		double pltmaxZ = (*(thrust::max_element(hostPosZ.begin(), hostPosZ.end())));
-		numPlts = 2;//static_cast<unsigned>(ceil((pltmaxX - pltminX) * (pltmaxY - pltminY) * (pltmaxZ - pltminZ) * pltDensity));
+		numPlts = static_cast<unsigned>(ceil((pltmaxX - pltminX) * (pltmaxY - pltminY) * (pltmaxZ - pltminZ) * pltDensity));
 
 		std::cout<< "number of plts from density: "<< numPlts<<std::endl;
 
@@ -335,12 +335,12 @@ std::shared_ptr<System> SystemBuilder::create() {
     	std::uniform_real_distribution<> distZ(pltminZ + padding, pltmaxZ - padding);
 
 		for (unsigned plt = 0; plt < numPlts; plt++ ){
-			__attribute__ ((unused)) double xPos = distX(genX);
-			__attribute__ ((unused)) double yPos = distY(genY);
-			__attribute__ ((unused)) double zPos = distZ(genZ);
-			hostPltPosX.push_back(static_cast<double>(plt+3) );
-			hostPltPosY.push_back(static_cast<double>(plt+3) );
-			hostPltPosZ.push_back(static_cast<double>(plt+3) );
+			 double xPos = distX(genX);
+			 double yPos = distY(genY);
+			 double zPos = distZ(genZ);
+			hostPltPosX.push_back(xPos);
+			hostPltPosY.push_back(yPos);
+			hostPltPosZ.push_back(zPos);
 
 			std::cout<<" plt pos: "<< hostPltPosX[plt] << " "<< hostPltPosY[plt] << " "<< hostPltPosZ[plt] << std::endl;
 		}
