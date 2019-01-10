@@ -8,6 +8,7 @@
 #include "Plt_Field_Plt_Force.h"
 #include "Plt_Vol_Exc_Force.h"
 
+#include "Params_Calc.h"
 #include "Advance_Positions.h"
 #include "Bucket_Net.h"
 #include "Bucket_Plt.h"
@@ -168,8 +169,6 @@ void System::solveSystem() {
 
 		
 		solveForces(); //resets and solves forces for next time step
-//std::cout<<"post force plt pos: "<<pltInfoVecs.pltLocX[0]<<" "<<pltInfoVecs.pltLocY[0]<<" "<<pltInfoVecs.pltLocZ[0]<<std::endl;
-//std::cout<<"post force plt force: "<<pltInfoVecs.pltForceX[0]<<" "<<pltInfoVecs.pltForceY[0]<<" "<<pltInfoVecs.pltForceZ[0]<<std::endl;
 
 
 		if (generalParams.iterationCounter % 500 == 0) {
@@ -177,34 +176,15 @@ void System::solveSystem() {
 			storage->print_VTK_File();
 			//store sum of all forces on each node. Used in stress calculations
 			//store before upadting storage class.
-		/*	thrust::transform(
-				thrust::make_zip_iterator(
-					thrust::make_tuple(
-						nodeInfoVecs.nodeForceX.begin(),
-						nodeInfoVecs.nodeForceY.begin(),
-						nodeInfoVecs.nodeForceZ.begin())),
-				thrust::make_zip_iterator(
-					thrust::make_tuple(
-						nodeInfoVecs.nodeForceX.begin(),
-						nodeInfoVecs.nodeForceY.begin(),
-						nodeInfoVecs.nodeForceZ.begin())) + generalParams.maxNodeCount,
-				nodeInfoVecs.sumForcesOnNode.begin(),//save vector
-				NormFunctor());
-				//platelets
-				thrust::transform(
-					thrust::make_zip_iterator(
-						thrust::make_tuple(
-							pltInfoVecs.pltForceX.begin(),
-							pltInfoVecs.pltForceY.begin(),
-							pltInfoVecs.pltForceZ.begin())),
-					thrust::make_zip_iterator(
-						thrust::make_tuple(
-							pltInfoVecs.pltForceX.begin(),
-							pltInfoVecs.pltForceY.begin(),
-							pltInfoVecs.pltForceZ.begin())) + generalParams.maxPltCount,
-					pltInfoVecs.sumForcesOnPlt.begin(),//save vector
-					NormFunctor());*/
 
+			//WARNING BEFORE CALLING SAVE_PARAMS CALCULATE THEM FIRST
+			Params_Calc(
+    			wlcInfoVecs,
+    			nodeInfoVecs,
+    			generalParams,
+    			pltInfoVecs);
+
+			storage->save_params();
 
 			generalParams.epsilon = (1.0) *
 				sqrt(6.0 * generalParams.kB * generalParams.temperature * generalParams.dtTemp / generalParams.viscousDamp);

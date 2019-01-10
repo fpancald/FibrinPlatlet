@@ -12,72 +12,116 @@ Storage::Storage(std::weak_ptr<System> a_system,
 
 	system = a_system;
 	builder = b_system;
-/*	bn = a_fileName; //this will be used later to open files
-	std::ofstream statesOutput(a_fileName + ".sta");
-	std::ofstream statesOutputStrain(a_fileName + "_Strain.sta");
-
-	std::shared_ptr<System> sysA = system.lock();
-	std::shared_ptr<SystemBuilder> sysB = builder.lock();
-
-	if ((sysA) && (sysB) ){
-		unsigned maxNodeCount = sysA->generalParams.maxNodeCount;
-		__attribute__ ((unused)) unsigned maxNeighborCount = sysA->generalParams.maxNeighborCount;
-
-		statesOutput << "node_count " << maxNodeCount << '\n';
-		statesOutput << "origin_node_count " << sysA->generalParams.originNodeCount << '\n';
-		statesOutput << "origin_link_count " << sysA->generalParams.originLinkCount << '\n';
-		statesOutput << "sub_node_count " << sysA->generalParams.subNodeCount << std::endl;//system->getSubNodesSize() << '\n';
-		statesOutput << "link_count " << sysA->generalParams.originEdgeCount << '\n';
-
-		for (unsigned edge = 0; edge < sysB->hostWLCEdgeLeft.size(); edge++) {
-			unsigned idLeft = sysB->hostWLCEdgeLeft[edge];
-			unsigned idRight = sysB->hostWLCEdgeRight[edge];
-			statesOutput << '\n' << idLeft << ' ' << idRight;
-		}
-
-	}
-
-
-	statesOutput.close();*/
-};
-
-void Storage::updateStrain() {
 
 };
 
-void Storage::updateTotalStrain(void) {
-	/*std::shared_ptr<System> sys = system.lock();
+
+
+void Storage::save_params(void) {
+	std::shared_ptr<System> sys = system.lock();
 	if (sys) {
 
-
+		//first create a new file using the current network strain
+		
 		std::string format = ".sta";
-		std::string strain =  std::to_string(currentStrain);
-		std::string initial = "StrainTest/Strain_";
+		
+		std::string strain =  std::to_string(sys->generalParams.currentTime);
+		std::string initial = "Params/Param_";
 		std::ofstream ofs;
-		std::string Filename = initial + format;
+		std::string Filename = initial + strain + format;
 		ofs.open(Filename.c_str());
 
 
 
-		unsigned maxNeighborCount = sys->generalParams.maxNeighborCount;
+		//unsigned maxNeighborCount = sys->generalParams.maxNeighborCount;
 		unsigned maxNodeCount = sys->generalParams.maxNodeCount;
 		unsigned originalNodeCount = sys->generalParams.originNodeCount;
 		unsigned originalEdgeCount = sys->generalParams.originLinkCount;
 		unsigned edgeCountDiscretize = sys->generalParams.originEdgeCount;
 		//Now first place strain
-		ofs << std::setprecision(5) <<std::fixed<< "network_strain " << currentStrain<<std::endl;
+		ofs << std::setprecision(5) <<std::fixed<< "time " << sys->generalParams.currentTime<<std::endl;
 		ofs << std::setprecision(5) <<std::fixed<< "minX " << sys->domainParams.minX<<std::endl;
 		ofs << std::setprecision(5) <<std::fixed<< "maxX " << sys->domainParams.maxX<<std::endl;
 		ofs << std::setprecision(5) <<std::fixed<< "minY " << sys->domainParams.minY<<std::endl;
 		ofs << std::setprecision(5) <<std::fixed<< "maxY " << sys->domainParams.maxY<<std::endl;
 		ofs << std::setprecision(5) <<std::fixed<< "minZ " << sys->domainParams.minX<<std::endl;
 		ofs << std::setprecision(5) <<std::fixed<< "maxZ " << sys->domainParams.maxX<<std::endl;
+		
+		
+		ofs << std::setprecision(5) <<std::fixed<< "original_node_count " << originalNodeCount <<std::endl;
+		ofs << std::setprecision(5) <<std::fixed<< "node_count_discretize " << maxNodeCount <<std::endl;
+		ofs << std::setprecision(5) <<std::fixed<< "original_edge_count " << originalEdgeCount <<std::endl;
+		ofs << std::setprecision(5) <<std::fixed<< "edge_count_discretize " << edgeCountDiscretize <<std::endl;
+		
+		//place nodes
+		for (unsigned i = 0; i < sys->nodeInfoVecs.nodeLocX.size(); i++) {
+			double x = sys->nodeInfoVecs.nodeLocX[i];
+			double y = sys->nodeInfoVecs.nodeLocY[i];
+			double z = sys->nodeInfoVecs.nodeLocZ[i];
+			ofs << std::setprecision(5) <<std::fixed<< "node " << x << " " << y << " " << z <<std::endl;
+		
+		}
+		
+		//place plts
+		for (unsigned i = 0; i < sys->pltInfoVecs.pltLocX.size(); i++) {
+			double x = sys->pltInfoVecs.pltLocX[i];
+			double y = sys->pltInfoVecs.pltLocY[i];
+			double z = sys->pltInfoVecs.pltLocZ[i];
+			ofs << std::setprecision(5) <<std::fixed<< "plt " << x << " " << y << " " << z <<std::endl;
+		
+		}
+		//place force node is experiencing
+		for (unsigned i = 0; i < sys->nodeInfoVecs.nodeLocX.size(); i++) {
+			ofs << std::setprecision(5) <<std::fixed<< "force_on_node " << sys->nodeInfoVecs.sumForcesOnNode[i]<<std::endl;
+		
+		}
+
+		//place original edges
+		for (unsigned edge = 0; edge < sys->generalParams.originEdgeCount; edge++) {
+			unsigned idL = sys->nodeInfoVecs.deviceEdgeLeft[edge];
+			unsigned idR = sys->nodeInfoVecs.deviceEdgeRight[edge];
+			ofs <<"original_edge_discretized " <<idL <<" "<< idR <<std::endl;
+			
+		}
+				 
+		//place added edges
+		for (unsigned edge = sys->generalParams.originEdgeCount; edge < sys->generalParams.currentEdgeCount; edge++) {
+			unsigned idL = sys->nodeInfoVecs.deviceEdgeLeft[edge];
+			unsigned idR = sys->nodeInfoVecs.deviceEdgeRight[edge];
+			ofs <<"added_edge " <<idL <<" "<< idR <<std::endl;
+			
+		}
+
+		//original edge strain
+		for (unsigned i = 0; i < sys->generalParams.originEdgeCount; i++ ){
+			double val = sys->nodeInfoVecs.discretizedEdgeStrain[i];
+
+			ofs << std::setprecision(5)<< std::fixed<<"original_edge_strain " << val <<std::endl;
+		}
+				
+		//original edge alignment
+		for (unsigned i = 0; i < sys->generalParams.originEdgeCount; i++ ){
+			double val = sys->nodeInfoVecs.discretizedEdgeAlignment[i];
+			ofs << std::setprecision(5)<< std::fixed<<"original_edge_alignment " << val <<std::endl;
+		}
+
+		//added edge strain
+		for (unsigned i = sys->generalParams.originEdgeCount; i < sys->generalParams.currentEdgeCount; i++ ){
+			double val = sys->nodeInfoVecs.discretizedEdgeStrain[i];
+			ofs << std::setprecision(5)<< std::fixed<<"added_edge_strain " << val <<std::endl;
+		}
+		
+		//added links per node.
+		for (unsigned i = 0; i < sys->generalParams.maxNodeCount; i++ ){
+			unsigned val = sys->wlcInfoVecs.currentNodeEdgeCountVector[i] - 
+				sys->wlcInfoVecs.numOriginalNeighborsNodeVector[i];
+			ofs << std::setprecision(5)<< std::fixed<<"bind_sites_per_node " << val <<std::endl;
+		}
 
 
 
-
-	}*/
-}
+	}
+};
 
 
 void Storage::print_VTK_File() {

@@ -233,21 +233,6 @@ struct AveStrainFunctor {
 
 
 
-struct NormFunctor {
-
-		__host__ __device__
-		double operator() (const CVec3& vec) {
-		//divide force by fiber cross section to get stress
-		double result = sqrt(thrust::get<0>(vec) * thrust::get<0>(vec) +
-			thrust::get<1>(vec) * thrust::get<1>(vec) +
-			thrust::get<2>(vec) * thrust::get<2>(vec));
-
-		return result;
-
-
-	}
-};
-
 struct IsEqualToOne {
 	 __host__ __device__
 
