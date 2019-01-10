@@ -20,6 +20,7 @@ CPP_SRCS += \
 ../Torsion_Force.cu \
 ../WLC_Force.cu \
 ../Advance_Positions.cu \
+../Params_Calc.cu \
 ../Link_Nodes.cu \
 ../Bucket_Net.cu \
 ../Bucket_Plt.cu \
@@ -39,6 +40,7 @@ OBJS += \
 ./Torsion_Force.o \
 ./WLC_Force.o \
 ./Advance_Positions.o \
+./Params_Calc.o \
 ./Link_Nodes.o \
 ./Bucket_Net.o \
 ./Bucket_Plt.o \
@@ -57,6 +59,7 @@ CPP_DEPS += \
 ./Torsion_Force.d \
 ./WLC_Force.d \
 ./Advance_Positions.d \
+./Params_Calc.d \
 ./Link_Nodes.d \
 ./Bucket_Net.d \
 ./Bucket_Plt.d \

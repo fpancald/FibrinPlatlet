@@ -34,11 +34,9 @@ public:
 	Storage(std::weak_ptr<System> a_system,
 		std::weak_ptr<SystemBuilder> b_system, const std::string& a_filename);
 
-	void updateStrain(void);
-	void updateTotalStrain(void);
+	void save_params(void);
 
 	void updateStorage(void);
 	void print_VTK_File(void);
 };
-
-#endif /*FORCEDIAGRAMSTORAGE_H_*/
+#endif
