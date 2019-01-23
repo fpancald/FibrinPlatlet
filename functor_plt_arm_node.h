@@ -277,8 +277,13 @@ struct functor_plt_arm_node : public thrust::unary_function< U2CVec6, CVec3>  {
 				//ISSUE HERE: we need a random permutation of nodes.
         	    for (unsigned newpull_index = beginIndex; newpull_index < endIndex; newpull_index++){
         	        unsigned newPullNode_id = id_value_expanded[ newpull_index ];
-					bool node_is_new = true;
 
+					bool isNodeInPltVol = false;
+					if (agg_release) {
+						isNodeInPltVol = isNodeInPltVolAddr[newPullNode_id];
+					}
+
+					bool node_is_new = true;
 					//check tentative node is not already connected
 				    for (unsigned checkId = 0; checkId < plt_tndrl_intrct; checkId++){
         	        	if (newPullNode_id == tndrlNodeId[storageLocation + checkId]){
@@ -286,7 +291,9 @@ struct functor_plt_arm_node : public thrust::unary_function< U2CVec6, CVec3>  {
         	        		break;
         	        	}
         	      	}
-					if ((node_is_new)){
+					  
+					//only pull on new nodes that(if agg is on) are not in plt volume
+					if ( (node_is_new) && (isNodeInPltVol == false) ){
 
 						double vecN_PX = pltLocX - nodeLocXAddr[newPullNode_id];
 						double vecN_PY = pltLocY - nodeLocYAddr[newPullNode_id];
