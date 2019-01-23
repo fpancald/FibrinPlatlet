@@ -116,6 +116,7 @@ void Plt_Vol_Exc_Force(
  			thrust::equal_to<unsigned>(), CVec3Add())) - pltInfoVecs.nodeReducedId.begin();//binary_pred, binary_op
 
 		//apply force to network 
+		//and check of node is in plt volume or not
         thrust::for_each(
         	thrust::make_zip_iterator(//1st begin
         		thrust::make_tuple(
@@ -129,8 +130,9 @@ void Plt_Vol_Exc_Force(
         			pltInfoVecs.nodeReducedForceX.begin(),
         			pltInfoVecs.nodeReducedForceY.begin(),
         			pltInfoVecs.nodeReducedForceZ.begin())) + endKey,
-        	functor_add_UCVec3_CVec3(
+        	functor_add_UCVec3_CVec3_pltVol(
         		thrust::raw_pointer_cast(nodeInfoVecs.nodeForceX.data()),
         		thrust::raw_pointer_cast(nodeInfoVecs.nodeForceY.data()),
-        		thrust::raw_pointer_cast(nodeInfoVecs.nodeForceZ.data())));
+        		thrust::raw_pointer_cast(nodeInfoVecs.nodeForceZ.data()),
+				thrust::raw_pointer_cast(nodeInfoVecs.isNodeInPltVol.data())));
 	}

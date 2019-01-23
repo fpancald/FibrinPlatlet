@@ -73,6 +73,7 @@ void Plt_Arm_Node_Force(
                 generalParams.maxNeighborCount,
 				generalParams.pltrelease,
 				generalParams.plthandhand,
+				generalParams.agg_release,
 
                 thrust::raw_pointer_cast(nodeInfoVecs.nodeLocX.data()),
                 thrust::raw_pointer_cast(nodeInfoVecs.nodeLocY.data()),
@@ -90,6 +91,7 @@ void Plt_Arm_Node_Force(
 
                 thrust::raw_pointer_cast(pltInfoVecs.tndrlNodeId.data()),
                 thrust::raw_pointer_cast(pltInfoVecs.tndrlNodeType.data()),
+                thrust::raw_pointer_cast(nodeInfoVecs.isNodeInPltVol.data()),
                 thrust::raw_pointer_cast(wlcInfoVecs.globalNeighbors.data()),
 
                 thrust::raw_pointer_cast(pltInfoVecs.pltLocX.data()),

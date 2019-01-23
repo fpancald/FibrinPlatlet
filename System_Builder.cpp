@@ -309,7 +309,7 @@ std::shared_ptr<System> SystemBuilder::create() {
 		}
 	}
 
-	//build platelets if density > 0
+	//build platelets if density > 0, otherwise use input positions
 	if (pltDensity > 0.0) {
 		double pltminX = (*(thrust::min_element(hostPosX.begin(), hostPosX.end())));
 		double pltmaxX = (*(thrust::max_element(hostPosX.begin(), hostPosX.end())));

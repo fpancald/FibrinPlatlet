@@ -16,6 +16,7 @@ struct functor_plt_arm_node : public thrust::unary_function< U2CVec6, CVec3>  {
   	unsigned maxNeighborCount;
 	bool pltrelease;
 	bool plthandhand;
+	bool agg_release;
 
   	double* nodeLocXAddr;
 	double* nodeLocYAddr;
@@ -33,6 +34,7 @@ struct functor_plt_arm_node : public thrust::unary_function< U2CVec6, CVec3>  {
 
   	unsigned* tndrlNodeId;
   	unsigned* tndrlNodeType;
+	bool* isNodeInPltVolAddr;
   	unsigned* glblNghbrsId;
 
   	double* pltLocXAddr;
@@ -55,6 +57,7 @@ struct functor_plt_arm_node : public thrust::unary_function< U2CVec6, CVec3>  {
             unsigned& _maxNeighborCount,
 			bool& _pltrelease,
 			bool& _plthandhand,
+			bool& _agg_release,
 
             double* _nodeLocXAddr,
             double* _nodeLocYAddr,
@@ -72,6 +75,7 @@ struct functor_plt_arm_node : public thrust::unary_function< U2CVec6, CVec3>  {
 
             unsigned* _tndrlNodeId,
             unsigned* _tndrlNodeType,
+			bool* _isNodeInPltVolAddr,
             unsigned* _glblNghbrsId,
 
             double* _pltLocXAddr,
@@ -90,6 +94,7 @@ struct functor_plt_arm_node : public thrust::unary_function< U2CVec6, CVec3>  {
     maxNeighborCount(_maxNeighborCount),
 	pltrelease(_pltrelease),
 	plthandhand(_plthandhand),
+	agg_release(_agg_release),
 
     nodeLocXAddr(_nodeLocXAddr),
 	nodeLocYAddr(_nodeLocYAddr),
@@ -107,6 +112,7 @@ struct functor_plt_arm_node : public thrust::unary_function< U2CVec6, CVec3>  {
 
     tndrlNodeId(_tndrlNodeId),
     tndrlNodeType(_tndrlNodeType),
+	isNodeInPltVolAddr(_isNodeInPltVolAddr),
     glblNghbrsId(_glblNghbrsId),
 
     pltLocXAddr(_pltLocXAddr),
@@ -145,56 +151,74 @@ struct functor_plt_arm_node : public thrust::unary_function< U2CVec6, CVec3>  {
     	//double vecN_PZ = 0.0;
     	//double dist = 0.0;
 
-        //pulling
         //Loop through the number of available tendrils
         for(unsigned interactionCounter = 0; interactionCounter < plt_tndrl_intrct; interactionCounter++) {
 
             unsigned pullNode_id = tndrlNodeId[storageLocation + interactionCounter];
             unsigned pullNode_type = tndrlNodeType[storageLocation + interactionCounter];
 
+			//CHECK IF PLT PULLS NODE
+			//WARNING: RESETS NBRs
             if (( pullNode_id != maxIdCountFlag) &&
                ( pullNode_type == 0)) {
-			   //then we have a node connected to the plt.
+			    //then we have a node connected to the plt.
                 //TYPE 0 is network
 
                 //Calculate distance from plt to node.
-               // unsigned pullNode_id = tndrlNodeId[storageLocation + interactionCounter];
+                //unsigned pullNode_id = tndrlNodeId[storageLocation + interactionCounter];
                 //Get position of node
                 double vecN_PX = pltLocX - nodeLocXAddr[pullNode_id];
                 double vecN_PY = pltLocY - nodeLocYAddr[pullNode_id];
                 double vecN_PZ = pltLocZ - nodeLocZAddr[pullNode_id];
+
                 double dist = sqrt(
                     (vecN_PX) * (vecN_PX) +
                     (vecN_PY) * (vecN_PY) +
                     (vecN_PZ) * (vecN_PZ));
 
                 //check if the node is not in pulling range anymore.
-                if ((dist >= pltRForce) || (dist <= (pltR + fiberDiameter / 2.0 ) ) ){
+                if ((dist >= pltRForce) || (dist <= (pltR + fiberDiameter / 2.0 ) ) ) {
 
                   	//then node is out of range, so we empty tendril if pltrelease is true
 
-					if (pltrelease==true){
+					if (pltrelease == true){
 						tndrlNodeId[storageLocation + interactionCounter] = maxIdCountFlag;//reset
 					}
                   	//try to find a new node to pull within connections of previous node if plthandhand is true
-					if (plthandhand==true){
+					
+					//HOW TO MAKE THE PLT CHOOSE ANOTHER 
+					//POINT WHEN TWO PLT's MEET?
+					if (plthandhand == true) {
 						unsigned startIndex_1 = maxNeighborCount * pullNode_id;
 						unsigned endIndex_1 = startIndex_1 + maxNeighborCount;
 
-						for (unsigned nbr_loc = startIndex_1; nbr_loc < endIndex_1; nbr_loc++){
+						for (unsigned nbr_loc = startIndex_1; nbr_loc < endIndex_1; nbr_loc++) {
 
-								unsigned newpullNode_id = glblNghbrsId[ nbr_loc ];
+								unsigned newPullNode_id = glblNghbrsId[ nbr_loc ];
 								//check tentative node is not already connected
 								for (unsigned checkId = 0; checkId < plt_tndrl_intrct; checkId++) {
-									if (newpullNode_id != tndrlNodeId[storageLocation + checkId]) {
-									  break;
+									if (newPullNode_id != tndrlNodeId[storageLocation + checkId]) {
+										
+										bool isNodeInPltVol = false;
+										if (agg_release) {
+											isNodeInPltVol = isNodeInPltVolAddr[newPullNode_id];
+										}
+										//then newPullNode_id isn't yet pulled.
+										//We can break out of this for statement
+										//and check if it is close enough
+
+										//This ensures that agg_release controls the node in plt volume
+										//variables.
+										if (isNodeInPltVol == false){
+											break;
+										}
 									}
 								}
 							//check neighbor not empty
-							if (newpullNode_id < maxNodeCount){//maxNodeCount is default neighbor value.
-								 vecN_PX = pltLocX - nodeLocXAddr[newpullNode_id];
-								 vecN_PY = pltLocY - nodeLocYAddr[newpullNode_id];
-								 vecN_PZ = pltLocZ - nodeLocZAddr[newpullNode_id];
+							if (newPullNode_id < maxNodeCount){//maxNodeCount is default neighbor value.
+								 vecN_PX = pltLocX - nodeLocXAddr[newPullNode_id];
+								 vecN_PY = pltLocY - nodeLocYAddr[newPullNode_id];
+								 vecN_PZ = pltLocZ - nodeLocZAddr[newPullNode_id];
 								//Calculate distance from plt to node.
 								 dist = sqrt(
 									(vecN_PX) * (vecN_PX) +
@@ -203,17 +227,18 @@ struct functor_plt_arm_node : public thrust::unary_function< U2CVec6, CVec3>  {
 
 								//check if new node is in interaction range and fill tendril with new node than break neighbors loop
 								if ((dist < pltRForce) && (dist > (pltR + fiberDiameter / 2.0) ) ) {//pull this node
-									tndrlNodeId[storageLocation + interactionCounter] = newpullNode_id;//bucketNbrsExp[i];
+									tndrlNodeId[storageLocation + interactionCounter] = newPullNode_id;//bucketNbrsExp[i];
 									tndrlNodeType[storageLocation + interactionCounter] = 0;//assign type
 									break;
 								}
 							}
 						}
 					}
+					//end hand-hand
                 }
             }
 
-        	//check if tendril instead still pulls a plt
+        	//CHECK IF PLT PULLS PLT INSTEAD OF NETWORK
         	else if ( (pullNode_id != maxIdCountFlag) &&
         	    ( pullNode_type == 1) ) {//note this happens only if plt-plt interaction is on
         	  	//then we have a plt connected to the plt.
@@ -243,28 +268,29 @@ struct functor_plt_arm_node : public thrust::unary_function< U2CVec6, CVec3>  {
             pullNode_id = tndrlNodeId[storageLocation + interactionCounter];
             pullNode_type = tndrlNodeType[storageLocation + interactionCounter];
 
-        	// check if tendril still has no node or platelet to pull
-        	if (pullNode_id == maxIdCountFlag){
+        	//CHECK IF PLT HAS NOTHING
+			//THEN SEARCH FOR NODE
+			if (pullNode_id == maxIdCountFlag) {
 				//then we have nothing to pull.
         	    //try to find a node to pull by searching.
 
 				//ISSUE HERE: we need a random permutation of nodes.
         	    for (unsigned newpull_index = beginIndex; newpull_index < endIndex; newpull_index++){
-        	        unsigned newpullNode_id = id_value_expanded[ newpull_index ];
+        	        unsigned newPullNode_id = id_value_expanded[ newpull_index ];
 					bool node_is_new = true;
 
 					//check tentative node is not already connected
 				    for (unsigned checkId = 0; checkId < plt_tndrl_intrct; checkId++){
-        	        	if (newpullNode_id == tndrlNodeId[storageLocation + checkId]){
+        	        	if (newPullNode_id == tndrlNodeId[storageLocation + checkId]){
 							node_is_new = false;
         	        		break;
         	        	}
         	      	}
 					if ((node_is_new)){
 
-						double vecN_PX = pltLocX - nodeLocXAddr[newpullNode_id];
-						double vecN_PY = pltLocY - nodeLocYAddr[newpullNode_id];
-						double vecN_PZ = pltLocZ - nodeLocZAddr[newpullNode_id];
+						double vecN_PX = pltLocX - nodeLocXAddr[newPullNode_id];
+						double vecN_PY = pltLocY - nodeLocYAddr[newPullNode_id];
+						double vecN_PZ = pltLocZ - nodeLocZAddr[newPullNode_id];
 						//Calculate distance from plt to node.
 						double dist = sqrt(
 						(vecN_PX) * (vecN_PX) +
@@ -277,7 +303,7 @@ struct functor_plt_arm_node : public thrust::unary_function< U2CVec6, CVec3>  {
 							(dist > (pltR + fiberDiameter / 2.0) ) ) {
 							//pull this node
 
-							tndrlNodeId[storageLocation + interactionCounter] = newpullNode_id;//bucketNbrsExp[i];
+							tndrlNodeId[storageLocation + interactionCounter] = newPullNode_id;//bucketNbrsExp[i];
 							tndrlNodeType[storageLocation + interactionCounter] = 0;//assign type
 							break;
 						}

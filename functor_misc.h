@@ -47,4 +47,48 @@ struct functor_add_UCVec3_CVec3 {//same as torsion
 
 };
 
+
+struct functor_add_UCVec3_CVec3_pltVol {
+	double* forceXAddr;
+	double* forceYAddr;
+	double* forceZAddr;
+	bool* isNodeInPltVolAddr;
+
+	__host__ __device__
+	//
+		functor_add_UCVec3_CVec3_pltVol(
+				double* _forceXAddr,
+				double* _forceYAddr,
+				double* _forceZAddr,
+				bool* _isNodeInPltVolAddr) :
+			forceXAddr(_forceXAddr),
+			forceYAddr(_forceYAddr),
+			forceZAddr(_forceZAddr),
+			isNodeInPltVolAddr(_isNodeInPltVolAddr) {}
+
+	__device__
+	void operator() (const Tuddd& u1d3) {
+			unsigned idToAssign = thrust::get<0>(u1d3);
+			double f1 = thrust::get<1>(u1d3); 
+			double f2 = thrust::get<2>(u1d3); 
+			double f3 = thrust::get<3>(u1d3); 
+
+			if (!isnan(f1) && !isnan(f2) && !isnan(f3)) {
+
+				forceXAddr[idToAssign] += thrust::get<1>(u1d3);
+				forceYAddr[idToAssign] += thrust::get<2>(u1d3);
+				forceZAddr[idToAssign] += thrust::get<3>(u1d3);
+			}
+			if( (f1 != 0.0) || (f2 != 0.0) || (f3 != 0.0) ){
+				isNodeInPltVolAddr[idToAssign] = true;
+			}
+			else{
+				isNodeInPltVolAddr[idToAssign] = false;
+			}
+
+
+	}
+
+};
+
 #endif

@@ -301,6 +301,9 @@ void System::setNodeVecs(
 	nodeInfoVecs.isNodeFixed.resize(generalParams.maxNodeCount);
 	thrust::copy(hostIsNodeFixed.begin(), hostIsNodeFixed.end(), nodeInfoVecs.isNodeFixed.begin());
 
+	nodeInfoVecs.isNodeInPltVol.resize(generalParams.maxNodeCount);
+	thrust::fill(nodeInfoVecs.isNodeInPltVol.begin(),nodeInfoVecs.isNodeInPltVol.end(),false);
+
 	nodeInfoVecs.linksThreadMade.resize(generalParams.maxNodeCount);
 	nodeInfoVecs.delinksThreadMade.resize(generalParams.maxNodeCount);
 	nodeInfoVecs.idMadeTempLeft.resize(generalParams.maxNodeCount * generalParams.maxLinksPerIteration);
