@@ -24,6 +24,7 @@ struct NodeInfoVecs {
 	thrust::device_vector<double> discretizedEdgeAlignment;
 
 	thrust::device_vector<bool> isNodeFixed;
+	thrust::device_vector<bool> isNodeInPltVol;
 
 
 	// X,Y,Z, location, velocity and force of all
@@ -229,8 +230,9 @@ struct GeneralParams{
 	unsigned maxNeighborCount = 100;
 	unsigned maxNodeCount;//after discretize
 	unsigned originNodeCount;//pre discretize
-  //platelets
-  unsigned maxPltCount;//after discretize
+  	
+	  //platelets
+  	unsigned maxPltCount;//after discretize
 	unsigned originPltCount;//pre discretize
 
 	unsigned originLinkCount;//constant unsubdivided count of edges
@@ -261,6 +263,7 @@ struct GeneralParams{
 	bool pltrelease = true;
 	bool plthandhand = true;
 	bool pltonplt = true;
+	bool agg_release = true;
 	unsigned maxIdCountFlag;//flag variable
 
 	//parameters for advancing timestep and determining equilibrium

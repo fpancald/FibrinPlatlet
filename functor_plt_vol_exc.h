@@ -4,7 +4,8 @@
 #include <vector>
 #include "SystemStructures.h"
 
-
+//This functor performs a volume exclusion for each platelet against 
+//fiber nodes and other platelets
 struct functor_plt_vol_exc : public thrust::unary_function< U2CVec6, CVec3 >  {
     unsigned plt_other_intrct;
     double pltRForce;
@@ -110,86 +111,86 @@ struct functor_plt_vol_exc : public thrust::unary_function< U2CVec6, CVec3 >  {
      __device__
    		CVec3 operator()(const U2CVec6 &u2d6) {
 
-          unsigned pltId = thrust::get<0>(u2d6);
-          unsigned bucketId = thrust::get<1>(u2d6);
+        unsigned pltId = thrust::get<0>(u2d6);
+        unsigned bucketId = thrust::get<1>(u2d6);
 
-          //beginning and end of attempted interaction network nodes.
-  		    unsigned beginIndexNode = keyBegin[bucketId];
-  		    unsigned endIndexNode = keyEnd[bucketId];
+        //beginning and end of attempted interaction network nodes.
+  		unsigned beginIndexNode = keyBegin[bucketId];
+  		unsigned endIndexNode = keyEnd[bucketId];
 
-          unsigned beginIndexPlt = keyPltBegin[bucketId];
-  		    unsigned endIndexPlt = keyPltEnd[bucketId];
+        unsigned beginIndexPlt = keyPltBegin[bucketId];
+  		unsigned endIndexPlt = keyPltEnd[bucketId];
 
 
-          unsigned storageLocation = pltId * plt_other_intrct;
+        unsigned storageLocation = pltId * plt_other_intrct;
 
-          double pltLocX = thrust::get<2>(u2d6);
-          double pltLocY = thrust::get<3>(u2d6);
-          double pltLocZ = thrust::get<4>(u2d6);
+        double pltLocX = thrust::get<2>(u2d6);
+        double pltLocY = thrust::get<3>(u2d6);
+        double pltLocZ = thrust::get<4>(u2d6);
           
-          //use for return. 
-          double sumPltForceX = thrust::get<5>(u2d6);;
-          double sumPltForceY = thrust::get<6>(u2d6);;
-          double sumPltForceZ = thrust::get<7>(u2d6);;
+        //use for return. 
+        double sumPltForceX = thrust::get<5>(u2d6);;
+        double sumPltForceY = thrust::get<6>(u2d6);;
+        double sumPltForceZ = thrust::get<7>(u2d6);;
         
-          //pushing
-          unsigned pushCounter = 0;
+        //pushing
+        unsigned pushCounter = 0;
 
-          //go through all nodes that might be pushed
-          for( unsigned id_count = beginIndexNode; id_count < endIndexNode; id_count++){
-              unsigned pushNode_id = id_value_expanded[id_count];
+        //go through all nodes that might be pushed
+        for( unsigned id_count = beginIndexNode; id_count < endIndexNode; id_count++){
+            unsigned pushNode_id = id_value_expanded[id_count];
               
-              if (pushCounter < plt_other_intrct) {//must be same as other counter.
+            if (pushCounter < plt_other_intrct) {//must be same as other counter.
                   
-                  //Get position of node
-                  double vecN_PX = pltLocX - nodeLocXAddr[pushNode_id];
-                  double vecN_PY = pltLocY - nodeLocYAddr[pushNode_id];
-                  double vecN_PZ = pltLocZ - nodeLocZAddr[pushNode_id];
-                  //Calculate distance from plt to node.
-                  double dist = sqrt(
-                      (vecN_PX) * (vecN_PX) +
-                      (vecN_PY) * (vecN_PY) +
-                      (vecN_PZ) * (vecN_PZ));   
+                //Get position of node
+                double vecN_PX = pltLocX - nodeLocXAddr[pushNode_id];
+                double vecN_PY = pltLocY - nodeLocYAddr[pushNode_id];
+                double vecN_PZ = pltLocZ - nodeLocZAddr[pushNode_id];
+                //Calculate distance from plt to node.
+                double dist = sqrt(
+                    (vecN_PX) * (vecN_PX) +
+                    (vecN_PY) * (vecN_PY) +
+                    (vecN_PZ) * (vecN_PZ));   
 
-                  //check pushcounter
-                      //repulsion if fiber and platelet overlap more than adhesion fractional radius
-                  if (dist < (pltRAdhesion*pltR + fiberDiameter / 2.0) )  {
-                      //node only affects plt position if it is pulled.
-                      //Determine direction of force based on positions and multiply magnitude force
-                      double forceNodeX = -(vecN_PX / dist) * (pltForce);
-                      double forceNodeY = -(vecN_PY / dist) * (pltForce);
-                      double forceNodeZ = -(vecN_PZ / dist) * (pltForce);   
-                      //count force for plt.
-                      sumPltForceX += (-1.0) * forceNodeX;
-                      sumPltForceY += (-1.0) * forceNodeY;
-                      sumPltForceZ += (-1.0) * forceNodeZ;    
-                      //store force in temporary vector. Call reduction later.    
-                      nodeUForceXAddr[storageLocation + pushCounter] = forceNodeX;
-                      nodeUForceYAddr[storageLocation + pushCounter] = forceNodeY;
-                      nodeUForceZAddr[storageLocation + pushCounter] = forceNodeZ;
-                      nodeUId[storageLocation + pushCounter] = pushNode_id;
-                      pushCounter++;
-                  }
-				  //adhesion if between fractional adhesion radius and radius
-				  else if ((dist > (pltRAdhesion*pltR + fiberDiameter / 2.0)) && (dist < (pltR + fiberDiameter / 2.0)) )  {
-                      //node only affects plt position if it is pulled.
-                      //Determine direction of force based on positions and multiply magnitude force
-                      double forceNodeX = (vecN_PX / dist) * (pltForce);
-                      double forceNodeY = (vecN_PY / dist) * (pltForce);
-                      double forceNodeZ = (vecN_PZ / dist) * (pltForce);   
-                      //count force for plt.
-                      sumPltForceX += (-1.0) * forceNodeX;
-                      sumPltForceY += (-1.0) * forceNodeY;
-                      sumPltForceZ += (-1.0) * forceNodeZ;    
-                      //store force in temporary vector. Call reduction later.    
-                      nodeUForceXAddr[storageLocation + pushCounter] = forceNodeX;
-                      nodeUForceYAddr[storageLocation + pushCounter] = forceNodeY;
-                      nodeUForceZAddr[storageLocation + pushCounter] = forceNodeZ;
-                      nodeUId[storageLocation + pushCounter] = pushNode_id;
-                      pushCounter++;
-                  }
-              }
-          }
+                //check pushcounter
+                //repulsion if fiber and platelet overlap more than adhesion fractional radius
+                if (dist < (pltRAdhesion*pltR + fiberDiameter / 2.0) )  {
+                    //node only affects plt position if it is pulled.
+                    //Determine direction of force based on positions and multiply magnitude force
+                    double forceNodeX = -(vecN_PX / dist) * (pltForce);
+                    double forceNodeY = -(vecN_PY / dist) * (pltForce);
+                    double forceNodeZ = -(vecN_PZ / dist) * (pltForce);   
+                    //count force for plt.
+                    sumPltForceX += (-1.0) * forceNodeX;
+                    sumPltForceY += (-1.0) * forceNodeY;
+                    sumPltForceZ += (-1.0) * forceNodeZ;    
+                    //store force in temporary vector. Call reduction later.    
+                    nodeUForceXAddr[storageLocation + pushCounter] = forceNodeX;
+                    nodeUForceYAddr[storageLocation + pushCounter] = forceNodeY;
+                    nodeUForceZAddr[storageLocation + pushCounter] = forceNodeZ;
+                    nodeUId[storageLocation + pushCounter] = pushNode_id;
+                    pushCounter++;
+                }
+				//adhesion if between fractional adhesion radius and radius
+				else if ((dist > (pltRAdhesion*pltR + fiberDiameter / 2.0)) && (dist < (pltR + fiberDiameter / 2.0)) )  {
+                    //node only affects plt position if it is pulled.
+                    //Determine direction of force based on positions and multiply magnitude force
+                    double forceNodeX = (vecN_PX / dist) * (pltForce);
+                    double forceNodeY = (vecN_PY / dist) * (pltForce);
+                    double forceNodeZ = (vecN_PZ / dist) * (pltForce);   
+                    //count force for plt.
+                    sumPltForceX += (-1.0) * forceNodeX;
+                    sumPltForceY += (-1.0) * forceNodeY;
+                    sumPltForceZ += (-1.0) * forceNodeZ;    
+                    //store force in temporary vector. Call reduction later.    
+                    nodeUForceXAddr[storageLocation + pushCounter] = forceNodeX;
+                    nodeUForceYAddr[storageLocation + pushCounter] = forceNodeY;
+                    nodeUForceZAddr[storageLocation + pushCounter] = forceNodeZ;
+                    nodeUId[storageLocation + pushCounter] = pushNode_id;
+                    pushCounter++;
+                }
+            }
+        }
 
           //IN THIS SECTION THERE IS NO WRITING TO VECTORS. NO NEED FOR INCREMENT
           //FORCE IS ONLY APPLIED TO SELF. 
