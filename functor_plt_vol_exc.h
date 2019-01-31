@@ -217,9 +217,9 @@ struct functor_plt_vol_exc : public thrust::unary_function< U2CVec6, CVec3 >  {
                   if (dist < (2.0 * pltR ) )  {
                       //node only affects plt position if it is pulled.
                       //Determine direction of force based on positions and multiply magnitude force
-                      double forcePltX = -(vecN_PX / dist) * (pltForce) * (1.0 + 2.0 * pltR - dist);
-                      double forcePltY = -(vecN_PY / dist) * (pltForce) * (1.0 + 2.0 * pltR - dist);
-                      double forcePltZ = -(vecN_PZ / dist) * (pltForce) * (1.0 + 2.0 * pltR - dist);
+                      double forcePltX = -(vecN_PX / dist) * (pltForce) * (dist * dist + dist - pltR) / (dist * dist);//(1.0 + 2.0 * pltR - dist);
+                      double forcePltY = -(vecN_PY / dist) * (pltForce) * (dist * dist + dist - pltR) / (dist * dist);//(1.0 + 2.0 * pltR - dist);
+                      double forcePltZ = -(vecN_PZ / dist) * (pltForce) * (dist * dist + dist - pltR) / (dist * dist);//(1.0 + 2.0 * pltR - dist);
                       //count force for plt.
                       sumPltForceX += (-1.0) * forcePltX;
                       sumPltForceY += (-1.0) * forcePltY;
