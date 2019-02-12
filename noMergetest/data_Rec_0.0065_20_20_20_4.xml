@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+<settings>
+	<!-- model parameters-->
+	<resistance>3.769911184308</resistance>
+<spring-stiffness>50</spring-stiffness>
+<torsion-stiffness>0.002262593420685</torsion-stiffness>
+<persistance-length>0.001074033502990</persistance-length>
+<absolute-temperature>300.0</absolute-temperature>
+<contour-length-multiplier>2.351243606987286</contour-length-multiplier>
+<use-extra-nodes>true</use-extra-nodes>
+<units-per-extra-node>0.3</units-per-extra-node>
+<extra-nodes-per-edge>9</extra-nodes-per-edge>
+<constant-extra-nodes>false</constant-extra-nodes>
+<mass>1.0</mass><!--used?-->
+<link-diameter>0.1</link-diameter>
+	<use-linking>true</use-linking>
+<worm-like>true</worm-like>
+	
+	<use-pltforcefield>false</use-pltforcefield>
+	<use-plttndrl>true</use-plttndrl>
+	<use-pltrelease>true</use-pltrelease>
+	<use-plthandhand>true</use-plthandhand>
+	<use-pltonplt>true</use-pltonplt>
+	
+	<plt_mass>0.486</plt_mass><!-- platelet mass-->
+	<plt_force>2.1</plt_force><!-- platelet force-->
+	<plt_other_intrct>300</plt_other_intrct><!-- platelet maximum number of force field exclusion, or volume exclusion-->
+	<plt_tndrl_intrct>3</plt_tndrl_intrct><!-- platelet maximum number of connections-->
+	<plt_r>1.13</plt_r>   <!-- radius of platelet from center (volume exclusion)-->
+	<plt_r_force>2.18</plt_r_force><!-- force radius from platelet center-->
+	<plt_r_adhesion>0.9</plt_r_adhesion><!-- fractional radius of adhesion of platelt. This should be between 0 and 1. Nodes adhere to platelet between this fraction and the whole platelet radius-->
+	<plt_density>0.0</plt_density>
+</settings>
+    <nodes default-mass="1.0">
+        <node>2.702 18.9777 10.1697</node>
+        <node>12.0626 14.1998 15.1525</node>
+        <node>11.8648 19.15 8.1337</node>
+        <node>6.5047 3.2991 2.9263</node>
+        <node>8.4434 10.6978 13.7958</node>
+        <node>6.8075 9.4625 9.3107</node>
+        <node>19.5621 2.7337 13.2881</node>
+        <node>17.179 2.3742 5.5594</node>
+        <node>9.1271 4.3852 5.8174</node>
+        <node>1.5084 4.4185 13.7498</node>
+        <node>5.434 15.8045 9.6077</node>
+        <node>4.8242 0.15066 16.4279</node>
+        <node>18.7902 3.3024 8.7402</node>
+        <node>17.1064 6.3942 9.3425</node>
+        <node>12.9319 16.2992 8.1037</node>
+        <node>4.1515 6.1301 6.584</node>
+        <node>6.8238 2.3115 1.646</node>
+        <node>18.84 4.742 11.3348</node>
+        <node>18.5432 19.8817 8.0843</node>
+        <node>14.3681 7.2199 9.6316</node>
+        <node>15.6655 6.1196 5.5298</node>
+        <node>5.4722 0.14958 3.5832</node>
+        <node>7.4182 14.6468 1.1984</node>
+        <node>15.2445 17.5539 1.9936</node>
+        <node>1.9873 11.5736 7.8336</node>
+        <node>19.9571 19.6481 1.8664</node>
+        <node>6.5879 11.0212 8.7427</node>
+        <node>12.7673 6.0178 9.9224</node>
+        <node>18.7056 17.4309 1.7868</node>
+        <node>3.0761 1.0674 6.5761</node>
+        <node>1.4242 15.3341 13.3401</node>
+        <node>8.2118 9.9103 7.3601</node>
+        <node>0.061506 10.732 16.6117</node>
+        <node>9.1742 0.50539 17.6244</node>
+        <node>14.0849 14.8272 3.8884</node>
+        <node>7.3096 18.4093 7.1524</node>
+        <node>6.2084 3.5673 9.5377</node>
+        <node>9.3539 12.9734 5.7831</node>
+        <node>6.9695 7.7353 6.9545</node>
+        <node>7.3727 7.3297 17.0003</node>
+        <node>7.2639 0.30146 9.3463</node>
+        <node>16.4779 16.6928 18.2254</node>
+        <node>17.8354 3.267 4.1433</node>
+        <node>12.2061 10.229 8.6506</node>
+        <node>15.4956 3.4877 10.0076</node>
+        <node>12.3181 7.5379 9.1863</node>
+        <node>18.7654 2.0019 19.4724</node>
+        <node>16.0169 0.78149 7.0507</node>
+        <node>7.9098 3.4414 1.9375</node>
+        <node>7.8551 9.115 4.3237</node>
+        <node>14.143 4.2443 16.9735</node>
+        <node>4.1438 1.0468 15.7479</node>
+    </nodes>
+    <plts plt-mass="0.486"><!-- these are use only if plt_density is set to 0.0-->
+        <plt>0.061506 10.732 16.6117</plt>
+        <plt>9.1742 0.50539 17.6244</plt>
+        <plt>14.0849 14.8272 3.8884</plt>
+        <plt>7.3096 18.4093 7.1524</plt>
+        <plt>6.2084 3.5673 9.5377</plt>
+        <plt>9.3539 12.9734 5.7831</plt>
+        <plt>6.9695 7.7353 6.9545</plt>
+        <plt>7.3727 7.3297 17.0003</plt>
+        <plt>7.2639 0.30146 9.3463</plt>
+        <plt>16.4779 16.6928 18.2254</plt>
+        <plt>17.8354 3.267 4.1433</plt>
+        <plt>12.2061 10.229 8.6506</plt>
+        <plt>15.4956 3.4877 10.0076</plt>
+        <plt>12.3181 7.5379 9.1863</plt>
+        <plt>18.7654 2.0019 19.4724</plt>
+        <plt>16.0169 0.78149 7.0507</plt>
+        <plt>7.9098 3.4414 1.9375</plt>
+        <plt>7.8551 9.115 4.3237</plt>
+        <plt>14.143 4.2443 16.9735</plt>
+        <plt>4.1438 1.0468 15.7479</plt>
+	 </plts>
+    <links>
+        <link>27 45</link>
+        <link>47 7</link>
+        <link>43 45</link>
+        <link>43 19</link>
+        <link>51 11</link>
+        <link>38 31</link>
+        <link>48 16</link>
+        <link>34 23</link>
+        <link>49 38</link>
+        <link>26 31</link>
+        <link>28 25</link>
+        <link>32 30</link>
+        <link>37 31</link>
+        <link>21 16</link>
+        <link>40 36</link>
+        <link>50 46</link>
+        <link>46 6</link>
+        <link>36 15</link>
+        <link>51 9</link>
+        <link>43 31</link>
+        <link>42 7</link>
+        <link>50 33</link>
+        <link>37 49</link>
+        <link>48 3</link>
+        <link>35 10</link>
+        <link>39 4</link>
+        <link>50 6</link>
+        <link>24 26</link>
+        <link>45 19</link>
+        <link>44 13</link>
+        <link>29 21</link>
+        <link>44 12</link>
+        <link>22 37</link>
+        <link>51 33</link>
+        <link>24 5</link>
+        <link>28 23</link>
+        <link>25 23</link>
+        <link>20 42</link>
+        <link>18 25</link>
+        <link>17 6</link>
+        <link>40 29</link>
+        <link>41 1</link>
+        <link>0 10</link>
+        <link>20 7</link>
+        <link>27 19</link>
+        <link>47 44</link>
+        <link>34 14</link>
+        <link>38 5</link>
+        <link>30 0</link>
+        <link>2 14</link>
+        <link>36 8</link>
+        <link>47 12</link>
+        <link>43 27</link>
+        <link>40 8</link>
+        <link>42 47</link>
+        <link>42 12</link>
+        <link>49 26</link>
+        <link>44 27</link>
+        <link>48 8</link>
+        <link>4 5</link>
+        <link>24 10</link>
+        <link>49 15</link>
+        <link>11 33</link>
+        <link>21 3</link>
+        <link>20 13</link>
+        <link>34 37</link>
+        <link>17 13</link>
+        <link>40 21</link>
+        <link>18 14</link>
+        <link>2 35</link>
+        <link>44 17</link>
+        <link>1 4</link>
+        <link>43 37</link>
+        <link>49 3</link>
+        <link>42 44</link>
+        <link>9 11</link>
+        <link>28 34</link>
+        <link>36 38</link>
+        <link>47 20</link>
+        <link>29 36</link>
+        <link>45 38</link>
+        <link>22 49</link>
+        <link>35 0</link>
+    </links>
+    <fixed>
+    </fixed>
+</data>

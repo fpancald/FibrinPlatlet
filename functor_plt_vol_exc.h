@@ -135,6 +135,10 @@ struct functor_plt_vol_exc : public thrust::unary_function< U2CVec6, CVec3 >  {
         
         //pushing
         unsigned pushCounter = 0;
+		
+		// lennard-jones parameters. set so that when platelets start touching each other they first attract (for a short range and then repell)
+		double sigma=2.0 * pltR*pltRAdhesion/pow(2,1/6);
+		double eps=pltForce;
 
         //go through all nodes that might be pushed
         for( unsigned id_count = beginIndexNode; id_count < endIndexNode; id_count++){
@@ -217,9 +221,13 @@ struct functor_plt_vol_exc : public thrust::unary_function< U2CVec6, CVec3 >  {
                   if (dist < (2.0 * pltR ) )  {
                       //node only affects plt position if it is pulled.
                       //Determine direction of force based on positions and multiply magnitude force
-                      double forcePltX = -(vecN_PX / dist) * (pltForce) * (dist * dist + dist - pltR) / (dist * dist);//(1.0 + 2.0 * pltR - dist);
-                      double forcePltY = -(vecN_PY / dist) * (pltForce) * (dist * dist + dist - pltR) / (dist * dist);//(1.0 + 2.0 * pltR - dist);
-                      double forcePltZ = -(vecN_PZ / dist) * (pltForce) * (dist * dist + dist - pltR) / (dist * dist);//(1.0 + 2.0 * pltR - dist);
+					  
+					  //Lennard-Jones force coeff
+					  double LJF=48*eps*(pow(sigma,12)/pow(dist,13)-pow(sigma,6)/pow(dist,7));
+					  
+                      double forcePltX = -(vecN_PX / dist) * (pltForce) *LJF;// (dist * dist + dist - pltR) / (dist * dist);//(1.0 + 2.0 * pltR - dist);
+                      double forcePltY = -(vecN_PY / dist) * (pltForce) *LJF;// (dist * dist + dist - pltR) / (dist * dist);//(1.0 + 2.0 * pltR - dist);
+                      double forcePltZ = -(vecN_PZ / dist) * (pltForce) *LJF;// (dist * dist + dist - pltR) / (dist * dist);//(1.0 + 2.0 * pltR - dist);
                       //count force for plt.
                       sumPltForceX += (-1.0) * forcePltX;
                       sumPltForceY += (-1.0) * forcePltY;
