@@ -86,8 +86,8 @@ struct functor_link_nodes {
 			//tsafety
 
 			//beginning and end of attempted linking end id's in id_value_expanded
-			__attribute__ ((unused)) unsigned beginIndex = keyBegin[bucketId];
-			__attribute__ ((unused)) unsigned endIndex = keyEnd[bucketId];
+			unsigned beginIndex = keyBegin[bucketId];
+			unsigned endIndex = keyEnd[bucketId];
 
 			for (unsigned iter = beginIndex; iter < endIndex; iter++ ) {
 

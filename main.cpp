@@ -39,8 +39,11 @@ std::shared_ptr<System> createSystem(const char* schemeFile, std::shared_ptr<Sys
 	}
 
 	//default settings in NSB.h
-	if (auto p = props.child("resistance"))
-		builder->defaultResistance = (p.text().as_double());
+	if (auto p = props.child("resistance_fibrin"))
+		builder->viscousDamp_Fibrin = (p.text().as_double());
+
+	if (auto p = props.child("resistance_plt"))
+		builder->viscousDamp_Plt = (p.text().as_double());
 
 	if (auto p = props.child("spring-stiffness"))
 		builder->defaultSpringStiffness = (p.text().as_double());
@@ -108,9 +111,10 @@ std::shared_ptr<System> createSystem(const char* schemeFile, std::shared_ptr<Sys
 		}
 	}
 
+
 	if (auto p = props.child("plt_density")) {
 		builder->pltDensity = (p.text().as_double());
-		std::cout<<"setting density: "<< builder->pltDensity << std::endl;
+		std::cout << "setting density: " << builder->pltDensity << std::endl;
 	}
 
 	if (auto p = props.child("use-pltforcefield")){
@@ -187,27 +191,20 @@ std::shared_ptr<System> createSystem(const char* schemeFile, std::shared_ptr<Sys
 
 	__attribute__ ((unused)) double pltmass;
 	double pltx, plty, pltz; //variables to be used reading in data.
-	double defaultPltMass = plts.attribute("plt-mass").as_double(-1.0);
-	builder->defaultPltMass = defaultPltMass;
-
+	
 	//only use platelet input if density is zero
-	if ((builder->pltDensity) == 0.0) {
-		for (auto plt = plts.child("plt"); plt; plt = plt.next_sibling("plt")) {
+	for (auto plt = plts.child("plt"); plt; plt = plt.next_sibling("plt")) {
 
-			if (defaultPltMass < 0.0) {
-				std::cout << "parse error: plt mass is undefined\n";
-				return 0;
-			}
-			const char* text = plt.text().as_string();
+		const char* text = plt.text().as_string();
 
-			//std::cout<<"mass: " << mass << std::endl;
-			if (3 != sscanf(text, "%lf %lf %lf", &pltx, &plty, &pltz)) {
-				std::cout << "parse plt error\n";
-				return 0;
-			}
-			__attribute__ ((unused)) int unused = builder->addPlt(defaultPltMass, glm::dvec3(pltx, plty, pltz));
+		//std::cout<<"mass: " << mass << std::endl;
+		if (3 != sscanf(text, "%lf %lf %lf", &pltx, &plty, &pltz)) {
+			std::cout << "parse plt error\n";
+			return 0;
 		}
+		__attribute__ ((unused)) int unused = builder->addPlt(builder->defaultPltMass, glm::dvec3(pltx, plty, pltz));
 	}
+	
 
 
 

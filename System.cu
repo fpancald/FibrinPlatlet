@@ -80,13 +80,13 @@ void System::solveForces() {
 	thrust::fill(pltInfoVecs.pltForceY.begin(),pltInfoVecs.pltForceY.end(),0);
 	thrust::fill(pltInfoVecs.pltForceZ.begin(),pltInfoVecs.pltForceZ.end(),0);
 
-
+	
 	if (generalParams.linking == true) {
-			Link_Nodes(
-					nodeInfoVecs,
-					wlcInfoVecs,
-					auxVecs,
-					generalParams);
+		Link_Nodes(
+			nodeInfoVecs,
+			wlcInfoVecs,
+			auxVecs,
+			generalParams);
 	}
 	Torsion_Force(nodeInfoVecs, torsionInfoVecs, generalParams);
 
@@ -150,13 +150,13 @@ void System::solveSystem() {
 
 	//set initial epsilon
 	generalParams.epsilon = (1.0) *
-		sqrt(6.0*generalParams.kB * generalParams.temperature * generalParams.dtTemp / generalParams.viscousDamp);
+		sqrt(6.0*generalParams.kB * generalParams.temperature * generalParams.dtTemp / generalParams.viscousDamp_Fibrin);
 
 	while (generalParams.runSim == true) {
 
 		generalParams.iterationCounter++;
 		generalParams.currentTime += generalParams.dtTemp;
-		//std::cout<<"iterationCount: "<< generalParams.iterationCounter <<std::endl;
+		std::cout<<"iterationCount: "<< generalParams.iterationCounter <<std::endl;
 
 		Advance_Positions(
 			nodeInfoVecs,
@@ -187,7 +187,7 @@ void System::solveSystem() {
 			storage->save_params();
 
 			generalParams.epsilon = (1.0) *
-				sqrt(6.0 * generalParams.kB * generalParams.temperature * generalParams.dtTemp / generalParams.viscousDamp);
+				sqrt(6.0 * generalParams.kB * generalParams.temperature * generalParams.dtTemp / generalParams.viscousDamp_Fibrin);
 
 		}
 
