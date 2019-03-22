@@ -373,7 +373,14 @@ std::shared_ptr<System> SystemBuilder::create() {
 	host_ptr_devNodeSystem->generalParams.kB = defaultBoltzmannConstant;
 	host_ptr_devNodeSystem->generalParams.CLM = defaultContourLengthMultiplier;
 	host_ptr_devNodeSystem->generalParams.torsionStiffness = defaultTorsionSpringStiffness;
-	host_ptr_devNodeSystem->generalParams.viscousDamp = defaultResistance;
+
+	host_ptr_devNodeSystem->generalParams.viscousDamp_Fibrin = viscousDamp_Fibrin;
+
+	host_ptr_devNodeSystem->generalParams.viscousDamp_Plt = viscousDamp_Plt;
+
+	std::cout << "vd_plt: " << host_ptr_devNodeSystem->generalParams.viscousDamp_Plt << std::endl;
+	std::cout << "vd_fib: " << host_ptr_devNodeSystem->generalParams.viscousDamp_Fibrin << std::endl;
+
 	host_ptr_devNodeSystem->generalParams.temperature = defaultTemperature;
 	host_ptr_devNodeSystem->generalParams.persistenceLengthMon = defaultPersistanceLength;
 	host_ptr_devNodeSystem->generalParams.nodeMass = defaultMass;
@@ -383,8 +390,7 @@ std::shared_ptr<System> SystemBuilder::create() {
 
 	std::cout<< host_ptr_devNodeSystem->generalParams.kB<< " "<< host_ptr_devNodeSystem->generalParams.temperature << " "<< host_ptr_devNodeSystem->generalParams.torsionStiffness<< " "<< host_ptr_devNodeSystem->generalParams.persistenceLengthMon<<std::endl;
 
-	std::cout<<"default res: "<< defaultResistance << std::endl;
-	std::cout<< host_ptr_devNodeSystem->generalParams.dtTemp<< " "<< host_ptr_devNodeSystem->generalParams.df << " "<< host_ptr_devNodeSystem->generalParams.viscousDamp<<std::endl;
+	std::cout<< host_ptr_devNodeSystem->generalParams.dtTemp<< " "<< host_ptr_devNodeSystem->generalParams.df << std::endl;
 
 	//platelet parameters
 	host_ptr_devNodeSystem->generalParams.pltForce = pltForce;

@@ -46,7 +46,8 @@ public:
 	unsigned numNodes;
 	unsigned torsionCount = 0;
 	double defaultMass = 10;
-	double defaultResistance = 3.769911184308;
+	double viscousDamp_Fibrin = 3.769911184308;
+	double viscousDamp_Plt = 85.2000;
 	double defaultSpringStiffness = 1.0;
 	double defaultTorsionSpringStiffness = 1.0;
 	double defaultPersistanceLength = 1.0;

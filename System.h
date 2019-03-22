@@ -242,7 +242,7 @@ struct GeneralParams{
 	unsigned totalTorsionCount;//total bending springs
 	unsigned subNodeCount = 0;//maximal subnode division for longest edge
 
-	double kB, CLM, temperature, torsionStiffness, viscousDamp;
+	double kB, CLM, temperature, torsionStiffness, viscousDamp_Fibrin, viscousDamp_Plt;
 	double nodeMass = 1;
 	double persistenceLengthMon;
 
