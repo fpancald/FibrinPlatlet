@@ -17,6 +17,7 @@ struct functor_wlc {
 	double Temp;
 	unsigned maxNeighborCount;
 	unsigned maxNodeCount;
+	unsigned numMonFiberArea;
 
 	double* lenZero;
 	unsigned* edgeCountVec;
@@ -39,6 +40,7 @@ struct functor_wlc {
 			double& _Temp,
 			unsigned& _maxNeighborCount,
 			unsigned& _maxNodeCount,
+			unsigned& _numMonFiberArea,
 
 			double* _lenZero,
 			unsigned* _globalNeighbors,
@@ -58,6 +60,7 @@ struct functor_wlc {
 		Temp(_Temp),
 		maxNeighborCount(_maxNeighborCount),
 		maxNodeCount(_maxNodeCount),
+		numMonFiberArea(_numMonFiberArea),
 
 		lenZero(_lenZero),
 		globalNeighbors(_globalNeighbors),
@@ -101,7 +104,7 @@ struct functor_wlc {
 						double strain = ((currentLength - lengthZero) / lengthZero);
 
 						double dL_norm = strain / ( CLM);//CLM is unitless since it was already normalized. 
-						double magForce = (1100.0*(Kb*Temp) / PLengthMon) * ( 0.25 * pow(1.0 - dL_norm, -2.0) - 0.25 + dL_norm);
+						double magForce = (numMonFiberArea*(Kb*Temp) / PLengthMon) * ( 0.25 * pow(1.0 - dL_norm, -2.0) - 0.25 + dL_norm);
 				
 						double magForceX = (posXA_XB / currentLength) * magForce;
 						double magForceY = (posYA_YB / currentLength) * magForce;

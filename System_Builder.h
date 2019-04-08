@@ -50,6 +50,7 @@ public:
 	double viscousDamp_Plt = 85.2000;
 	double defaultSpringStiffness = 1.0;
 	double defaultTorsionSpringStiffness = 1.0;
+	unsigned defaultNumMonFiberArea = 1100;
 	double defaultPersistanceLength = 1.0;
 	double defaultTemperature = 300.0; // 300' kelvin ~ 27' celsius
 	double defaultContourLengthMultiplier = 1.0;

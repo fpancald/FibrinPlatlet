@@ -373,6 +373,7 @@ std::shared_ptr<System> SystemBuilder::create() {
 	host_ptr_devNodeSystem->generalParams.kB = defaultBoltzmannConstant;
 	host_ptr_devNodeSystem->generalParams.CLM = defaultContourLengthMultiplier;
 	host_ptr_devNodeSystem->generalParams.torsionStiffness = defaultTorsionSpringStiffness;
+	host_ptr_devNodeSystem->generalParams.nummonfiberarea = defaultNumMonFiberArea;
 
 	host_ptr_devNodeSystem->generalParams.viscousDamp_Fibrin = viscousDamp_Fibrin;
 

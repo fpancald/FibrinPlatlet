@@ -45,6 +45,7 @@ void WLC_Force(
 			generalParams.temperature,
 			generalParams.maxNeighborCount,
 			generalParams.maxNodeCount,
+			generalParams.nummonfiberarea,
 
 			thrust::raw_pointer_cast(wlcInfoVecs.lengthZero.data()),
 			thrust::raw_pointer_cast(wlcInfoVecs.globalNeighbors.data()),

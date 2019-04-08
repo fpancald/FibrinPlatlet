@@ -230,6 +230,7 @@ struct GeneralParams{
 	unsigned maxNeighborCount = 100;
 	unsigned maxNodeCount;//after discretize
 	unsigned originNodeCount;//pre discretize
+	unsigned nummonfiberarea = 1100;//number of monomers per fiber crossesction;
   	
 	  //platelets
   	unsigned maxPltCount;//after discretize
