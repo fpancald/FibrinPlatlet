@@ -44,9 +44,9 @@ std::shared_ptr<System> createSystem(const char* schemeFile, std::shared_ptr<Sys
 	int base_num_mon=1100;
 	if (auto p = props.child("link-diameter")){//base diameter 0.1 microns
 		builder->defaultLinkDiameter = (p.text().as_double());
-		double r_ratio_square= pow(((p.text().as_double())/base_diam),2);
-		builder->defaultTorsionSpringStiffness = r_ratio_square*base_tor;
-		builder->defaultNumMonFiberArea = base_num_mon*r_ratio_square;
+		double r_ratio= (p.text().as_double())/base_diam;
+		builder->defaultTorsionSpringStiffness = pow(r_ratio,2.4)*base_tor;//E prop to r^-1.6 and I prop to r^4
+		builder->defaultNumMonFiberArea = base_num_mon*pow(r_ratio,2);// N prop to r^2
 	}
 	else{
 		builder->defaultLinkDiameter = base_diam;
